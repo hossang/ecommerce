@@ -15,4 +15,8 @@ public class UserRepository {
         entityManager.persist(user);
         return user.getId();
     }
+
+    public User findOne(Long id) {
+        return entityManager.find(User.class, id);
+    }
 }
