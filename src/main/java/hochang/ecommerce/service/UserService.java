@@ -16,6 +16,14 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
 
+    @Transactional
+    public Long join(UserForm userForm) {
+        User user = toUser(userForm);
+        validateDuplicateUser(user);
+        return userRepository.save(user);
+
+    }
+
     private void validateDuplicateUser(User user) {
         User findUser = userRepository.findByOnlineId(user.getOnlineId());
         if (findUser != null) {
