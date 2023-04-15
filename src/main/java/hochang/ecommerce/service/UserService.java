@@ -28,6 +28,10 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    public User findOne(Long userId) {
+        return userRepository.findOne(userId);
+    }
+
     private void validateDuplicateUser(User user) {
         User findUser = userRepository.findByOnlineId(user.getOnlineId());
         if (findUser != null) {
