@@ -24,6 +24,10 @@ public class UserService {
 
     }
 
+    public List<User> findUsers() {
+        return userRepository.findAll();
+    }
+
     private void validateDuplicateUser(User user) {
         User findUser = userRepository.findByOnlineId(user.getOnlineId());
         if (findUser != null) {
