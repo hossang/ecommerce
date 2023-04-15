@@ -24,4 +24,12 @@ public class UserRepository {
         return entityManager.createQuery("select u from User u", User.class)
                 .getResultList();
     }
+
+    public User findByOnlineId(String onlineId) {
+        return entityManager.createQuery("select u from User u where u.onlineId= :onlineId", User.class)
+                .setParameter("onlineId", onlineId)
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
+    }
 }
