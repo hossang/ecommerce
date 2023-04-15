@@ -32,4 +32,9 @@ public class UserRepository {
                 .findFirst()
                 .orElse(null);
     }
+
+    public void remove(Long id) {
+        entityManager.remove(entityManager.find(User.class, id));
+    }
+
 }
