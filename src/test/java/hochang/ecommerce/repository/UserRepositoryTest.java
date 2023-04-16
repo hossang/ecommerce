@@ -31,4 +31,14 @@ class UserRepositoryTest {
         
         Long id = userRepository.save(user);
     }
+    
+    @Test
+    public void 단일회원조회() {
+        //Given
+        //When
+        User user = userRepository.findByOnlineId("asdf1234");
+        System.out.println("user.getId() = " + user.getId());
+        //Then
+        assertThat(user.getOnlineId()).isEqualTo("asdf1234");
+    } 
 }
