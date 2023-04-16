@@ -64,4 +64,15 @@ class UserRepositoryTest {
         }
         assertThat(all.size()).isEqualTo(2);
     } 
+
+    @Test
+    public void 회원삭제() {
+        //Given
+        User user = userRepository.findByOnlineId("asdf1234");
+        System.out.println("user.getId() = " + user.getId());
+        //When
+        userRepository.remove(user.getId());
+        //Then
+        assertThat(userRepository.findByOnlineId("asdf1234")).isNull();
+    }
 }
