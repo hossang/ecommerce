@@ -20,4 +20,13 @@ public class UserController {
         model.addAttribute("userForm", new UserForm());
         return "users/signup";
     }
+
+    @PostMapping("/signup")
+    public String create(@Valid UserForm userForm, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return "users/signup";
+        }
+        userService.join(userForm);
+        return "redirect:/";
+    }
 }
