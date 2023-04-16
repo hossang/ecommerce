@@ -75,4 +75,13 @@ class UserRepositoryTest {
         //Then
         assertThat(userRepository.findByOnlineId("asdf1234")).isNull();
     }
+
+    @Test
+    public void 아이디로_회원_찾기() {
+        //Given
+        //When
+        User user = userRepository.findByOnlineId("asdf1234");
+        //Then
+        assertThat(user.getOnlineId()).isEqualTo("asdf1234");
+    }
 }
