@@ -41,4 +41,27 @@ class UserRepositoryTest {
         //Then
         assertThat(user.getOnlineId()).isEqualTo("asdf1234");
     } 
+    
+    @Test
+    public void 모든회원조회() {
+        //Given
+        User secondUser = User.builder()
+                .onlineId("qwer")
+                .password("qwer123!@@")
+                .name("qwer")
+                .birthDate(LocalDate.of(2345, 12, 1))
+                .email("qwer@qewr.com")
+                .phone("01022223333")
+                .build();
+        Long id = userRepository.save(secondUser);
+        //When
+        List<User> all = userRepository.findAll();
+        //Then
+        for (User user : all) {
+            System.out.println("user.getOnlineId() = " + user.getOnlineId());
+            System.out.println("user.getId() = " + user.getId());
+            System.out.println();
+        }
+        assertThat(all.size()).isEqualTo(2);
+    } 
 }
