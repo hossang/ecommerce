@@ -4,6 +4,7 @@ import hochang.ecommerce.domain.User;
 import hochang.ecommerce.repository.UserRepository;
 import hochang.ecommerce.dto.UserForm;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder encoder;
 
     @Transactional
     public Long join(UserForm userForm) {
@@ -41,7 +43,7 @@ public class UserService {
 
     private User toUser(UserForm userForm) {
         User user = User.builder().onlineId(userForm.getOnlineId())
-                .password(userForm.getPassword())
+                .password(encoder.encode(userForm.getPassword()))
                 .name(userForm.getName())
                 .birthDate(userForm.getBirthDate())
                 .email(userForm.getEmail())
