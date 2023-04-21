@@ -49,4 +49,21 @@ class UserServiceTest {
         then(userRepository).should(times(2)).save(any(User.class));
     }
 
+    @Test
+    public void 모든_회원_찾기() {
+        //Given
+        List<User> users = new ArrayList<>();
+        users.add(User.builder().onlineId("user1").build());
+        users.add(User.builder().onlineId("user2").build());
+        given(userRepository.findAll()).willReturn(users);
+
+        //When
+        List<User> result = userService.findUsers();
+        //Then
+        then(userRepository).should().findAll();
+        assertThat(users.size()).isEqualTo(result.size());
+        assertThat(users.get(0).getOnlineId()).isEqualTo(result.get(0).getOnlineId());
+        assertThat(users.get(1).getOnlineId()).isEqualTo(result.get(1).getOnlineId());
+    }
+
 }
