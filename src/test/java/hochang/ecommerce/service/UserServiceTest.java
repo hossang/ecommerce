@@ -32,4 +32,21 @@ class UserServiceTest {
         //Then
         assertThat(userId).isEqualTo(1L);
     }
+
+    @Test
+    public void 중복_회원가입() {
+        //Given
+        UserForm userForm1 = new UserForm();
+        UserForm userForm2 = new UserForm();
+        given(userRepository.save(any(User.class)))
+                .willReturn(1L)
+                .willThrow(IllegalStateException.class);
+        //When
+        Long userId = userService.join(userForm1);
+        assertThatThrownBy(() -> userService.join(userForm2))
+                .isInstanceOf(IllegalStateException.class);
+        //Then
+        then(userRepository).should(times(2)).save(any(User.class));
+    }
+
 }
