@@ -81,7 +81,7 @@ class UserFormTest {
     public void 옳바른_아이디1() {
         //Given
         UserForm userForm = new UserForm();
-        userForm.setOnlineId("tyfhvg123");
+        userForm.setUsername("tyfhvg123");
         //When
         Set<ConstraintViolation<UserForm>> violations = validator.validate(userForm);
         //Then
