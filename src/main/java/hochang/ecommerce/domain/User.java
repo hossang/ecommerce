@@ -12,7 +12,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -23,7 +22,7 @@ public class User extends BaseEntity{
     @Column(name = "user_id")
     private Long id;
 
-    private String onlineId;
+    private String username; 
 
     private String password;
 
@@ -39,8 +38,8 @@ public class User extends BaseEntity{
     private Role role;
 
     @Builder
-    public User(String onlineId, String password, String name, LocalDate birthDate, String email, String phone) {
-        this.onlineId = onlineId;
+    public User(String username, String password, String name, LocalDate birthDate, String email, String phone) {
+        this.username = username;
         this.password = password;
         this.name = name;
         this.birthDate = birthDate;

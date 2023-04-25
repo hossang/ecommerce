@@ -25,9 +25,9 @@ public class UserRepository {
                 .getResultList();
     }
 
-    public User findByOnlineId(String onlineId) {
-        return entityManager.createQuery("select u from User u where u.onlineId= :onlineId", User.class)
-                .setParameter("onlineId", onlineId)
+    public User findByUsername(String username) {
+        return entityManager.createQuery("select u from User u where u.username= :username", User.class)
+                .setParameter("username", username)
                 .getResultStream()
                 .findFirst()
                 .orElse(null);

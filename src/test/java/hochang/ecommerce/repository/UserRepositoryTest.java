@@ -21,7 +21,7 @@ class UserRepositoryTest {
     @BeforeEach
     public void 회원가입() {
         User user = User.builder()
-                .onlineId("asdf1234")
+                .username("asdf1234")
                 .password("asdf123!@@")
                 .name("asdf")
                 .birthDate(LocalDate.of(1234, 12, 1))
@@ -36,17 +36,17 @@ class UserRepositoryTest {
     public void 단일회원조회() {
         //Given
         //When
-        User user = userRepository.findByOnlineId("asdf1234");
+        User user = userRepository.findByUsername("asdf1234");
         System.out.println("user.getId() = " + user.getId());
         //Then
-        assertThat(user.getOnlineId()).isEqualTo("asdf1234");
+        assertThat(user.getUsername()).isEqualTo("asdf1234");
     } 
     
     @Test
     public void 모든회원조회() {
         //Given
         User secondUser = User.builder()
-                .onlineId("qwer")
+                .username("qwer")
                 .password("qwer123!@@")
                 .name("qwer")
                 .birthDate(LocalDate.of(2345, 12, 1))
@@ -58,7 +58,7 @@ class UserRepositoryTest {
         List<User> all = userRepository.findAll();
         //Then
         for (User user : all) {
-            System.out.println("user.getOnlineId() = " + user.getOnlineId());
+            System.out.println("user.getOnlineId() = " + user.getUsername());
             System.out.println("user.getId() = " + user.getId());
             System.out.println();
         }
@@ -68,20 +68,20 @@ class UserRepositoryTest {
     @Test
     public void 회원삭제() {
         //Given
-        User user = userRepository.findByOnlineId("asdf1234");
+        User user = userRepository.findByUsername("asdf1234");
         System.out.println("user.getId() = " + user.getId());
         //When
         userRepository.remove(user.getId());
         //Then
-        assertThat(userRepository.findByOnlineId("asdf1234")).isNull();
+        assertThat(userRepository.findByUsername("asdf1234")).isNull();
     }
 
     @Test
     public void 아이디로_회원_찾기() {
         //Given
         //When
-        User user = userRepository.findByOnlineId("asdf1234");
+        User user = userRepository.findByUsername("asdf1234");
         //Then
-        assertThat(user.getOnlineId()).isEqualTo("asdf1234");
+        assertThat(user.getUsername()).isEqualTo("asdf1234");
     }
 }

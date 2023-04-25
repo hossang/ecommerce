@@ -12,7 +12,7 @@ import java.time.LocalDate;
 public class UserForm {
     @Pattern(regexp = "^[a-zA-Z][a-zA-Z0-9]{3,19}$"
             ,message = "아이디는 첫 글자는 영어로 시작하고, 그 뒤로는 영어 대/소문자, 숫자를 사용하고 3 ~ 19자리까지 입력해야 합니다. ")
-    private String onlineId;
+    private String username;
 
     @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()\\-_=+\\\\|{}\\[\\]:\";'<>?,./~`])[A-Za-z\\d!@#$%^&*()\\-_=+\\\\|{}\\[\\]:\";'<>?,./~`]{8,}$"
             , message = "비밀번호는 대소문자, 숫자, 특수문자를 모두 포함한 8자리 이상 입력해야 합니다.")

@@ -35,14 +35,14 @@ public class UserService {
     }
 
     private void validateDuplicateUser(User user) {
-        User findUser = userRepository.findByOnlineId(user.getOnlineId());
+        User findUser = userRepository.findByUsername(user.getUsername());
         if (findUser != null) {
-            throw new IllegalStateException("이미 존재하는 회원입니다.");
+            throw new IllegalStateException("이미 존재하는 회원입니다."); //중복회원이 있으면 어떻게 되지 ?
         }
     }
 
     private User toUser(UserForm userForm) {
-        User user = User.builder().onlineId(userForm.getOnlineId())
+        User user = User.builder().username(userForm.getUsername())
                 .password(encoder.encode(userForm.getPassword()))
                 .name(userForm.getName())
                 .birthDate(userForm.getBirthDate())
