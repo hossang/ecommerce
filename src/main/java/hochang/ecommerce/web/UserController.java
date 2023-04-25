@@ -1,5 +1,6 @@
 package hochang.ecommerce.web;
 
+import hochang.ecommerce.dto.SignInForm;
 import hochang.ecommerce.dto.UserForm;
 import hochang.ecommerce.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -28,5 +29,10 @@ public class UserController {
         }
         userService.join(userForm);
         return "redirect:/";
+    }
+
+    @GetMapping("/sign-in")
+    public String createSignInForm(SignInForm signInForm) {
+        return "guests/signIn";
     }
 }
