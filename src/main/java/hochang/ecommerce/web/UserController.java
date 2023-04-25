@@ -15,16 +15,16 @@ import javax.validation.Valid;
 public class UserController {
     private final UserService userService;
 
-    @GetMapping("/users/sign-up")
+    @GetMapping("/sign-up")
     public String createForm(Model model) {
         model.addAttribute("userForm", new UserForm());
-        return "users/signUp";
+        return "guests/signUp";
     }
 
-    @PostMapping("/users/sign-up")
+    @PostMapping("/sign-up")
     public String create(@Valid UserForm userForm, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return "users/signUp";
+            return "guests/signUp";
         }
         userService.join(userForm);
         return "redirect:/";
