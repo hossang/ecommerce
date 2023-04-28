@@ -1,6 +1,7 @@
 package hochang.ecommerce.service;
 
 import hochang.ecommerce.domain.User;
+import hochang.ecommerce.dto.SignInForm;
 import hochang.ecommerce.repository.UserRepository;
 import hochang.ecommerce.dto.UserForm;
 import lombok.RequiredArgsConstructor;
@@ -34,10 +35,17 @@ public class UserService {
         return userRepository.findOne(userId);
     }
 
+    public String signIn(SignInForm signInForm) {
+        User user = userRepository.findByUsername(signInForm.getUsername());
+        if (user == null || !encoder.matches(signInForm.getPassword(), user.getPassword())) {
+            return null;
+        }
+        return user.getUsername();
+    }
     private void validateDuplicateUser(User user) {
         User findUser = userRepository.findByUsername(user.getUsername());
         if (findUser != null) {
-            throw new IllegalStateException("이미 존재하는 회원입니다."); //중복회원이 있으면 어떻게 되지 ?
+            throw new IllegalStateException("이미 존재하는 회원입니다.");
         }
     }
 
