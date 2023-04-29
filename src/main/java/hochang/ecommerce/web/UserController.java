@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -56,5 +57,14 @@ public class UserController {
         HttpSession session = request.getSession();
         session.setAttribute(SessionConst.SIGN_IN_USER, username);
         return "redirect:" + redirectURL;
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public String SignUpDuplicateUser(IllegalStateException illegalStateException, Model model) {
+        String errorMessage = illegalStateException.getMessage();
+        log.info("errorMessage : {}", errorMessage);
+        model.addAttribute("errorMessage", errorMessage);
+        model.addAttribute("userForm", new UserForm());
+        return "guests/signUp";
     }
 }
