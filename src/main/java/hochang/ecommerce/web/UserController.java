@@ -59,6 +59,15 @@ public class UserController {
         return "redirect:" + redirectURL;
     }
 
+    @PostMapping("/sign-out")
+    public String signOut(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        return "redirect:/";
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     public String SignUpDuplicateUser(IllegalStateException illegalStateException, Model model) {
         String errorMessage = illegalStateException.getMessage();
