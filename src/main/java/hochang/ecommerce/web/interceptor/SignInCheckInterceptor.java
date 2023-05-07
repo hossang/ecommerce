@@ -19,7 +19,7 @@ public class SignInCheckInterceptor implements HandlerInterceptor {
 
         if (session == null || session.getAttribute(SessionConst.SIGN_IN_USER) == null) {
             log.info("미인증 사용자 요청");
-            response.sendRedirect("/login?redirectURL=" + requestURI);
+            response.sendRedirect("/sign-in?redirectURL=" + requestURI);
             return false;
         }
         return true;
