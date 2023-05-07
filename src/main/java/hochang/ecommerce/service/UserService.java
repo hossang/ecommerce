@@ -48,6 +48,21 @@ public class UserService {
         }
         return user.getUsername();
     }
+
+    @Transactional
+    public Long modifyEmailAndPhone(UserForm userForm) {
+        User user = userRepository.findByUsername(userForm.getUsername());
+        log.info("user.getId() = {}", user.getId());
+        if (!encoder.matches(userForm.getPassword(), user.getPassword())) { //리팩토링
+            return null;
+        }
+        user.modifyProfile(userForm.getEmail(), userForm.getPhone());
+        log.info("user.getId() = {}", user.getId());
+        log.info("user.getEmail() = {}", user.getEmail());
+        log.info("user.getPhone() = {}", user.getPhone());
+        return user.getId();
+    }
+
     private void validateDuplicateUser(User user) {
         User findUser = userRepository.findByUsername(user.getUsername());
         if (findUser != null) {
@@ -66,7 +81,7 @@ public class UserService {
         return user;
     }
 
-    private UserForm toUserForm(User user) { 
+    private UserForm toUserForm(User user) {
         UserForm userForm = new UserForm();
         userForm.setUsername(user.getUsername());
         userForm.setPassword("");
