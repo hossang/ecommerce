@@ -5,13 +5,14 @@ import hochang.ecommerce.dto.SignInForm;
 import hochang.ecommerce.repository.UserRepository;
 import hochang.ecommerce.dto.UserForm;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -33,6 +34,11 @@ public class UserService {
 
     public User findOne(Long userId) {
         return userRepository.findOne(userId);
+    }
+
+    public UserForm findUserFormByUsername(String username) {
+        User user = userRepository.findByUsername(username);
+        return toUserForm(user);
     }
 
     public String signIn(SignInForm signInForm) {
@@ -58,5 +64,16 @@ public class UserService {
                 .phone(userForm.getPhone())
                 .build();
         return user;
+    }
+
+    private UserForm toUserForm(User user) { 
+        UserForm userForm = new UserForm();
+        userForm.setUsername(user.getUsername());
+        userForm.setPassword("");
+        userForm.setName(user.getName());
+        userForm.setBirthDate(user.getBirthDate());
+        userForm.setEmail(user.getEmail());
+        userForm.setPhone(user.getPhone());
+        return userForm;
     }
 }
