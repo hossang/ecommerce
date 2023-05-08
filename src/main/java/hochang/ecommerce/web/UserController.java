@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.http.HttpServletRequest;
@@ -68,12 +69,32 @@ public class UserController {
         return "redirect:/";
     }
 
+    @GetMapping("/users/{username}/modify")
+    public String createProfileModification(@PathVariable String username, Model model) {
+        UserForm userForm = userService.findUserFormByUsername(username);
+        model.addAttribute("userForm", userForm);
+        return "users/userProfileModification";
+    }
+
+    @PostMapping("/users/{username}/modify")
+    public String modifyProfile(@Valid UserForm userForm, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return "users/userProfileModification";
+        }
+        if (userService.modifyEmailAndPhone(userForm) == null) {
+            bindingResult.reject("improperPassword", "비밀번호가 맞지 않습니다.");
+            return "users/userProfileModification";
+        }
+
+        return "redirect:/users/{username}";
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     public String SignUpDuplicateUser(IllegalStateException illegalStateException, Model model) {
         String errorMessage = illegalStateException.getMessage();
         log.info("errorMessage : {}", errorMessage);
         model.addAttribute("errorMessage", errorMessage);
-        model.addAttribute("userForm", new UserForm());
+        model.addAttribute("userForm", new UserForm()); //Q redirectAttribute 로 해결 가능할까?
         return "guests/signUp";
     }
 }
