@@ -92,6 +92,25 @@ public class UserController {
         return "redirect:/users/{username}";
     }
 
+    @GetMapping("/users/{username}")
+    public String createMyPage(@PathVariable String username, Model model) {
+        model.addAttribute("username", username);
+        return "users/MyPage";
+    }
+
+    @GetMapping("/users/{username}/withdraw")
+    public String withdrawUser(@PathVariable String username, Model model) {
+        model.addAttribute("uesrname", username);
+        return "users/userWithdrawl";
+    }
+
+    @PostMapping("/users/{username}/withdraw")
+    public String withdrawUser(@PathVariable String username, HttpSession session) { //Q HtttpServletRequest하고 HttpSession 하는 거랑 무슨 차이?
+        userService.removeUser(username);
+        session.invalidate();
+        return "redirect:/";
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     public String SignUpDuplicateUser(IllegalStateException illegalStateException, RedirectAttributes redirectAttributes) {
         String errorMessage = illegalStateException.getMessage();
