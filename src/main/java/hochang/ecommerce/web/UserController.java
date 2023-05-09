@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -24,7 +26,8 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/sign-up")
-    public String createForm(Model model) {
+    public String createForm(Model model, @RequestParam(required = false) String errorMessage) {
+        model.addAttribute("errorMessage", errorMessage);
         model.addAttribute("userForm", new UserForm());
         return "guests/signUp";
     }
@@ -90,11 +93,10 @@ public class UserController {
     }
 
     @ExceptionHandler(IllegalStateException.class)
-    public String SignUpDuplicateUser(IllegalStateException illegalStateException, Model model) {
+    public String SignUpDuplicateUser(IllegalStateException illegalStateException, RedirectAttributes redirectAttributes) {
         String errorMessage = illegalStateException.getMessage();
         log.info("errorMessage : {}", errorMessage);
-        model.addAttribute("errorMessage", errorMessage);
-        model.addAttribute("userForm", new UserForm()); //Q redirectAttribute 로 해결 가능할까?
-        return "guests/signUp";
+        redirectAttributes.addAttribute("errorMessage", errorMessage);
+        return "redirect:/sign-up";
     }
 }
