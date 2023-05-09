@@ -47,4 +47,9 @@ public class User extends BaseEntity{
         this.phone = phone;
         this.role = Role.USER;
     }
+
+    public void modifyProfile(String email, String phone) {
+        this.email = email;
+        this.phone = phone;
+    }
 }
