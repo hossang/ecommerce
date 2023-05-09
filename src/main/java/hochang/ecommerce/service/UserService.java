@@ -63,6 +63,11 @@ public class UserService {
         return user.getId();
     }
 
+    @Transactional
+    public Long removeUser(String username) {
+        return userRepository.remove(username);
+    }
+
     private void validateDuplicateUser(User user) {
         User findUser = userRepository.findUserByUsername(user.getUsername());
         if (findUser != null) {
