@@ -35,8 +35,11 @@ public class UserRepository {
                 .orElse(null);
     }
 
-    public void remove(Long id) {
-        entityManager.remove(entityManager.find(User.class, id));
+    public Long remove(String username) {
+        User userByUsername = findUserByUsername(username);
+        entityManager.remove(userByUsername);
+        log.info("userByUsername : {}", userByUsername.getId());
+        return userByUsername.getId();
     }
 
 }
