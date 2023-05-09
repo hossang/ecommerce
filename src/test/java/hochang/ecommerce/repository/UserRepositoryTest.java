@@ -36,7 +36,7 @@ class UserRepositoryTest {
     public void 단일회원조회() {
         //Given
         //When
-        User user = userRepository.findByUsername("asdf1234");
+        User user = userRepository.findUserByUsername("asdf1234");
         System.out.println("user.getId() = " + user.getId());
         //Then
         assertThat(user.getUsername()).isEqualTo("asdf1234");
@@ -68,19 +68,19 @@ class UserRepositoryTest {
     @Test
     public void 회원삭제() {
         //Given
-        User user = userRepository.findByUsername("asdf1234");
+        User user = userRepository.findUserByUsername("asdf1234");
         System.out.println("user.getId() = " + user.getId());
         //When
-        userRepository.remove(user.getId());
+        Long id = userRepository.remove(user.getUsername());
         //Then
-        assertThat(userRepository.findByUsername("asdf1234")).isNull();
+        assertThat(id).isNotNull();
     }
 
     @Test
     public void 아이디로_회원_찾기() {
         //Given
         //When
-        User user = userRepository.findByUsername("asdf1234");
+        User user = userRepository.findUserByUsername("asdf1234");
         //Then
         assertThat(user.getUsername()).isEqualTo("asdf1234");
     }

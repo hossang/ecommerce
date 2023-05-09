@@ -37,12 +37,12 @@ public class UserService {
     }
 
     public UserForm findUserFormByUsername(String username) {
-        User user = userRepository.findByUsername(username);
+        User user = userRepository.findUserByUsername(username);
         return toUserForm(user);
     }
 
     public String signIn(SignInForm signInForm) {
-        User user = userRepository.findByUsername(signInForm.getUsername());
+        User user = userRepository.findUserByUsername(signInForm.getUsername());
         if (user == null || !encoder.matches(signInForm.getPassword(), user.getPassword())) {
             return null;
         }
@@ -51,7 +51,7 @@ public class UserService {
 
     @Transactional
     public Long modifyEmailAndPhone(UserForm userForm) {
-        User user = userRepository.findByUsername(userForm.getUsername());
+        User user = userRepository.findUserByUsername(userForm.getUsername());
         log.info("user.getId() = {}", user.getId());
         if (!encoder.matches(userForm.getPassword(), user.getPassword())) { //리팩토링
             return null;
@@ -64,7 +64,7 @@ public class UserService {
     }
 
     private void validateDuplicateUser(User user) {
-        User findUser = userRepository.findByUsername(user.getUsername());
+        User findUser = userRepository.findUserByUsername(user.getUsername());
         if (findUser != null) {
             throw new IllegalStateException("이미 존재하는 회원입니다.");
         }
