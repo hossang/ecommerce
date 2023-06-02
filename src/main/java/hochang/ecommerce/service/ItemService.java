@@ -29,6 +29,12 @@ public class ItemService {
         return itemRepository.save(item).getId();
     }
 
+    public Page<BoardItem> createBoardItems(Pageable pageable) {
+        Page<Item> itemPage = itemRepository.findAll(pageable);
+        Page<BoardItem> boardItems = itemPage.map(o -> toBoardItem(o));
+        return boardItems;
+    }
+
     private Item toItem(ItemRegistrationForm itemRegistrationForm, UploadFile uploadFile) {
         return Item.builder()
                 .name(itemRegistrationForm.getName())
@@ -38,6 +44,14 @@ public class ItemService {
                 .uploadFileName(uploadFile.getUploadFileName())
                 .storeFileName(uploadFile.getStoreFileName())
                 .build();
+    }
+
+    private BoardItem toBoardItem(Item item) {
+        BoardItem boardItem = new BoardItem();
+        boardItem.setId(item.getId());
+        boardItem.setName(item.getName());
+        boardItem.setCreatedDate(item.getCreatedDate());
+        return boardItem;
     }
 
 }
