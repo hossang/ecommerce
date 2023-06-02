@@ -35,6 +35,12 @@ public class ItemService {
         return boardItems;
     }
 
+    public BulletinItem findBulletinItem(Long itemId) {
+        Optional<Item> optionalItem = itemRepository.findById(itemId);
+        Item item = optionalItem.get();
+        return toBulletinItem(item);
+    }
+
     private Item toItem(ItemRegistrationForm itemRegistrationForm, UploadFile uploadFile) {
         return Item.builder()
                 .name(itemRegistrationForm.getName())
@@ -52,6 +58,15 @@ public class ItemService {
         boardItem.setName(item.getName());
         boardItem.setCreatedDate(item.getCreatedDate());
         return boardItem;
+    }
+
+    private BulletinItem toBulletinItem(Item item) {
+        BulletinItem bulletinItem = new BulletinItem();
+        bulletinItem.setName(item.getName());
+        bulletinItem.setPrice(item.getPrice());
+        bulletinItem.setContents(item.getContents());
+        bulletinItem.setStoreFileName(item.getStoreFileName());
+        return bulletinItem;
     }
 
 }
