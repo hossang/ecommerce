@@ -38,6 +38,21 @@ public class ItemController {
     private final ItemService itemService;
     private final FileStore fileStore;
 
+    @GetMapping("/admins/items")
+    public String createItemList(@PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable, Model model) {
+        Page<BoardItem> boardItems = itemService.createBoardItems(pageable);
+        int nowPage = boardItems.getPageable().getPageNumber() + 1;
+        int startPage = Math.max(1, nowPage - 4);
+        int endPage = Math.min(boardItems.getTotalPages(),nowPage + 5);
+
+        model.addAttribute("boardItems", boardItems);
+        model.addAttribute("nowPage", nowPage);
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
+
+        return "admins/itemlist";
+    }
+
     @GetMapping("/admins/items/register")
     public String createItemRegistrationForm(ItemRegistrationForm itemRegistrationForm) {
         return "admins/itemRegistration";
