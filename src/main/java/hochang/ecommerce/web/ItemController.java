@@ -64,4 +64,17 @@ public class ItemController {
         Long itemId = itemService.save(itemRegistrationForm, uploadFile);
         return "redirect:/admins/items";
     }
+
+    @GetMapping("/items/{itemId}")
+    public String createBulletinItem(@PathVariable Long itemId, Model model) {
+        BulletinItem bulletinItem = itemService.findBulletinItem(itemId);
+        model.addAttribute("bulletinItem", bulletinItem);
+        return "guests/itemPurchase";
+    }
+
+    @ResponseBody
+    @GetMapping("/images/{filename}")
+    public Resource downloadImage(@PathVariable String filename) throws MalformedURLException {
+        return new UrlResource("file:" + fileStore.getFullPath(filename));
+    }
 }
