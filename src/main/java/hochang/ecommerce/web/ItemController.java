@@ -72,6 +72,22 @@ public class ItemController {
         return "guests/itemPurchase";
     }
 
+    @GetMapping("/admins/items/{id}/modify")
+    public String modifyItemRegistrationForm(@PathVariable Long id, Model model) {
+        ItemRegistrationForm itemRegistrationForm = itemService.findItemRegistrationForm(id);
+        model.addAttribute("itemRegistrationForm", itemRegistrationForm);
+        return "admins/itemModification";
+    }
+
+    @PostMapping("/admins/items/{id}/modify")
+    public String modifyItem(ItemRegistrationForm itemRegistrationForm) throws IOException {
+        UploadFile uploadFile = fileStore.storeFile(itemRegistrationForm.getImageFile());
+        log.info("uploadFile.getUploadFileName() = {}", uploadFile.getUploadFileName());
+        itemService.modifyItemForm(itemRegistrationForm, uploadFile);
+        return "redirect:admins/items";
+
+    }
+
     @ResponseBody
     @GetMapping("/images/{filename}")
     public Resource downloadImage(@PathVariable String filename) throws MalformedURLException {
