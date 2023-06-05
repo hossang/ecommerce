@@ -88,6 +88,17 @@ public class ItemController {
 
     }
 
+    @GetMapping("/admins/items/{id}/withdraw")
+    public String removeItemRegistrationForm(@PathVariable Long id) {
+        return "admins/itemWithdrawl";
+    }
+
+    @PostMapping("/admins/items/{id}/withdraw")
+    public String removeItem(@PathVariable Long id) throws IOException {
+        itemService.removeItem(id);
+        return "redirect:/admins/items";
+    }
+
     @ResponseBody
     @GetMapping("/images/{filename}")
     public Resource downloadImage(@PathVariable String filename) throws MalformedURLException {
