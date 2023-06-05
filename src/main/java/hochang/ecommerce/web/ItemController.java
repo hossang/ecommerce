@@ -1,9 +1,8 @@
 package hochang.ecommerce.web;
 
-import hochang.ecommerce.domain.Item;
 import hochang.ecommerce.dto.BoardItem;
 import hochang.ecommerce.dto.BulletinItem;
-import hochang.ecommerce.dto.ItemRegistrationForm;
+import hochang.ecommerce.dto.ItemRegistration;
 import hochang.ecommerce.service.ItemService;
 import hochang.ecommerce.util.file.FileStore;
 import hochang.ecommerce.util.file.UploadFile;
@@ -15,21 +14,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.multipart.MultipartException;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.List;
 
 @Slf4j
 @Controller
@@ -54,14 +47,14 @@ public class ItemController {
     }
 
     @GetMapping("/admins/items/register")
-    public String createItemRegistrationForm(ItemRegistrationForm itemRegistrationForm) {
+    public String createItemRegistrationForm(ItemRegistration itemRegistration) {
         return "admins/itemRegistration";
     }
 
     @PostMapping("/admins/items/register")
-    public String registerItem(ItemRegistrationForm itemRegistrationForm) throws IOException {
-        UploadFile uploadFile = fileStore.storeFile(itemRegistrationForm.getImageFile());
-        Long itemId = itemService.save(itemRegistrationForm, uploadFile);
+    public String registerItem(ItemRegistration itemRegistration) throws IOException {
+        UploadFile uploadFile = fileStore.storeFile(itemRegistration.getImageFile());
+        Long itemId = itemService.save(itemRegistration, uploadFile);
         return "redirect:/admins/items";
     }
 
@@ -74,16 +67,16 @@ public class ItemController {
 
     @GetMapping("/admins/items/{id}/modify")
     public String modifyItemRegistrationForm(@PathVariable Long id, Model model) {
-        ItemRegistrationForm itemRegistrationForm = itemService.findItemRegistrationForm(id);
-        model.addAttribute("itemRegistrationForm", itemRegistrationForm);
+        ItemRegistration itemRegistration = itemService.findItemRegistrationForm(id);
+        model.addAttribute("itemRegistrationForm", itemRegistration);
         return "admins/itemModification";
     }
 
     @PostMapping("/admins/items/{id}/modify")
-    public String modifyItem(ItemRegistrationForm itemRegistrationForm) throws IOException {
-        UploadFile uploadFile = fileStore.storeFile(itemRegistrationForm.getImageFile());
+    public String modifyItem(ItemRegistration itemRegistration) throws IOException {
+        UploadFile uploadFile = fileStore.storeFile(itemRegistration.getImageFile());
         log.info("uploadFile.getUploadFileName() = {}", uploadFile.getUploadFileName());
-        itemService.modifyItemForm(itemRegistrationForm, uploadFile);
+        itemService.modifyItemForm(itemRegistration, uploadFile);
         return "redirect:admins/items";
 
     }

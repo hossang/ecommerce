@@ -1,15 +1,14 @@
 package hochang.ecommerce.service;
 
 import hochang.ecommerce.domain.User;
-import hochang.ecommerce.dto.SignInForm;
+import hochang.ecommerce.dto.SignIn;
+import hochang.ecommerce.dto.UserRegistration;
 import hochang.ecommerce.repository.UserRepository;
-import hochang.ecommerce.dto.UserForm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 @Slf4j
@@ -21,8 +20,8 @@ public class UserService {
     private final BCryptPasswordEncoder encoder;
 
     @Transactional
-    public Long join(UserForm userForm) {
-        User user = toUser(userForm);
+    public Long join(UserRegistration userRegistration) {
+        User user = toUser(userRegistration);
         validateDuplicateUser(user);
         return userRepository.save(user);
 
@@ -36,27 +35,27 @@ public class UserService {
         return userRepository.findOne(userId);
     }
 
-    public UserForm findUserFormByUsername(String username) {
+    public UserRegistration findUserFormByUsername(String username) {
         User user = userRepository.findUserByUsername(username);
         return toUserForm(user);
     }
 
-    public String signIn(SignInForm signInForm) {
-        User user = userRepository.findUserByUsername(signInForm.getUsername());
-        if (user == null || !encoder.matches(signInForm.getPassword(), user.getPassword())) {
+    public String signIn(SignIn signIn) {
+        User user = userRepository.findUserByUsername(signIn.getUsername());
+        if (user == null || !encoder.matches(signIn.getPassword(), user.getPassword())) {
             return null;
         }
         return user.getUsername();
     }
 
     @Transactional
-    public Long modifyEmailAndPhone(UserForm userForm) {
-        User user = userRepository.findUserByUsername(userForm.getUsername());
+    public Long modifyEmailAndPhone(UserRegistration userRegistration) {
+        User user = userRepository.findUserByUsername(userRegistration.getUsername());
         log.info("user.getId() = {}", user.getId());
-        if (!encoder.matches(userForm.getPassword(), user.getPassword())) { //리팩토링
+        if (!encoder.matches(userRegistration.getPassword(), user.getPassword())) { //리팩토링
             return null;
         }
-        user.modifyProfile(userForm.getEmail(), userForm.getPhone());
+        user.modifyProfile(userRegistration.getEmail(), userRegistration.getPhone());
         log.info("user.getId() = {}", user.getId());
         log.info("user.getEmail() = {}", user.getEmail());
         log.info("user.getPhone() = {}", user.getPhone());
@@ -75,25 +74,25 @@ public class UserService {
         }
     }
 
-    private User toUser(UserForm userForm) {
-        User user = User.builder().username(userForm.getUsername())
-                .password(encoder.encode(userForm.getPassword()))
-                .name(userForm.getName())
-                .birthDate(userForm.getBirthDate())
-                .email(userForm.getEmail())
-                .phone(userForm.getPhone())
+    private User toUser(UserRegistration userRegistration) {
+        User user = User.builder().username(userRegistration.getUsername())
+                .password(encoder.encode(userRegistration.getPassword()))
+                .name(userRegistration.getName())
+                .birthDate(userRegistration.getBirthDate())
+                .email(userRegistration.getEmail())
+                .phone(userRegistration.getPhone())
                 .build();
         return user;
     }
 
-    private UserForm toUserForm(User user) {
-        UserForm userForm = new UserForm();
-        userForm.setUsername(user.getUsername());
-        userForm.setPassword("");
-        userForm.setName(user.getName());
-        userForm.setBirthDate(user.getBirthDate());
-        userForm.setEmail(user.getEmail());
-        userForm.setPhone(user.getPhone());
-        return userForm;
+    private UserRegistration toUserForm(User user) {
+        UserRegistration userRegistration = new UserRegistration();
+        userRegistration.setUsername(user.getUsername());
+        userRegistration.setPassword("");
+        userRegistration.setName(user.getName());
+        userRegistration.setBirthDate(user.getBirthDate());
+        userRegistration.setEmail(user.getEmail());
+        userRegistration.setPhone(user.getPhone());
+        return userRegistration;
     }
 }

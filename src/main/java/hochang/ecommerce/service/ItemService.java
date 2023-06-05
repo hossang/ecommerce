@@ -3,7 +3,7 @@ package hochang.ecommerce.service;
 import hochang.ecommerce.domain.Item;
 import hochang.ecommerce.dto.BoardItem;
 import hochang.ecommerce.dto.BulletinItem;
-import hochang.ecommerce.dto.ItemRegistrationForm;
+import hochang.ecommerce.dto.ItemRegistration;
 import hochang.ecommerce.repository.ItemRepository;
 import hochang.ecommerce.util.file.FileStore;
 import hochang.ecommerce.util.file.UploadFile;
@@ -25,8 +25,8 @@ public class ItemService {
     private final FileStore fileStore;
 
     @Transactional
-    public Long save(ItemRegistrationForm itemRegistrationForm, UploadFile uploadFile) throws IOException {
-        Item item = toItem(itemRegistrationForm, uploadFile);
+    public Long save(ItemRegistration itemRegistration, UploadFile uploadFile) throws IOException {
+        Item item = toItem(itemRegistration, uploadFile);
         return itemRepository.save(item).getId();
     }
 
@@ -42,21 +42,21 @@ public class ItemService {
         return toBulletinItem(item);
     }
 
-    public ItemRegistrationForm findItemRegistrationForm(Long itemId) {
+    public ItemRegistration findItemRegistrationForm(Long itemId) {
         Optional<Item> optionalItem = itemRepository.findById(itemId);
         Item item = optionalItem.get();
         return toItemRegistration(item);
     }
 
     @Transactional
-    public void modifyItemForm(ItemRegistrationForm itemRegistrationForm, UploadFile uploadFile) throws IOException {
-        Optional<Item> optionalItem = itemRepository.findById(itemRegistrationForm.getId());
+    public void modifyItemForm(ItemRegistration itemRegistration, UploadFile uploadFile) throws IOException {
+        Optional<Item> optionalItem = itemRepository.findById(itemRegistration.getId());
         Item item = optionalItem.get();
         log.info("item.getStoreFileName() = {}", item.getStoreFileName());
         log.info("uploadFile.getStoreFileName() = {}", uploadFile.getStoreFileName());
         fileStore.deleteFile(item.getStoreFileName());
-        item.modifyItemForm(itemRegistrationForm.getName(), itemRegistrationForm.getCount(), itemRegistrationForm.getPrice(),
-                itemRegistrationForm.getContents(), uploadFile.getUploadFileName(), uploadFile.getStoreFileName());
+        item.modifyItemForm(itemRegistration.getName(), itemRegistration.getCount(), itemRegistration.getPrice(),
+                itemRegistration.getContents(), uploadFile.getUploadFileName(), uploadFile.getStoreFileName());
     }
 
     @Transactional
@@ -69,22 +69,22 @@ public class ItemService {
 
     //toxxx()들 어댑터로 만들어 볼까?
 
-    private ItemRegistrationForm toItemRegistration(Item item) {
-        ItemRegistrationForm itemRegistrationForm = new ItemRegistrationForm();
-        itemRegistrationForm.setId(item.getId());
-        itemRegistrationForm.setName(item.getName());
-        itemRegistrationForm.setCount(item.getCount());
-        itemRegistrationForm.setPrice(item.getPrice());
-        itemRegistrationForm.setContents(item.getContents());
-        return itemRegistrationForm;
+    private ItemRegistration toItemRegistration(Item item) {
+        ItemRegistration itemRegistration = new ItemRegistration();
+        itemRegistration.setId(item.getId());
+        itemRegistration.setName(item.getName());
+        itemRegistration.setCount(item.getCount());
+        itemRegistration.setPrice(item.getPrice());
+        itemRegistration.setContents(item.getContents());
+        return itemRegistration;
     }
 
-    private Item toItem(ItemRegistrationForm itemRegistrationForm, UploadFile uploadFile) {
+    private Item toItem(ItemRegistration itemRegistration, UploadFile uploadFile) {
         return Item.builder()
-                .name(itemRegistrationForm.getName())
-                .count(itemRegistrationForm.getCount())
-                .price(itemRegistrationForm.getPrice())
-                .contents(itemRegistrationForm.getContents())
+                .name(itemRegistration.getName())
+                .count(itemRegistration.getCount())
+                .price(itemRegistration.getPrice())
+                .contents(itemRegistration.getContents())
                 .uploadFileName(uploadFile.getUploadFileName())
                 .storeFileName(uploadFile.getStoreFileName())
                 .build();

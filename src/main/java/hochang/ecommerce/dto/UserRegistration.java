@@ -3,13 +3,11 @@ package hochang.ecommerce.dto;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
-
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
 
 @Getter @Setter
-public class UserForm {
+public class UserRegistration {
     @Pattern(regexp = "^[a-zA-Z][a-zA-Z0-9]{3,19}$"
             ,message = "아이디는 첫 글자는 영어로 시작하고, 그 뒤로는 영어 대/소문자, 숫자를 사용하고 3 ~ 19자리까지 입력해야 합니다. ")
     private String username;

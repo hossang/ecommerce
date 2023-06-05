@@ -1,7 +1,7 @@
 package hochang.ecommerce.web;
 
-import hochang.ecommerce.dto.SignInForm;
-import hochang.ecommerce.dto.UserForm;
+import hochang.ecommerce.dto.SignIn;
+import hochang.ecommerce.dto.UserRegistration;
 import hochang.ecommerce.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -26,33 +25,33 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/sign-up")
-    public String createForm(Model model, @RequestParam(required = false) String errorMessage) {
+    public String createUserForm(Model model, @RequestParam(required = false) String errorMessage) {
         model.addAttribute("errorMessage", errorMessage);
-        model.addAttribute("userForm", new UserForm());
+        model.addAttribute("userForm", new UserRegistration());
         return "guests/signUp";
     }
 
     @PostMapping("/sign-up")
-    public String create(@Valid UserForm userForm, BindingResult bindingResult) {
+    public String create(@Valid UserRegistration userRegistration, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "guests/signUp";
         }
-        userService.join(userForm);
+        userService.join(userRegistration);
         return "redirect:/";
     }
 
     @GetMapping("/sign-in")
-    public String createSignInForm(SignInForm signInForm) {
+    public String createSignInForm(SignIn signIn) {
         return "guests/signIn";
     }
 
     @PostMapping("/sign-in")
-    public String signIn(@Valid SignInForm signInForm, BindingResult bindingResult
+    public String signIn(@Valid SignIn signIn, BindingResult bindingResult
             , HttpServletRequest request, @RequestParam(defaultValue = "/") String redirectURL) {
         if (bindingResult.hasErrors()) {
             return "guests/signIn";
         }
-        String username = userService.signIn(signInForm);
+        String username = userService.signIn(signIn);
         log.info("username : {}", username);
         if (username == null) {
             bindingResult.reject("signInFail", "아이디 또는 비밀번호가 맞지 않습니다.");
@@ -74,17 +73,17 @@ public class UserController {
 
     @GetMapping("/users/{username}/modify")
     public String createProfileModification(@PathVariable String username, Model model) {
-        UserForm userForm = userService.findUserFormByUsername(username);
-        model.addAttribute("userForm", userForm);
+        UserRegistration userRegistration = userService.findUserFormByUsername(username);
+        model.addAttribute("userForm", userRegistration);
         return "users/userProfileModification";
     }
 
     @PostMapping("/users/{username}/modify")
-    public String modifyProfile(@Valid UserForm userForm, BindingResult bindingResult) {
+    public String modifyProfile(@Valid UserRegistration userRegistration, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "users/userProfileModification";
         }
-        if (userService.modifyEmailAndPhone(userForm) == null) {
+        if (userService.modifyEmailAndPhone(userRegistration) == null) {
             bindingResult.reject("improperPassword", "비밀번호가 맞지 않습니다.");
             return "users/userProfileModification";
         }
@@ -95,7 +94,7 @@ public class UserController {
     @GetMapping("/users/{username}")
     public String createMyPage(@PathVariable String username, Model model) {
         model.addAttribute("username", username);
-        return "users/MyPage";
+        return "users/myPage";
     }
 
     @GetMapping("/users/{username}/withdraw")
@@ -118,4 +117,5 @@ public class UserController {
         redirectAttributes.addAttribute("errorMessage", errorMessage);
         return "redirect:/sign-up";
     }
+    //회원 목록 url 추가
 }
