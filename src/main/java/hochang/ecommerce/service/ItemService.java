@@ -58,6 +58,15 @@ public class ItemService {
         item.modifyItemForm(itemRegistrationForm.getName(), itemRegistrationForm.getCount(), itemRegistrationForm.getPrice(),
                 itemRegistrationForm.getContents(), uploadFile.getUploadFileName(), uploadFile.getStoreFileName());
     }
+
+    @Transactional
+    public void removeItem(Long id) throws IOException {
+        Optional<Item> optionalItem = itemRepository.findById(id);
+        Item item = optionalItem.get();
+        fileStore.deleteFile(item.getStoreFileName());
+        itemRepository.delete(item);
+    }
+
     //toxxx()들 어댑터로 만들어 볼까?
 
     private ItemRegistrationForm toItemRegistration(Item item) {
