@@ -7,8 +7,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 @Component
@@ -29,8 +31,15 @@ public class FileStore {
 
         BufferedImage bufferedImage = ImageIO.read(multipartFile.getInputStream());
         bufferedImage = resizeImage(bufferedImage, 450, 450);
-        ImageIO.write(bufferedImage, "jpg", new File(getFullPath(storeFileName)));
+        Path filePath = Path.of(getFullPath(storeFileName));
+        ImageIO.write(bufferedImage, "jpg", Files.newOutputStream(filePath));
         return new UploadFile(originalFilename, storeFileName);
+    }
+
+    public void deleteFile(String filename) throws IOException {
+        //파일이없을 때 에러발생함
+        Path filePath = Paths.get(fileDir).resolve(filename).normalize();
+        Files.deleteIfExists(filePath);
     }
 
     private BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
