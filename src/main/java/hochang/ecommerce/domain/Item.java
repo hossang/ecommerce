@@ -45,4 +45,13 @@ public class Item extends BaseEntity {
         this.storeFileName = storeFileName;
     }
 
+    //마음에 들지 않아... 매게변수 순서잘못입력하면 ?
+    public void modifyItemForm(String name, int count, long price, String contents, String uploadFileName, String storeFileName) {
+        this.name = name;
+        this.count = count;
+        this.price = price;
+        this.contents = contents;
+        this.uploadFileName = uploadFileName;
+        this.storeFileName = storeFileName;
+    }
 }
