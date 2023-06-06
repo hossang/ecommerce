@@ -30,39 +30,41 @@ public class ItemService {
         return itemRepository.save(item).getId();
     }
 
-    public Page<BoardItem> createBoardItems(Pageable pageable) {
+    public Page<BoardItem> findBoardItems(Pageable pageable) {
         Page<Item> itemPage = itemRepository.findAll(pageable);
         Page<BoardItem> boardItems = itemPage.map(o -> toBoardItem(o));
         return boardItems;
     }
 
-    public BulletinItem findBulletinItem(Long itemId) {
+    private Item findItem(Long itemId) {
         Optional<Item> optionalItem = itemRepository.findById(itemId);
         Item item = optionalItem.get();
+        return item;
+    }
+
+    public BulletinItem findBulletinItem(Long itemId) {
+        Item item = findItem(itemId);
         return toBulletinItem(item);
     }
 
-    public ItemRegistration findItemRegistrationForm(Long itemId) {
-        Optional<Item> optionalItem = itemRepository.findById(itemId);
-        Item item = optionalItem.get();
+    public ItemRegistration findItemRegistration(Long itemId) {
+        Item item = findItem(itemId);
         return toItemRegistration(item);
     }
 
     @Transactional
-    public void modifyItemForm(ItemRegistration itemRegistration, UploadFile uploadFile) throws IOException {
-        Optional<Item> optionalItem = itemRepository.findById(itemRegistration.getId());
-        Item item = optionalItem.get();
+    public void modifyItem(ItemRegistration itemRegistration, UploadFile uploadFile) throws IOException {
+        Item item = findItem(itemRegistration.getId());
         log.info("item.getStoreFileName() = {}", item.getStoreFileName());
         log.info("uploadFile.getStoreFileName() = {}", uploadFile.getStoreFileName());
         fileStore.deleteFile(item.getStoreFileName());
-        item.modifyItemForm(itemRegistration.getName(), itemRegistration.getCount(), itemRegistration.getPrice(),
+        item.modifyItem(itemRegistration.getName(), itemRegistration.getCount(), itemRegistration.getPrice(),
                 itemRegistration.getContents(), uploadFile.getUploadFileName(), uploadFile.getStoreFileName());
     }
 
     @Transactional
     public void removeItem(Long id) throws IOException {
-        Optional<Item> optionalItem = itemRepository.findById(id);
-        Item item = optionalItem.get();
+        Item item = findItem(id);
         fileStore.deleteFile(item.getStoreFileName());
         itemRepository.delete(item);
     }

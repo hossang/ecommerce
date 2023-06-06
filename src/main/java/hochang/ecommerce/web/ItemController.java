@@ -32,8 +32,8 @@ public class ItemController {
     private final FileStore fileStore;
 
     @GetMapping("/admins/items")
-    public String createItemList(@PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable, Model model) {
-        Page<BoardItem> boardItems = itemService.createBoardItems(pageable);
+    public String itemList(@PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable, Model model) {
+        Page<BoardItem> boardItems = itemService.findBoardItems(pageable);
         int nowPage = boardItems.getPageable().getPageNumber() + 1;
         int startPage = Math.max(1, nowPage - 4);
         int endPage = Math.min(boardItems.getTotalPages(),nowPage + 5);
@@ -47,47 +47,47 @@ public class ItemController {
     }
 
     @GetMapping("/admins/items/register")
-    public String createItemRegistrationForm(ItemRegistration itemRegistration) {
+    public String itemRegistrationFormCreate(ItemRegistration itemRegistration) {
         return "admins/itemRegistration";
     }
 
     @PostMapping("/admins/items/register")
-    public String registerItem(ItemRegistration itemRegistration) throws IOException {
+    public String itemRegistrationCreate(ItemRegistration itemRegistration) throws IOException {
         UploadFile uploadFile = fileStore.storeFile(itemRegistration.getImageFile());
         Long itemId = itemService.save(itemRegistration, uploadFile);
         return "redirect:/admins/items";
     }
 
-    @GetMapping("/items/{itemId}")
-    public String createBulletinItem(@PathVariable Long itemId, Model model) {
-        BulletinItem bulletinItem = itemService.findBulletinItem(itemId);
+    @GetMapping("/items/{id}")
+    public String BulletinItemDetails(@PathVariable Long id, Model model) {
+        BulletinItem bulletinItem = itemService.findBulletinItem(id);
         model.addAttribute("bulletinItem", bulletinItem);
         return "guests/itemPurchase";
     }
 
     @GetMapping("/admins/items/{id}/modify")
-    public String modifyItemRegistrationForm(@PathVariable Long id, Model model) {
-        ItemRegistration itemRegistration = itemService.findItemRegistrationForm(id);
+    public String itemRegistrationFormModify(@PathVariable Long id, Model model) {
+        ItemRegistration itemRegistration = itemService.findItemRegistration(id);
         model.addAttribute("itemRegistrationForm", itemRegistration);
         return "admins/itemModification";
     }
 
     @PostMapping("/admins/items/{id}/modify")
-    public String modifyItem(ItemRegistration itemRegistration) throws IOException {
+    public String itemRegistrationModify(ItemRegistration itemRegistration) throws IOException {
         UploadFile uploadFile = fileStore.storeFile(itemRegistration.getImageFile());
         log.info("uploadFile.getUploadFileName() = {}", uploadFile.getUploadFileName());
-        itemService.modifyItemForm(itemRegistration, uploadFile);
+        itemService.modifyItem(itemRegistration, uploadFile);
         return "redirect:admins/items";
 
     }
 
-    @GetMapping("/admins/items/{id}/withdraw")
-    public String removeItemRegistrationForm(@PathVariable Long id) {
-        return "admins/itemWithdrawl";
+    @GetMapping("/admins/items/{id}/remove")
+    public String itemFormRemove(@PathVariable Long id) {
+        return "/admins/itemRemoval";
     }
 
-    @PostMapping("/admins/items/{id}/withdraw")
-    public String removeItem(@PathVariable Long id) throws IOException {
+    @PostMapping("/admins/items/{id}/remove")
+    public String itemRemove(@PathVariable Long id) throws IOException {
         itemService.removeItem(id);
         return "redirect:/admins/items";
     }
