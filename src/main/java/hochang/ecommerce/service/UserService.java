@@ -35,7 +35,7 @@ public class UserService {
         return userRepository.findOne(userId);
     }
 
-    public UserRegistration findUserFormByUsername(String username) {
+    public UserRegistration findUserRegistrationByUsername(String username) {
         User user = userRepository.findUserByUsername(username);
         return toUserForm(user);
     }

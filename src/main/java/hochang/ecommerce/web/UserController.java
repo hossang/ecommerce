@@ -25,14 +25,14 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/sign-up")
-    public String createUserForm(Model model, @RequestParam(required = false) String errorMessage) {
+    public String userRegistrationFormCreate(Model model, @RequestParam(required = false) String errorMessage) {
         model.addAttribute("errorMessage", errorMessage);
-        model.addAttribute("userForm", new UserRegistration());
+        model.addAttribute("userRegistration", new UserRegistration());
         return "guests/signUp";
     }
 
     @PostMapping("/sign-up")
-    public String create(@Valid UserRegistration userRegistration, BindingResult bindingResult) {
+    public String userRegistrationCreate(@Valid UserRegistration userRegistration, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "guests/signUp";
         }
@@ -41,12 +41,12 @@ public class UserController {
     }
 
     @GetMapping("/sign-in")
-    public String createSignInForm(SignIn signIn) {
+    public String signInFormCreate(SignIn signIn) {
         return "guests/signIn";
     }
 
     @PostMapping("/sign-in")
-    public String signIn(@Valid SignIn signIn, BindingResult bindingResult
+    public String signInCreate(@Valid SignIn signIn, BindingResult bindingResult
             , HttpServletRequest request, @RequestParam(defaultValue = "/") String redirectURL) {
         if (bindingResult.hasErrors()) {
             return "guests/signIn";
@@ -63,7 +63,7 @@ public class UserController {
     }
 
     @PostMapping("/sign-out")
-    public String signOut(HttpServletRequest request) {
+    public String signOutCreate(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session != null) {
             session.invalidate();
@@ -72,14 +72,14 @@ public class UserController {
     }
 
     @GetMapping("/users/{username}/modify")
-    public String createProfileModification(@PathVariable String username, Model model) {
-        UserRegistration userRegistration = userService.findUserFormByUsername(username);
-        model.addAttribute("userForm", userRegistration);
+    public String userRegistrationFormModify(@PathVariable String username, Model model) {
+        UserRegistration userRegistration = userService.findUserRegistrationByUsername(username);
+        model.addAttribute("userRegistration", userRegistration);
         return "users/userProfileModification";
     }
 
     @PostMapping("/users/{username}/modify")
-    public String modifyProfile(@Valid UserRegistration userRegistration, BindingResult bindingResult) {
+    public String userRegistrationModify(@Valid UserRegistration userRegistration, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "users/userProfileModification";
         }
@@ -87,24 +87,23 @@ public class UserController {
             bindingResult.reject("improperPassword", "비밀번호가 맞지 않습니다.");
             return "users/userProfileModification";
         }
-
         return "redirect:/users/{username}";
     }
 
     @GetMapping("/users/{username}")
-    public String createMyPage(@PathVariable String username, Model model) {
+    public String myPage(@PathVariable String username, Model model) {
         model.addAttribute("username", username);
         return "users/myPage";
     }
 
-    @GetMapping("/users/{username}/withdraw")
-    public String withdrawUser(@PathVariable String username, Model model) {
+    @GetMapping("/users/{username}/remove")
+    public String userFormRemove(@PathVariable String username, Model model) {
         model.addAttribute("uesrname", username);
-        return "users/userWithdrawl";
+        return "users/userRemoval";
     }
 
-    @PostMapping("/users/{username}/withdraw")
-    public String withdrawUser(@PathVariable String username, HttpSession session) { //Q HtttpServletRequest하고 HttpSession 하는 거랑 무슨 차이?
+    @PostMapping("/users/{username}/remove")
+    public String userRemove(@PathVariable String username, HttpSession session) { //Q HtttpServletRequest하고 HttpSession 하는 거랑 무슨 차이?
         userService.removeUser(username);
         session.invalidate();
         return "redirect:/";
