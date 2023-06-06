@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RequiredArgsConstructor
 public class HomeController {
     @GetMapping("/")
-    public String showHomePage(@SignIn String signInUser, Model model) {
+    public String homePage(@SignIn String signInUser, Model model) {
         log.info("signInUser = {}",signInUser);
         if (signInUser == null) {
             return "guests/home";
