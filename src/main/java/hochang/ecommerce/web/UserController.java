@@ -110,7 +110,7 @@ public class UserController {
     }
 
     @ExceptionHandler(IllegalStateException.class)
-    public String SignUpDuplicateUser(IllegalStateException illegalStateException, RedirectAttributes redirectAttributes) {
+    public String signUpDuplicateUser(IllegalStateException illegalStateException, RedirectAttributes redirectAttributes) {
         String errorMessage = illegalStateException.getMessage();
         log.info("errorMessage : {}", errorMessage);
         redirectAttributes.addAttribute("errorMessage", errorMessage);
