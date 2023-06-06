@@ -29,7 +29,6 @@ import java.net.MalformedURLException;
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
-    private final FileStore fileStore;
 
     @GetMapping("/admins/items")
     public String itemList(@PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable, Model model) {
@@ -53,8 +52,7 @@ public class ItemController {
 
     @PostMapping("/admins/items/register")
     public String itemRegistrationCreate(ItemRegistration itemRegistration) throws IOException {
-        UploadFile uploadFile = fileStore.storeFile(itemRegistration.getImageFile());
-        Long itemId = itemService.save(itemRegistration, uploadFile);
+        Long itemId = itemService.save(itemRegistration);
         return "redirect:/admins/items";
     }
 
@@ -74,9 +72,7 @@ public class ItemController {
 
     @PostMapping("/admins/items/{id}/modify")
     public String itemRegistrationModify(ItemRegistration itemRegistration) throws IOException {
-        UploadFile uploadFile = fileStore.storeFile(itemRegistration.getImageFile());
-        log.info("uploadFile.getUploadFileName() = {}", uploadFile.getUploadFileName());
-        itemService.modifyItem(itemRegistration, uploadFile);
+        itemService.modifyItem(itemRegistration);
         return "redirect:admins/items";
 
     }
@@ -95,6 +91,6 @@ public class ItemController {
     @ResponseBody
     @GetMapping("/images/{filename}")
     public Resource downloadImage(@PathVariable String filename) throws MalformedURLException {
-        return new UrlResource("file:" + fileStore.getFullPath(filename));
+        return itemService.getImage(filename);
     }
 }

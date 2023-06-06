@@ -9,11 +9,14 @@ import hochang.ecommerce.util.file.FileStore;
 import hochang.ecommerce.util.file.UploadFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Optional;
 
 @Slf4j
@@ -25,7 +28,8 @@ public class ItemService {
     private final FileStore fileStore;
 
     @Transactional
-    public Long save(ItemRegistration itemRegistration, UploadFile uploadFile) throws IOException {
+    public Long save(ItemRegistration itemRegistration) throws IOException {
+        UploadFile uploadFile = fileStore.storeFile(itemRegistration.getImageFile());
         Item item = toItem(itemRegistration, uploadFile);
         return itemRepository.save(item).getId();
     }
@@ -53,7 +57,8 @@ public class ItemService {
     }
 
     @Transactional
-    public void modifyItem(ItemRegistration itemRegistration, UploadFile uploadFile) throws IOException {
+    public void modifyItem(ItemRegistration itemRegistration) throws IOException {
+        UploadFile uploadFile = fileStore.storeFile(itemRegistration.getImageFile());
         Item item = findItem(itemRegistration.getId());
         log.info("item.getStoreFileName() = {}", item.getStoreFileName());
         log.info("uploadFile.getStoreFileName() = {}", uploadFile.getStoreFileName());
@@ -67,6 +72,10 @@ public class ItemService {
         Item item = findItem(id);
         fileStore.deleteFile(item.getStoreFileName());
         itemRepository.delete(item);
+    }
+
+    public Resource getImage(String filename) throws MalformedURLException {
+        return new UrlResource("file:" + fileStore.getFullPath(filename));
     }
 
     //toxxx()들 어댑터로 만들어 볼까?
