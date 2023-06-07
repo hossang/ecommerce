@@ -31,11 +31,11 @@ class UserServiceTest {
     public void 회원가입() {
         //Given
         UserRegistration userRegistration = new UserRegistration();
-        given(userRepository.save(any(User.class))).willReturn(1L);
+        given(userRepository.save(any(User.class))).willReturn(any(User.class));
         //When
-        Long userId = userService.join(userRegistration);
+        User user = userService.join(userRegistration);
         //Then
-        assertThat(userId).isEqualTo(1L);
+        then(userRepository).should(times(1)).save(any(User.class));
     }
 
     @Test
@@ -44,10 +44,10 @@ class UserServiceTest {
         UserRegistration userRegistration1 = new UserRegistration();
         UserRegistration userRegistration2 = new UserRegistration();
         given(userRepository.save(any(User.class)))
-                .willReturn(1L)
+                .willReturn(any(User.class))
                 .willThrow(IllegalStateException.class);
         //When
-        Long userId = userService.join(userRegistration1);
+        User user = userService.join(userRegistration1);
         assertThatThrownBy(() -> userService.join(userRegistration2))
                 .isInstanceOf(IllegalStateException.class);
         //Then

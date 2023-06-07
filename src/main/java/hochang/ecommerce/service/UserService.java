@@ -20,7 +20,7 @@ public class UserService {
     private final BCryptPasswordEncoder encoder;
 
     @Transactional
-    public Long join(UserRegistration userRegistration) {
+    public User join(UserRegistration userRegistration) {
         User user = toUser(userRegistration);
         validateDuplicateUser(user);
         return userRepository.save(user);
@@ -31,17 +31,13 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User findOne(Long userId) {
-        return userRepository.findOne(userId);
-    }
-
     public UserRegistration findUserRegistrationByUsername(String username) {
-        User user = userRepository.findUserByUsername(username);
+        User user = userRepository.findByUsername(username);
         return toUserForm(user);
     }
 
     public String signIn(SignIn signIn) {
-        User user = userRepository.findUserByUsername(signIn.getUsername());
+        User user = userRepository.findByUsername(signIn.getUsername());
         if (user == null || !encoder.matches(signIn.getPassword(), user.getPassword())) {
             return null;
         }
@@ -50,7 +46,7 @@ public class UserService {
 
     @Transactional
     public Long modifyEmailAndPhone(UserRegistration userRegistration) {
-        User user = userRepository.findUserByUsername(userRegistration.getUsername());
+        User user = userRepository.findByUsername(userRegistration.getUsername());
         log.info("user.getId() = {}", user.getId());
         if (!encoder.matches(userRegistration.getPassword(), user.getPassword())) { //리팩토링
             return null;
@@ -63,12 +59,13 @@ public class UserService {
     }
 
     @Transactional
-    public Long removeUser(String username) {
-        return userRepository.remove(username);
+    public void removeUser(String username) {
+        User user = userRepository.findByUsername(username);
+        userRepository.delete(user);
     }
 
     private void validateDuplicateUser(User user) {
-        User findUser = userRepository.findUserByUsername(user.getUsername());
+        User findUser = userRepository.findByUsername(user.getUsername());
         if (findUser != null) {
             throw new IllegalStateException("이미 존재하는 회원입니다.");
         }

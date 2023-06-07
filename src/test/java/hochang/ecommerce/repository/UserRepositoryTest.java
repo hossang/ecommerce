@@ -3,17 +3,20 @@ package hochang.ecommerce.repository;
 import hochang.ecommerce.domain.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
 
-@SpringBootTest
-@Transactional
+@ExtendWith(SpringExtension.class)
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class UserRepositoryTest {
     @Autowired
     UserRepository userRepository;
@@ -28,16 +31,16 @@ class UserRepositoryTest {
                 .email("adsf@asdf.com")
                 .phone("12345678912")
                 .build();
-        
-        Long id = userRepository.save(user);
+
+        userRepository.save(user);
     }
     
     @Test
     public void 단일회원조회() {
         //Given
         //When
-        User user = userRepository.findUserByUsername("asdf1234");
-        System.out.println("user.getId() = " + user.getId());
+        User user = userRepository.findByUsername("asdf1234");
+        System.out.println("user.getId() = " + user.getUsername());
         //Then
         assertThat(user.getUsername()).isEqualTo("asdf1234");
     } 
@@ -53,7 +56,7 @@ class UserRepositoryTest {
                 .email("qwer@qewr.com")
                 .phone("01022223333")
                 .build();
-        Long id = userRepository.save(secondUser);
+        userRepository.save(secondUser);
         //When
         List<User> all = userRepository.findAll();
         //Then
@@ -68,19 +71,19 @@ class UserRepositoryTest {
     @Test
     public void 회원삭제() {
         //Given
-        User user = userRepository.findUserByUsername("asdf1234");
+        User user = userRepository.findByUsername("asdf1234");
         System.out.println("user.getId() = " + user.getId());
         //When
-        Long id = userRepository.remove(user.getUsername());
+        userRepository.deleteAll();
         //Then
-        assertThat(id).isNotNull();
+        assertThat(userRepository.findAll()).isEmpty();
     }
 
     @Test
     public void 아이디로_회원_찾기() {
         //Given
         //When
-        User user = userRepository.findUserByUsername("asdf1234");
+        User user = userRepository.findByUsername("asdf1234");
         //Then
         assertThat(user.getUsername()).isEqualTo("asdf1234");
     }
