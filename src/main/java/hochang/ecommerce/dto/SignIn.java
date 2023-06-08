@@ -2,13 +2,11 @@ package hochang.ecommerce.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
 
 @Getter
 @Setter
-public class SignInForm {
+public class SignIn {
     @NotBlank
     private String username;
 

@@ -1,11 +1,9 @@
 package hochang.ecommerce.domain;
 
-import hochang.ecommerce.util.file.UploadFile;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -16,7 +14,7 @@ import javax.persistence.Lob;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Item extends BaseEntity {
+public class Item extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "item_id")
@@ -46,7 +44,7 @@ public class Item extends BaseEntity {
     }
 
     //마음에 들지 않아... 매게변수 순서잘못입력하면 ?
-    public void modifyItemForm(String name, int count, long price, String contents, String uploadFileName, String storeFileName) {
+    public void modifyItem(String name, int count, long price, String contents, String uploadFileName, String storeFileName) {
         this.name = name;
         this.count = count;
         this.price = price;

@@ -3,17 +3,20 @@ package hochang.ecommerce.service;
 import hochang.ecommerce.domain.Item;
 import hochang.ecommerce.dto.BoardItem;
 import hochang.ecommerce.dto.BulletinItem;
-import hochang.ecommerce.dto.ItemRegistrationForm;
+import hochang.ecommerce.dto.ItemRegistration;
 import hochang.ecommerce.repository.ItemRepository;
 import hochang.ecommerce.util.file.FileStore;
 import hochang.ecommerce.util.file.UploadFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Optional;
 
 @Slf4j
@@ -25,66 +28,74 @@ public class ItemService {
     private final FileStore fileStore;
 
     @Transactional
-    public Long save(ItemRegistrationForm itemRegistrationForm, UploadFile uploadFile) throws IOException {
-        Item item = toItem(itemRegistrationForm, uploadFile);
+    public Long save(ItemRegistration itemRegistration) throws IOException {
+        UploadFile uploadFile = fileStore.storeFile(itemRegistration.getImageFile());
+        Item item = toItem(itemRegistration, uploadFile);
         return itemRepository.save(item).getId();
     }
 
-    public Page<BoardItem> createBoardItems(Pageable pageable) {
+    public Page<BoardItem> findBoardItems(Pageable pageable) {
         Page<Item> itemPage = itemRepository.findAll(pageable);
         Page<BoardItem> boardItems = itemPage.map(o -> toBoardItem(o));
         return boardItems;
     }
 
-    public BulletinItem findBulletinItem(Long itemId) {
+    private Item findItem(Long itemId) {
         Optional<Item> optionalItem = itemRepository.findById(itemId);
         Item item = optionalItem.get();
+        return item;
+    }
+
+    public BulletinItem findBulletinItem(Long itemId) {
+        Item item = findItem(itemId);
         return toBulletinItem(item);
     }
 
-    public ItemRegistrationForm findItemRegistrationForm(Long itemId) {
-        Optional<Item> optionalItem = itemRepository.findById(itemId);
-        Item item = optionalItem.get();
+    public ItemRegistration findItemRegistration(Long itemId) {
+        Item item = findItem(itemId);
         return toItemRegistration(item);
     }
 
     @Transactional
-    public void modifyItemForm(ItemRegistrationForm itemRegistrationForm, UploadFile uploadFile) throws IOException {
-        Optional<Item> optionalItem = itemRepository.findById(itemRegistrationForm.getId());
-        Item item = optionalItem.get();
+    public void modifyItem(ItemRegistration itemRegistration) throws IOException {
+        UploadFile uploadFile = fileStore.storeFile(itemRegistration.getImageFile());
+        Item item = findItem(itemRegistration.getId());
         log.info("item.getStoreFileName() = {}", item.getStoreFileName());
         log.info("uploadFile.getStoreFileName() = {}", uploadFile.getStoreFileName());
         fileStore.deleteFile(item.getStoreFileName());
-        item.modifyItemForm(itemRegistrationForm.getName(), itemRegistrationForm.getCount(), itemRegistrationForm.getPrice(),
-                itemRegistrationForm.getContents(), uploadFile.getUploadFileName(), uploadFile.getStoreFileName());
+        item.modifyItem(itemRegistration.getName(), itemRegistration.getCount(), itemRegistration.getPrice(),
+                itemRegistration.getContents(), uploadFile.getUploadFileName(), uploadFile.getStoreFileName());
     }
 
     @Transactional
     public void removeItem(Long id) throws IOException {
-        Optional<Item> optionalItem = itemRepository.findById(id);
-        Item item = optionalItem.get();
+        Item item = findItem(id);
         fileStore.deleteFile(item.getStoreFileName());
         itemRepository.delete(item);
     }
 
-    //toxxx()들 어댑터로 만들어 볼까?
-
-    private ItemRegistrationForm toItemRegistration(Item item) {
-        ItemRegistrationForm itemRegistrationForm = new ItemRegistrationForm();
-        itemRegistrationForm.setId(item.getId());
-        itemRegistrationForm.setName(item.getName());
-        itemRegistrationForm.setCount(item.getCount());
-        itemRegistrationForm.setPrice(item.getPrice());
-        itemRegistrationForm.setContents(item.getContents());
-        return itemRegistrationForm;
+    public Resource getImage(String filename) throws MalformedURLException {
+        return new UrlResource("file:" + fileStore.getFullPath(filename));
     }
 
-    private Item toItem(ItemRegistrationForm itemRegistrationForm, UploadFile uploadFile) {
+    //toxxx()들 어댑터로 만들어 볼까?
+
+    private ItemRegistration toItemRegistration(Item item) {
+        ItemRegistration itemRegistration = new ItemRegistration();
+        itemRegistration.setId(item.getId());
+        itemRegistration.setName(item.getName());
+        itemRegistration.setCount(item.getCount());
+        itemRegistration.setPrice(item.getPrice());
+        itemRegistration.setContents(item.getContents());
+        return itemRegistration;
+    }
+
+    private Item toItem(ItemRegistration itemRegistration, UploadFile uploadFile) {
         return Item.builder()
-                .name(itemRegistrationForm.getName())
-                .count(itemRegistrationForm.getCount())
-                .price(itemRegistrationForm.getPrice())
-                .contents(itemRegistrationForm.getContents())
+                .name(itemRegistration.getName())
+                .count(itemRegistration.getCount())
+                .price(itemRegistration.getPrice())
+                .contents(itemRegistration.getContents())
                 .uploadFileName(uploadFile.getUploadFileName())
                 .storeFileName(uploadFile.getStoreFileName())
                 .build();

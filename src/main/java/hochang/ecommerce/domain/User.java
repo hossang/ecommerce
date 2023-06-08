@@ -4,21 +4,21 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.time.LocalDate;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User extends BaseEntity{
+public class User extends BaseTimeEntity {
     @Id
-    @GeneratedValue() //Mysql 사용시, strategy = GenerationType.IDENTITY
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
 
@@ -45,7 +45,7 @@ public class User extends BaseEntity{
         this.birthDate = birthDate;
         this.email = email;
         this.phone = phone;
-        this.role = Role.USER;
+        this.role = Role.USER; //관리자 추가
     }
 
     public void modifyProfile(String email, String phone) {

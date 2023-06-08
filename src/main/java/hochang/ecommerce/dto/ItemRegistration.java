@@ -6,7 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
-public class ItemRegistrationForm {
+public class ItemRegistration {
     private Long id;
 
     private String name;

@@ -1,6 +1,5 @@
 package hochang.ecommerce.web.argumentresolver;
 
-import hochang.ecommerce.domain.User;
 import hochang.ecommerce.web.SessionConst;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;

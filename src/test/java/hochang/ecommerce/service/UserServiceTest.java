@@ -1,8 +1,8 @@
 package hochang.ecommerce.service;
 
 import hochang.ecommerce.domain.User;
+import hochang.ecommerce.dto.UserRegistration;
 import hochang.ecommerce.repository.UserRepository;
-import hochang.ecommerce.dto.UserForm;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,25 +30,25 @@ class UserServiceTest {
     @Test
     public void 회원가입() {
         //Given
-        UserForm userForm = new UserForm();
-        given(userRepository.save(any(User.class))).willReturn(1L);
+        UserRegistration userRegistration = new UserRegistration();
+        given(userRepository.save(any(User.class))).willReturn(any(User.class));
         //When
-        Long userId = userService.join(userForm);
+        User user = userService.join(userRegistration);
         //Then
-        assertThat(userId).isEqualTo(1L);
+        then(userRepository).should(times(1)).save(any(User.class));
     }
 
     @Test
     public void 중복_회원가입() {
         //Given
-        UserForm userForm1 = new UserForm();
-        UserForm userForm2 = new UserForm();
+        UserRegistration userRegistration1 = new UserRegistration();
+        UserRegistration userRegistration2 = new UserRegistration();
         given(userRepository.save(any(User.class)))
-                .willReturn(1L)
+                .willReturn(any(User.class))
                 .willThrow(IllegalStateException.class);
         //When
-        Long userId = userService.join(userForm1);
-        assertThatThrownBy(() -> userService.join(userForm2))
+        User user = userService.join(userRegistration1);
+        assertThatThrownBy(() -> userService.join(userRegistration2))
                 .isInstanceOf(IllegalStateException.class);
         //Then
         then(userRepository).should(times(2)).save(any(User.class));
