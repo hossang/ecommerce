@@ -17,7 +17,6 @@ public class HomeController {
         if (signInUser == null) {
             return "guests/home";
         }
-
         model.addAttribute("signInUser", signInUser);
         return "users/signInHome";
     }
