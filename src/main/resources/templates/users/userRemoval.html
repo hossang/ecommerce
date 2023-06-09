@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>회원 탈퇴</title>
+</head>
+<body>
+<div class="content">
+    <h2>회원 탈퇴</h2>
+    <form th:action="@{/users/{username}/remove(username=${username})}" method="post">
+        <p>정말로 회원을 탈퇴하시겠습니까?</p>
+        <p>탈퇴 후에는 복구할 수 없습니다.</p>
+        <button type="submit">회원 탈퇴</button>
+    </form>
+</div>
+</body>
+</html>

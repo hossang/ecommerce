@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>상품 상세 페이지</title>
+</head>
+<body>
+<h1 th:text="${bulletinItem.name}"></h1>
+
+<div class="image">
+    <img th:src="|/images/${bulletinItem.storeFileName}|" alt="Product Image">
+</div>
+
+<div class="info">
+    <p>가격: <span th:text="${bulletinItem.price}"></span></p>
+    <p>
+        수량:
+        <input type="number" id="quantity" name="quantity" min="1" value="1">
+    </p>
+    <button type="button">장바구니</button>
+    <button type="button">구매하기</button>
+</div>
+
+<div class="contents" th:text="${bulletinItem.contents}"></div>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Item Registration</title>
+</head>
+<body>
+<h1>Item Registration</h1>
+<form th:action="@{/admins/items/{id}/modify(id =${itemRegistration.id})}" method="post" enctype="multipart/form-data">
+    <div>
+        <label for="name">상품명:</label>
+        <input type="text" id="name" name="name" th:value="${itemRegistration.name}" required>
+    </div>
+    <div>
+        <label for="count">수량:</label>
+        <input type="number" id="count" name="count" th:value="${itemRegistration.count}" required>
+    </div>
+    <div>
+        <label for="price">가격:</label>
+        <input type="number" id="price" name="price" th:value="${itemRegistration.price}" required>
+    </div>
+    <div>
+        <label for="contents">상품 내용:</label>
+        <textarea id="contents" name="contents" required th:text="${itemRegistration.contents}"></textarea>
+    </div>
+    <div>
+        <p>파일 사이즈가 xxx보다 작아야 합니다.</p>
+        <label for="imageFile">이미지:</label>
+        <input type="file" id="imageFile" name="imageFile" accept="image/jpeg, image/png" required>
+    </div>
+    <button type="submit">수정</button>
+</form>
+</body>
+</html>

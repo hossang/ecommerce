@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시판 목록</title>
+</head>
+<body>
+<h1>게시판 목록</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>번호</th>
+        <th>제목</th>
+        <th>작성일</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="boardItem : ${boardItems}">
+        <td th:text="${boardItem.id}"></td>
+        <td>
+            <a th:href="@{/items/{id}(id=${boardItem.id})}" th:text="${boardItem.name}"></a>
+        </td>
+        <td th:text="${boardItem.createdDate}"></td>
+        <td>
+            <a th:href="@{/admins/items/{id}/modify(id=${boardItem.id})}">수정</a>
+        </td>
+        <td>
+            <a th:href="@{/admins/items/{id}/remove(id=${boardItem.id})}">삭제</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<th:block th:each="page : ${#numbers.sequence(startPage, endPage)}">
+    <a th:if="${page != nowPage}" th:href="@{/board/list(page = ${page - 1}, searchKeyword = ${param.searchKeyword})}" th:text="${page}"></a>
+    <strong th:if="${page == nowPage}" th:text="${page}" style="color : red"></strong>
+</th:block>
+
+</body>
+</html>
