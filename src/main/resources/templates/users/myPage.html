@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>쇼핑몰 마이페이지</title>
+</head>
+<body>
+<div class="sidebar">
+    <ul>
+        <li><a th:href="@{/users/{username}(username=${username})}" th:text="${username}">My Page</a></li>
+        <li><a th:href="@{/}">주문 현황</a></li>
+        <li><a th:href="@{/}">회원 목록</a></li>
+        <li><a th:href="@{/users/{username}/modify(username=${username})}">회원 정보 수정</a></li>
+        <li><a th:href="@{/admins/items/register}">상품 등록</a></li>
+        <li><a th:href="@{/admins/items}">상품 목록</a></li>
+        <li><a th:href="@{/users/{username}/remove(username=${username})}">회원 탈퇴</a></li>
+    </ul>
+</div>
+</body>
+</html>
