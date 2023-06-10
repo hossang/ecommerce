@@ -1,11 +1,14 @@
 package hochang.ecommerce.service;
 
 import hochang.ecommerce.domain.User;
+import hochang.ecommerce.dto.BoardUser;
 import hochang.ecommerce.dto.SignIn;
 import hochang.ecommerce.dto.UserRegistration;
 import hochang.ecommerce.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,6 +61,12 @@ public class UserService {
         return user.getId();
     }
 
+    public Page<BoardUser> findBoardUsers(Pageable pageable) {
+        Page<User> users = userRepository.findAll(pageable);
+        Page<BoardUser> boardUsers = users.map(o -> toBoardUser(o));
+        return boardUsers;
+    }
+
     @Transactional
     public void removeUser(String username) {
         User user = userRepository.findByUsername(username);
@@ -91,5 +100,13 @@ public class UserService {
         userRegistration.setEmail(user.getEmail());
         userRegistration.setPhone(user.getPhone());
         return userRegistration;
+    }
+
+    private BoardUser toBoardUser(User user) {
+        BoardUser boardUser = new BoardUser();
+        boardUser.setId(user.getId());
+        boardUser.setUsername(user.getUsername());
+        boardUser.setCreatedDate(user.getCreatedDate());
+        return boardUser;
     }
 }
