@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>User List</title>
+</head>
+<body>
+<h1>User List</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>번호</th>
+        <th>닉네임</th>
+        <th>생성 날짜</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="user : ${boardUsers}">
+        <td th:text="${user.id}"></td>
+        <td th:text="${user.username}"></td>
+        <td th:text="${user.createdDate}"></td>
+    </tr>
+    </tbody>
+</table>
+
+<th:block th:each="page : ${#numbers.sequence(startPage, endPage)}">
+    <a th:if="${page != nowPage}" th:href="@{/admins/users(page=${page - 1}, searchKeyword=${param.searchKeyword})}" th:text="${page}"></a>
+    <strong th:if="${page == nowPage}" th:text="${page}" style="color: red"></strong>
+</th:block>
+
+</body>
+</html>

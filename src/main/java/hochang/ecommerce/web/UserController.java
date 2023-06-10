@@ -1,10 +1,15 @@
 package hochang.ecommerce.web;
 
+import hochang.ecommerce.dto.BoardUser;
 import hochang.ecommerce.dto.SignIn;
 import hochang.ecommerce.dto.UserRegistration;
 import hochang.ecommerce.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -109,6 +114,20 @@ public class UserController {
         return "redirect:/";
     }
 
+    @GetMapping("/admins/users")
+    public String userList(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable, Model model) {
+        Page<BoardUser> boardUsers = userService.findBoardUsers(pageable);
+        int nowPage = boardUsers.getPageable().getPageNumber() + 1;
+        int startPage = Math.max(1, nowPage - 4);
+        int endPage = Math.min(boardUsers.getTotalPages(),nowPage + 5);
+
+        model.addAttribute("boardUsers", boardUsers);
+        model.addAttribute("nowPage", nowPage);
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
+        return "admins/userList";
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     public String signUpDuplicateUser(IllegalStateException illegalStateException, RedirectAttributes redirectAttributes) {
         String errorMessage = illegalStateException.getMessage();
@@ -116,5 +135,4 @@ public class UserController {
         redirectAttributes.addAttribute("errorMessage", errorMessage);
         return "redirect:/sign-up";
     }
-    //회원 목록 url 추가
 }
