@@ -13,7 +13,7 @@
 </head>
 <body>
 <h1>상품 등록</h1>
-<form th:action="@{/admins/items/register}" method="post" enctype="multipart/form-data">
+<form th:action="@{/admins/{username}/items/register(username=${username})}" method="post" enctype="multipart/form-data">
     <div>
         <label for="name">상품명:</label>
         <input type="text" id="name" name="name" maxlength="20" required>
