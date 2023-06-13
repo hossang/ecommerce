@@ -17,8 +17,12 @@
         수량:
         <input type="number" id="quantity" name="quantity" min="1" value="1">
     </p>
-    <button type="button">장바구니</button>
-    <button type="button">구매하기</button>
+    <!--<form th:action="@{/users/}" method="post">
+        <button type="submit">장바구니</button>
+    </form>-->
+    <form th:action="@{/users/{username}/orders(username=${username})}" method="post">
+        <button type="submit">구매하기</button>
+    </form>
 </div>
 
 <div class="contents" th:text="${bulletinItem.contents}"></div>

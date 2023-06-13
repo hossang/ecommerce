@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RequiredArgsConstructor
 public class HomeController {
     @GetMapping("/")
-    public String homePage(@SignIn String signInUser, Model model) {
-        log.info("signInUser = {}",signInUser);
-        if (signInUser == null) {
+    public String homePage(@SignIn String username, Model model) {
+        log.info("username = {}",username);
+        if (username == null) {
             return "guests/home";
         }
-        model.addAttribute("signInUser", signInUser);
+        model.addAttribute("username", username);
         return "users/signInHome";
     }
 }

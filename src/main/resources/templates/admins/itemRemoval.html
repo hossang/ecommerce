@@ -6,7 +6,7 @@
 </head>
 <body>
 <h1>Item Withdrawal</h1>
-<form th:action="@{/admins/items/{id}/remove(id=${id})}" method="post">
+<form th:action="@{/admins/{username}/items/{id}/remove(username=${username}, id=${id})}" method="post">
     <p>Are you sure you want to withdraw this item?</p>
     <button type="submit">삭제</button>
 </form>

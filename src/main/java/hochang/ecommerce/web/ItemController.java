@@ -30,13 +30,15 @@ import java.net.MalformedURLException;
 public class ItemController {
     private final ItemService itemService;
 
-    @GetMapping("/admins/items")
-    public String itemList(@PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable, Model model) {
+    @GetMapping("/admins/{username}/items")
+    public String itemList(@PathVariable String username
+            , @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable, Model model) {
         Page<BoardItem> boardItems = itemService.findBoardItems(pageable);
         int nowPage = boardItems.getPageable().getPageNumber() + 1;
         int startPage = Math.max(1, nowPage - 4);
         int endPage = Math.min(boardItems.getTotalPages(),nowPage + 5);
 
+        model.addAttribute("username", username);
         model.addAttribute("boardItems", boardItems);
         model.addAttribute("nowPage", nowPage);
         model.addAttribute("startPage", startPage);
@@ -45,15 +47,18 @@ public class ItemController {
         return "admins/itemlist";
     }
 
-    @GetMapping("/admins/items/register")
-    public String itemRegistrationFormCreate(ItemRegistration itemRegistration) {
+    @GetMapping("/admins/{username}/items/register")
+    public String itemRegistrationFormCreate(@PathVariable String username, ItemRegistration itemRegistration
+            , Model model) {
+        model.addAttribute("username", username);
         return "admins/itemRegistration";
     }
 
-    @PostMapping("/admins/items/register")
-    public String itemRegistrationCreate(ItemRegistration itemRegistration) throws IOException {
+    @PostMapping("/admins/{username}/items/register")
+    public String itemRegistrationCreate(@PathVariable String username,
+                                         ItemRegistration itemRegistration) throws IOException {
         Long itemId = itemService.save(itemRegistration);
-        return "redirect:/admins/items";
+        return "redirect:/admins/{username}/items";
     }
 
     @GetMapping("/items/{id}")
@@ -63,29 +68,32 @@ public class ItemController {
         return "guests/itemPurchase";
     }
 
-    @GetMapping("/admins/items/{id}/modify")
-    public String itemRegistrationFormModify(@PathVariable Long id, Model model) {
+    @GetMapping("/admins/{username}/items/{id}/modify")
+    public String itemRegistrationFormModify(@PathVariable String username
+            ,@PathVariable Long id, Model model) {
         ItemRegistration itemRegistration = itemService.findItemRegistration(id);
-        model.addAttribute("itemRegistrationForm", itemRegistration);
+        model.addAttribute("username", username);
+        model.addAttribute("itemRegistration", itemRegistration);
         return "admins/itemModification";
     }
 
-    @PostMapping("/admins/items/{id}/modify")
-    public String itemRegistrationModify(ItemRegistration itemRegistration) throws IOException {
+    @PostMapping("/admins/{username}/items/{id}/modify")
+    public String itemRegistrationModify(@PathVariable String username, @PathVariable Long id
+            , ItemRegistration itemRegistration) throws IOException {
         itemService.modifyItem(itemRegistration);
-        return "redirect:admins/items";
+        return "redirect:admins/{username}/items";
 
     }
 
-    @GetMapping("/admins/items/{id}/remove")
-    public String itemFormRemove(@PathVariable Long id) {
+    @GetMapping("/admins/{username}/items/{id}/remove")
+    public String itemFormRemove(@PathVariable String username, @PathVariable Long id) {
         return "/admins/itemRemoval";
     }
 
-    @PostMapping("/admins/items/{id}/remove")
-    public String itemRemove(@PathVariable Long id) throws IOException {
+    @PostMapping("/admins/{username}/items/{id}/remove")
+    public String itemRemove(@PathVariable String username, @PathVariable Long id) throws IOException {
         itemService.removeItem(id);
-        return "redirect:/admins/items";
+        return "redirect:/admins/{username}/items";
     }
 
     @ResponseBody

@@ -23,17 +23,17 @@
         </td>
         <td th:text="${boardItem.createdDate}"></td>
         <td>
-            <a th:href="@{/admins/items/{id}/modify(id=${boardItem.id})}">수정</a>
+            <a th:href="@{/admins/{username}/items/{id}/modify(username=${username}, id=${boardItem.id})}">수정</a>
         </td>
         <td>
-            <a th:href="@{/admins/items/{id}/remove(id=${boardItem.id})}">삭제</a>
+            <a th:href="@{/admins/{username}/items/{id}/remove(username=${username}, id=${boardItem.id})}">삭제</a>
         </td>
     </tr>
     </tbody>
 </table>
 
 <th:block th:each="page : ${#numbers.sequence(startPage, endPage)}">
-    <a th:if="${page != nowPage}" th:href="@{/admins/items(page = ${page - 1}, searchKeyword = ${param.searchKeyword})}" th:text="${page}"></a>
+    <a th:if="${page != nowPage}" th:href="@{/admins/{username}/items(username=${username}, page = ${page - 1}, searchKeyword = ${param.searchKeyword})}" th:text="${page}"></a>
     <strong th:if="${page == nowPage}" th:text="${page}" style="color : red"></strong>
 </th:block>
 

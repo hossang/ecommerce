@@ -84,7 +84,8 @@ public class UserController {
     }
 
     @PostMapping("/users/{username}/modify")
-    public String userRegistrationModify(@Valid UserRegistration userRegistration, BindingResult bindingResult) {
+    public String userRegistrationModify(@PathVariable String username
+            , @Valid UserRegistration userRegistration, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "users/userProfileModification";
         }
@@ -108,19 +109,21 @@ public class UserController {
     }
 
     @PostMapping("/users/{username}/remove")
-    public String userRemove(@PathVariable String username, HttpSession session) { //Q HtttpServletRequest하고 HttpSession 하는 거랑 무슨 차이?
+    public String userRemove(@PathVariable String username, HttpSession session) {
         userService.removeUser(username);
         session.invalidate();
         return "redirect:/";
     }
 
-    @GetMapping("/admins/users")
-    public String userList(@PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable, Model model) {
+    @GetMapping("/admins/{username}/users")
+    public String userList(@PathVariable String username
+            , @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable, Model model) {
         Page<BoardUser> boardUsers = userService.findBoardUsers(pageable);
         int nowPage = boardUsers.getPageable().getPageNumber() + 1;
         int startPage = Math.max(1, nowPage - 4);
-        int endPage = Math.min(boardUsers.getTotalPages(),nowPage + 5);
+        int endPage = Math.min(boardUsers.getTotalPages(), nowPage + 5);
 
+        model.addAttribute("username", username);
         model.addAttribute("boardUsers", boardUsers);
         model.addAttribute("nowPage", nowPage);
         model.addAttribute("startPage", startPage);

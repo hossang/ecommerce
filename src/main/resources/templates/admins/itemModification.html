@@ -6,7 +6,7 @@
 </head>
 <body>
 <h1>Item Registration</h1>
-<form th:action="@{/admins/items/{id}/modify(id =${itemRegistration.id})}" method="post" enctype="multipart/form-data">
+<form th:action="@{/admins/{username}/items/{id}/modify(username=${username}, id =${itemRegistration.id})}" method="post" enctype="multipart/form-data">
     <div>
         <label for="name">상품명:</label>
         <input type="text" id="name" name="name" th:value="${itemRegistration.name}" required>
