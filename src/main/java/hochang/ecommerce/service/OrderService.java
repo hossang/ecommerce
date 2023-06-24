@@ -83,6 +83,12 @@ public class OrderService {
     }
 
 
+    public BoardOrder findBoardOrder(Long id) {
+        Order order = findOrder(id);
+        BoardOrder boardOrder = toBoardOrder(order);
+        return boardOrder;
+    }
+
     public Order findOrder(Long id) {
         return orderRepository.findById(id).get();
     }
@@ -112,4 +118,20 @@ public class OrderService {
         return orderItem;
     }
 
+    private BoardOrder toBoardOrder(Order o) {
+        BoardOrder boardOrder = new BoardOrder();
+        StringBuffer stringBuffer = new StringBuffer();
+        boardOrder.setId(o.getId());
+
+        for (OrderLine orderLine : o.getOrderLines()) {
+            stringBuffer.append(orderLine.getItem().getName()).append(", ");
+        }
+        stringBuffer.delete(stringBuffer.length() - 2, stringBuffer.length() - 1);
+        boardOrder.setOrderLineNames(stringBuffer.toString());
+
+        boardOrder.setOrderStatue(OrderStatusConstants.ORDER_STATUS_MAP.get(o.getStatus()));
+        boardOrder.setTotalPrice(o.getTotalPrice());
+        boardOrder.setCreateDate(o.getCreatedDate());
+        return boardOrder;
+    }
 }
