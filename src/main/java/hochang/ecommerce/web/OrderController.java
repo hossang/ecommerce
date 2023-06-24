@@ -90,6 +90,13 @@ public class OrderController {
         return "users/orderDetail";
     }
 
+    @PostMapping("/users/{username}/orders/{id}/cancel")
+    public String orderCancel(@PathVariable String username, @PathVariable Long id) {
+        Order order = orderService.findOrder(id);
+        orderService.cancelOrder(order);
+        return "redirect:/users/{username}/orders";
+    }
+
     private Order getOrder(String username, Long itemId, Integer quantity, Optional<Order> optionalOrder) {
         if (!optionalOrder.isPresent()) {
             return orderService.createOrder(username, itemId, quantity);
