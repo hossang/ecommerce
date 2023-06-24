@@ -80,6 +80,16 @@ public class OrderController {
         return "users/orderList";
     }
 
+    @GetMapping("/users/{username}/orders/{id}")
+    public String orderDetail(@PathVariable String username, @PathVariable Long id, Model model) {
+        BoardOrder boardOrder = orderService.findBoardOrder(id);
+        List<OrderLine> orderLines = orderService.findOrder(id).getOrderLines();
+        List<OrderItem> orderItems = orderService.findOrderItems(orderLines);
+        model.addAttribute("boardOrder", boardOrder);
+        model.addAttribute("orderItems", orderItems);
+        return "users/orderDetail";
+    }
+
     private Order getOrder(String username, Long itemId, Integer quantity, Optional<Order> optionalOrder) {
         if (!optionalOrder.isPresent()) {
             return orderService.createOrder(username, itemId, quantity);
