@@ -41,6 +41,13 @@ public class OrderController {
         return "users/myCart";
     }
 
+    @PostMapping("/users/{username}/orders/cart")
+    public String orderLineCreate(@PathVariable String username, @RequestParam(required = false) Long itemId
+            , @RequestParam(required = false) Integer quantity) {
+        Long id = orderService.findByUserAndStatus(username).get().getId();
+        return "redirect:/users/{username}/orders/" + id +"/create";
+    }
+
     private Order getOrder(String username, Long itemId, Integer quantity, Optional<Order> optionalOrder) {
         if (!optionalOrder.isPresent()) {
             return orderService.createOrder(username, itemId, quantity);
