@@ -4,12 +4,10 @@ import hochang.ecommerce.dto.BoardItem;
 import hochang.ecommerce.dto.BulletinItem;
 import hochang.ecommerce.dto.ItemRegistration;
 import hochang.ecommerce.service.ItemService;
-import hochang.ecommerce.util.file.FileStore;
-import hochang.ecommerce.util.file.UploadFile;
+import hochang.ecommerce.web.argumentresolver.SignIn;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -19,7 +17,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -62,10 +62,22 @@ public class ItemController {
     }
 
     @GetMapping("/items/{id}")
-    public String BulletinItemDetails(@PathVariable Long id, Model model) {
+    public String bulletinItemDetails(@PathVariable Long id, Model model) {
         BulletinItem bulletinItem = itemService.findBulletinItem(id);
         model.addAttribute("bulletinItem", bulletinItem);
         return "guests/itemPurchase";
+    }
+
+    @PostMapping("/items/{id}")
+    public String bulletinItemPurchase(@SignIn String username, @PathVariable Long id, @RequestParam int quantity
+            , RedirectAttributes redirectAttributes) {
+        log.info("BulletinItemPurchase() username = {}", username);
+        if (username == null) {
+            return "redirect:/sign-in?redirectURL=/items/{id}";
+        }
+        redirectAttributes.addAttribute("itemId", id);
+        redirectAttributes.addAttribute("quantity", quantity);
+        return "redirect:/users/" + username + "/orders/cart";
     }
 
     @GetMapping("/admins/{username}/items/{id}/modify")
