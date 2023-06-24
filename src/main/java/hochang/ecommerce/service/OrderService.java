@@ -82,6 +82,11 @@ public class OrderService {
         return orderItems;
     }
 
+    public Page<BoardOrder> findBoardOrders(Pageable pageable) {
+        Page<Order> orderPage = orderRepository.findByStatusIn(List.of(OrderStatus.COMPLETE, OrderStatus.CANCEL), pageable);
+        Page<BoardOrder> boardOrders = orderPage.map(o -> toBoardOrder(o));
+        return boardOrders;
+    }
 
     public BoardOrder findBoardOrder(Long id) {
         Order order = findOrder(id);
