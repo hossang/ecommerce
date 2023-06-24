@@ -82,6 +82,11 @@ public class OrderService {
         return orderItems;
     }
 
+
+    public Order findOrder(Long id) {
+        return orderRepository.findById(id).get();
+    }
+
     //
 
     private OrderLine createOrderLine(Long itemId, int quantity) {
