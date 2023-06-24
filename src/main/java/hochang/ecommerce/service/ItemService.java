@@ -74,12 +74,12 @@ public class ItemService {
         itemRepository.delete(item);
     }
 
+    //
     public Resource getImage(String filename) throws MalformedURLException {
         return new UrlResource("file:" + fileStore.getFullPath(filename));
     }
-
-    //toxxx()들 어댑터로 만들어 볼까?
-
+    
+    //
     private ItemRegistration toItemRegistration(Item item) {
         ItemRegistration itemRegistration = new ItemRegistration();
         itemRegistration.setId(item.getId());
@@ -111,6 +111,7 @@ public class ItemService {
 
     private BulletinItem toBulletinItem(Item item) {
         BulletinItem bulletinItem = new BulletinItem();
+        bulletinItem.setId(item.getId());
         bulletinItem.setName(item.getName());
         bulletinItem.setPrice(item.getPrice());
         bulletinItem.setContents(item.getContents());
