@@ -69,6 +69,11 @@ public class OrderService {
         order.cancelOrder();
     }
 
+    public Optional<Order> findByUserAndStatus(String username) {
+        User user = userRepository.findByUsername(username);
+        return orderRepository.findByUserAndStatus(user, OrderStatus.ORDER);
+    }
+
     //
 
     private OrderLine createOrderLine(Long itemId, int quantity) {
