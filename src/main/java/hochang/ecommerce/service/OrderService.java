@@ -74,6 +74,14 @@ public class OrderService {
         return orderRepository.findByUserAndStatus(user, OrderStatus.ORDER);
     }
 
+    public List<OrderItem> findOrderItems(List<OrderLine> orderLines) {
+        List<OrderItem> orderItems = new ArrayList<>();
+        for (OrderLine orderLine : orderLines) {
+            orderItems.add(toOrderItem(orderLine));
+        }
+        return orderItems;
+    }
+
     //
 
     private OrderLine createOrderLine(Long itemId, int quantity) {
@@ -87,5 +95,16 @@ public class OrderService {
     }
 
     //
+
+    private OrderItem toOrderItem(OrderLine orderLine) {
+        OrderItem orderItem = new OrderItem();
+        orderItem.setItemId(orderLine.getItem().getId());
+        orderItem.setName(orderLine.getItem().getName());
+        orderItem.setPrice(orderLine.getItem().getPrice());
+        orderItem.setCount(orderLine.getCount());
+        orderItem.setOrderPrice(orderLine.getOrderPrice());
+        orderItem.setStoreFileName(orderLine.getItem().getStoreFileName());
+        return orderItem;
+    }
 
 }
