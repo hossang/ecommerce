@@ -59,6 +59,11 @@ public class OrderService {
         return order;
     }
 
+    @Transactional
+    public void completeOrder(Order order) {
+        order.completeOrder();
+    }
+
     //
 
     private OrderLine createOrderLine(Long itemId, int quantity) {
