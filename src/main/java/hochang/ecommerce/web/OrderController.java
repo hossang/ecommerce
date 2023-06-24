@@ -48,6 +48,22 @@ public class OrderController {
         return "redirect:/users/{username}/orders/" + id +"/create";
     }
 
+    @GetMapping("/users/{username}/orders/{id}/create")
+    public String  orderDetails(@PathVariable String username, @PathVariable Long id, Model model) {
+        Order order = orderService.findByUserAndStatus(username).get();
+        model.addAttribute("totalPrice", order.getTotalPrice());
+        List<OrderItem> orderItems = orderService.findOrderItems(order.getOrderLines());
+        model.addAttribute("orderItems", orderItems);
+        return "users/myOrder";
+    }
+
+    @PostMapping("/users/{username}/orders/{id}/create")
+    public String orderCreate(@PathVariable String username, @PathVariable Long id) {
+        Order order = orderService.findByUserAndStatus(username).get();
+        orderService.completeOrder(order);
+        return "redirect:/users/{username}/orders";
+    }
+
     private Order getOrder(String username, Long itemId, Integer quantity, Optional<Order> optionalOrder) {
         if (!optionalOrder.isPresent()) {
             return orderService.createOrder(username, itemId, quantity);
