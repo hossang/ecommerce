@@ -64,6 +64,22 @@ public class OrderController {
         return "redirect:/users/{username}/orders";
     }
 
+    @GetMapping("/users/{username}/orders")
+    public String orderList(@PathVariable String username
+            , @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable, Model model) {
+        Page<BoardOrder> boardOrders = orderService.findBoardOrders(pageable);
+        int nowPage = boardOrders.getPageable().getPageNumber() + 1;
+        int startPage = Math.max(1, nowPage - 4);
+        int endPage = Math.min(boardOrders.getTotalPages(),nowPage + 5);
+
+        model.addAttribute("username", username);
+        model.addAttribute("boardOrders", boardOrders);
+        model.addAttribute("nowPage", nowPage);
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
+        return "users/orderList";
+    }
+
     private Order getOrder(String username, Long itemId, Integer quantity, Optional<Order> optionalOrder) {
         if (!optionalOrder.isPresent()) {
             return orderService.createOrder(username, itemId, quantity);
