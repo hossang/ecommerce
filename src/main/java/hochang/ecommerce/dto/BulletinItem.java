@@ -10,6 +10,8 @@ public class BulletinItem {
 
     private String name;
 
+    private int count;
+
     private long price;
 
     private String contents;
