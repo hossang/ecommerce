@@ -44,6 +44,21 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
+    @Transactional
+    public Order addOrderLine(Order order, Long itemId, int quantity) {
+        for (OrderLine orderLine : order.getOrderLines()) {
+            if (orderLine.getItem().getId().equals(itemId)) {
+                orderLine.modifyCount(quantity);
+                order.calculateTotalPrice();
+                return order;
+            }
+        }
+        OrderLine orderLine = createOrderLine(itemId, quantity);
+        order.addOrderLine(orderLine);
+        order.calculateTotalPrice();
+        return order;
+    }
+
     //
 
     private OrderLine createOrderLine(Long itemId, int quantity) {
