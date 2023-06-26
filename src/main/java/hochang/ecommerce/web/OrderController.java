@@ -52,7 +52,11 @@ public class OrderController {
 
     @GetMapping("/users/{username}/orders/{id}/create")
     public String  orderDetails(@PathVariable String username, @PathVariable Long id, Model model) {
-        Order order = orderService.findByUserAndStatus(username).get();
+        Optional<Order> optionalOrder = orderService.findByUserAndStatus(username);
+        if (!optionalOrder.isPresent()) {
+            return "users/myEmptyCart";
+        }
+        Order order = optionalOrder.get();
         model.addAttribute("totalPrice", order.getTotalPrice());
         List<OrderItem> orderItems = orderService.findOrderItems(order.getOrderLines());
         model.addAttribute("orderItems", orderItems);
