@@ -35,7 +35,7 @@ public class Order extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderLine> orderLines = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
@@ -67,9 +67,6 @@ public class Order extends BaseTimeEntity {
 
     public void completeOrder() {
         this.status = OrderStatus.COMPLETE;
-        for (OrderLine orderLine : orderLines) {
-            orderLine.getItem().reduceCount(orderLine.getCount());
-        }
     }
 
     public void cancelOrder() {

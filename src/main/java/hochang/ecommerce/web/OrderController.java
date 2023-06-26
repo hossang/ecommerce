@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
 
@@ -95,6 +97,18 @@ public class OrderController {
         Order order = orderService.findOrder(id);
         orderService.cancelOrder(order);
         return "redirect:/users/{username}/orders";
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public String outOfStock(IllegalArgumentException illegalArgumentException, HttpServletRequest request
+            , RedirectAttributes redirectAttributes) {
+        String referer = request.getHeader("Referer");
+        log.info("referer: {}", referer);
+        if (referer == null) {
+            referer = "/";
+        }
+        redirectAttributes.addAttribute("errorMessage", illegalArgumentException.getMessage());
+        return "redirect:" + referer;
     }
 
     private Order getOrder(String username, Long itemId, Integer quantity, Optional<Order> optionalOrder) {

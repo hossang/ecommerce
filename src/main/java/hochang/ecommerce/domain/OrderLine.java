@@ -39,15 +39,18 @@ public class OrderLine extends BaseTimeEntity{
     @Builder
     public OrderLine(Item item, int count) {
         this.item = item;
+        this.item.reduceCount(count);
         this.count = count;
         calculateOrderPrice();
     }
 
+    //
     public void addOrder(Order order) {
         this.order = order;
     }
 
     public void modifyCount(int count) {
+        this.item.reduceCount(count);
         this.count += count;
         calculateOrderPrice();
     }
