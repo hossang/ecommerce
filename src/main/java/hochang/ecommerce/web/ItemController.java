@@ -61,8 +61,10 @@ public class ItemController {
     }
 
     @GetMapping("/items/{id}")
-    public String bulletinItemDetails(@PathVariable Long id, Model model) {
+    public String bulletinItemDetails(@SignIn String username, @PathVariable Long id, Model model, @RequestParam(required = false) String errorMessage) {
         BulletinItem bulletinItem = itemService.findBulletinItem(id);
+        model.addAttribute("username", username);
+        model.addAttribute("errorMessage", errorMessage);
         model.addAttribute("bulletinItem", bulletinItem);
         return "guests/itemPurchase";
     }
