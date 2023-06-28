@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -66,18 +65,6 @@ public class ItemController {
         BulletinItem bulletinItem = itemService.findBulletinItem(id);
         model.addAttribute("bulletinItem", bulletinItem);
         return "guests/itemPurchase";
-    }
-
-    @PostMapping("/items/{id}")
-    public String bulletinItemPurchase(@SignIn String username, @PathVariable Long id, @RequestParam int quantity
-            , RedirectAttributes redirectAttributes) {
-        log.info("BulletinItemPurchase() username = {}", username);
-        if (username == null) {
-            return "redirect:/sign-in?redirectURL=/items/{id}";
-        }
-        redirectAttributes.addAttribute("itemId", id);
-        redirectAttributes.addAttribute("quantity", quantity);
-        return "redirect:/users/" + username + "/orders/cart";
     }
 
     @GetMapping("/admins/{username}/items/{id}/modify")

@@ -37,8 +37,10 @@ public class OrderController {
         if (!optionalOrder.isPresent() && itemId == null && quantity == null) {
             return "users/myEmptyCart";
         }
-        Order order = getOrder(username, itemId, quantity, optionalOrder);
+        Order order = optionalOrder.get();
         List<OrderItem> orderItems = orderService.findOrderItems(order.getOrderLines());
+        model.addAttribute("username", username);
+        model.addAttribute("id", order.getId());
         model.addAttribute("orderItems", orderItems);
         return "users/myCart";
     }
@@ -46,8 +48,10 @@ public class OrderController {
     @PostMapping("/users/{username}/orders/cart")
     public String orderLineCreate(@PathVariable String username, @RequestParam(required = false) Long itemId
             , @RequestParam(required = false) Integer quantity) {
-        Long id = orderService.findByUserAndStatus(username).get().getId();
-        return "redirect:/users/{username}/orders/" + id +"/create";
+        Optional<Order> optionalOrder = orderService.findByUserAndStatus(username);
+        Order order = getOrder(username, itemId, quantity, optionalOrder);
+
+        return "redirect:/users/{username}/orders/cart";
     }
 
     @GetMapping("/users/{username}/orders/{id}/create")
