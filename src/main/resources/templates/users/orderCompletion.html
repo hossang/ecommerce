@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>주문 완료</title>
+</head>
+<body>
+<h1>주문이 완료되었습니다!</h1>
+
+<p>주문 번호: <span th:text="${orderNumber}"></span></p>
+<p>주문 날짜: <span th:text="${orderDate}"></span></p>
+<p>총 주문 금액: <span th:text="${totalPrice}"></span></p>
+
+<h2>주문 상품 목록:</h2>
+<table>
+  <thead>
+  <tr>
+    <th>상품명</th>
+    <th>가격</th>
+    <th>수량</th>
+    <th>주문 가격</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="orderItem : ${orderItems}">
+    <td>
+      <!-- 이미지 -->
+      <img th:src="|/images/${orderItem.storeFileName}|" alt="Product Image">
+    </td>
+    <td th:text="${orderItem.name}"></td>
+    <td th:text="${orderItem.price}"></td>
+    <td th:text="${orderItem.count}"></td>
+    <td th:text="${orderItem.orderPrice}"></td>
+  </tr>
+  </tbody>
+</table>
+
+<p>감사합니다. 추가 문의 사항이 있으시면 언제든지 연락주세요.</p>
+</body>
+</html>

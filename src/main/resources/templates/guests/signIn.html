@@ -50,7 +50,7 @@
 </head>
 <body>
 <h1>Login Form</h1>
-<form action="#" th:action="@{/sign-in}" th:object="${signIn}" method="post">
+<form action="#" th:action th:object="${signIn}" method="post">
     <div th:if="${#fields.hasGlobalErrors()}">
         <p th:each="err : ${#fields.globalErrors()}" th:text="${err}" class="error-message"></p>
     </div>

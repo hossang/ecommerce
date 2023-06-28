@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>결제 페이지</title>
+</head>
+<body>
+<h1>주문 상세 내역</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>상품</th>
+        <th>가격</th>
+        <th>수량</th>
+        <th>주문 가격</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="orderItem : ${orderItems}">
+        <td><img th:src="|/images/${orderItem.storeFileName}|" alt="Product Image"></td>
+        <td th:text="${orderItem.price}"></td>
+        <td th:text="${orderItem.count}"></td>
+        <td th:text="${orderItem.orderPrice}"></td>
+    </tr>
+    </tbody>
+</table>
+
+<p>총 가격: <span th:text="${totalPrice}"></span></p>
+
+<form th:action method="post">
+    <button type="submit">결제</button>
+</form>
+
+</body>
+</html>
