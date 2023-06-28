@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Order List</title>
+</head>
+<body>
+<h1>Order List for <span th:text="${username}"></span></h1>
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Order Lines</th>
+        <th>Status</th>
+        <th>Total Price</th>
+        <th>Create Date</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="order : ${boardOrders.content}">
+        <td th:text="${order.id}"></td>
+        <td>
+            <a th:href="@{/users/{username}/orders/{id}(username=${username}, id=${order.id})}">
+                <span th:text="${order.orderLineNames}"></span>
+            </a>
+        </td>
+        <td th:text="${order.orderStatue}"></td>
+        <td th:text="${order.totalPrice}"></td>
+        <td th:text="${order.createDate}"></td>
+    </tr>
+    </tbody>
+</table>
+<th:block th:each="page : ${#numbers.sequence(startPage, endPage)}">
+    <a th:if="${page != nowPage}" th:href="@{/users/{username}/orders(username=${username}, page = ${page - 1}, searchKeyword = ${param.searchKeyword})}" th:text="${page}"></a>
+    <strong th:if="${page == nowPage}" th:text="${page}" style="color : red"></strong>
+</th:block>
+</body>
+</html>

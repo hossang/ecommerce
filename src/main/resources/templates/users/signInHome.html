@@ -9,7 +9,7 @@
     <nav>
         <ul>
             <li><a th:href="@{/}">Home</a></li>
-            <li><a th:href="@{/}">Cart</a></li>
+            <li><a th:href="@{/users/{username}/orders/cart(username=${username})}">Cart</a></li>
             <li><a th:href="@{/users/{username}(username=${username})}" th:text="${username}">My Page</a></li>
             <form action="/sign-out" method="post">
                 <button type="submit">Sign Out</button>

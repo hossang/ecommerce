@@ -43,7 +43,7 @@ public class Item extends BaseTimeEntity {
         this.storeFileName = storeFileName;
     }
 
-    //마음에 들지 않아... 매게변수 순서잘못입력하면 ?
+    //
     public void modifyItem(String name, int count, long price, String contents, String uploadFileName, String storeFileName) {
         this.name = name;
         this.count = count;
@@ -51,5 +51,20 @@ public class Item extends BaseTimeEntity {
         this.contents = contents;
         this.uploadFileName = uploadFileName;
         this.storeFileName = storeFileName;
+    }
+
+    public void reduceCount(int count) {
+        int reducedCount = this.count - count;
+        if (reducedCount < 0) {
+            StringBuffer stringBuffer = new StringBuffer();
+            stringBuffer.append("재고가 부족합니다. ").append(this.name).append(" 의 현재 보유 수량은 ").append(this.count)
+                    .append("개 입니다.");
+            throw new IllegalArgumentException(stringBuffer.toString());
+        }
+        this.count = reducedCount;
+    }
+
+    public void addCount(int count) {
+        this.count += count;
     }
 }

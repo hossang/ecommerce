@@ -8,7 +8,7 @@
 <div class="sidebar">
     <ul>
         <li><a th:href="@{/users/{username}(username=${username})}" th:text="${username}">My Page</a></li>
-        <li><a th:href="@{/}">주문 현황</a></li>
+        <li><a th:href="@{/users/{username}/orders(username=${username})}">주문 목록</a></li>
         <li><a th:href="@{/admins/{username}/users(username=${username})}">회원 목록</a></li>
         <li><a th:href="@{/users/{username}/modify(username=${username})}">회원 정보 수정</a></li>
         <li><a th:href="@{/admins/{username}/items/register(username=${username})}">상품 등록</a></li>

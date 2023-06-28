@@ -5,8 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class BulletinItem {
-    private Long id;
+public class OrderItem {
+    private Long itemId;
 
     private String name;
 
@@ -14,7 +14,7 @@ public class BulletinItem {
 
     private long price;
 
-    private String contents;
+    private long orderPrice;
 
     private String storeFileName;
 }

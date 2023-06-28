@@ -4,25 +4,41 @@
     <meta charset="UTF-8">
     <title>상품 상세 페이지</title>
 </head>
+<style>
+    .error-message {
+        color: #bd2130;
+        margin-top: 5px;
+        font-size: 12px;
+    }
+</style>
 <body>
 <h1 th:text="${bulletinItem.name}"></h1>
 
 <div class="image">
     <img th:src="|/images/${bulletinItem.storeFileName}|" alt="Product Image">
 </div>
-
-<div class="info">
+<div th:if="${errorMessage}">
+    <p th:text="${errorMessage}" class="error-message"></p>
+</div>
+<div>
     <p>가격: <span th:text="${bulletinItem.price}"></span></p>
     <p>
+    </p>
+    <form th:if="${username}" method="post" th:action="@{/users/{username}/orders/cart(username=${username})}">
         수량:
         <input type="number" id="quantity" name="quantity" min="1" value="1">
-    </p>
-    <!--<form th:action="@{/users/}" method="post">
-        <button type="submit">장바구니</button>
-    </form>-->
-    <form th:action="@{/users/{username}/orders(username=${username})}" method="post">
+        <input type="hidden" th:name="itemId" th:value="${bulletinItem.id}">
+    <button type="submit">구매하기</button>
+    </form>
+
+    <form th:if="${username == null}" method="get" action="/sign-in">
+        수량:
+        <input type="number" id="quantity" name="quantity" min="1" value="1">
+        <input type="hidden" name="redirectURL" th:value="'/items/' + ${bulletinItem.id}" />
         <button type="submit">구매하기</button>
     </form>
+
+
 </div>
 
 <div class="contents" th:text="${bulletinItem.contents}"></div>

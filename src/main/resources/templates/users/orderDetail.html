@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Order Detail</title>
+</head>
+<body>
+<h1>Order Detail for <span th:text="${username}"></span></h1>
+<table>
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Order Lines</th>
+    <th>Status</th>
+    <th>Total Price</th>
+    <th>Create Date</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td th:text="${boardOrder.id}"></td>
+    <td th:text="${boardOrder.orderLineNames}"></td>
+    <td th:text="${boardOrder.orderStatue}"></td>
+    <td th:text="${boardOrder.totalPrice}"></td>
+    <td th:text="${boardOrder.createDate}"></td>
+  </tr>
+  </tbody>
+</table>
+<h2>Order Items</h2>
+<table>
+  <thead>
+  <tr>
+    <th>Item ID</th>
+    <th>Name</th>
+    <th>Price</th>
+    <th>Count</th>
+    <th>Order Price</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="orderItem : ${orderItems}">
+    <img th:src="|/images/${orderItem.storeFileName}|" alt="Product Image">
+    <td th:text="${orderItem.itemId}"></td>
+    <td th:text="${orderItem.name}"></td>
+    <td th:text="${orderItem.price}"></td>
+    <td th:text="${orderItem.count}"></td>
+    <td th:text="${orderItem.orderPrice}"></td>
+  </tr>
+  </tbody>
+</table>
+<form method="post" th:action="@{/users/{username}/orders/{id}/cancel(username=${username}, id=${boardOrder.id})}" th:if="${boardOrder.orderStatue != '주문 취소'}">
+  <button type="submit">Cancel Order</button>
+</form>
+<form method="get" th:action="@{/users/{username}/orders(username=${username})}">
+  <button type="submit">Go Back</button>
+</form>
+</body>
+</html>
