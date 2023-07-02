@@ -67,7 +67,12 @@ public class UserController {
         return "redirect:" + redirectURL;
     }
 
-    @PostMapping("/sign-out")
+    @GetMapping("/users/{username}/sign-out")
+    public String signOut(@PathVariable String username) {
+        return "users/signOut";
+    }
+
+    @PostMapping("/users/{username}/sign-out")
     public String signOutCreate(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session != null) {
@@ -94,12 +99,6 @@ public class UserController {
             return "users/userProfileModification";
         }
         return "redirect:/users/{username}";
-    }
-
-    @GetMapping("/users/{username}")
-    public String myPage(@PathVariable String username, Model model) {
-        model.addAttribute("username", username);
-        return "users/myPage";
     }
 
     @GetMapping("/users/{username}/remove")
