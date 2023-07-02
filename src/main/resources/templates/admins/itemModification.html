@@ -3,32 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <title>Item Registration</title>
+    <link rel="stylesheet" href="/css/bootstrap.css">
+    <style>
+        form {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+    </style>
 </head>
 <body>
-<h1>Item Registration</h1>
-<form th:action="@{/admins/{username}/items/{id}/modify(username=${username}, id =${itemRegistration.id})}" method="post" enctype="multipart/form-data">
-    <div>
-        <label for="name">상품명:</label>
-        <input type="text" id="name" name="name" th:value="${itemRegistration.name}" required>
+    <!-- 헤더 -->
+    <div th:replace="~{fragment/bodyHeader :: userAdinHeader(${username})}"></div>
+
+    <div class="container">
+        <form th:action="@{/admins/{username}/items/{id}/modify(username=${username}, id =${itemRegistration.id})}" method="post" enctype="multipart/form-data">
+            <h1>상품 수정</h1>
+            <div class="form-group">
+                <label for="name">상품명:</label>
+                <input class="form-control" type="text" id="name" name="name" maxlength="20" th:value="${itemRegistration.name}" required>
+            </div>
+            <div class="form-group">
+                <label for="count">수량:</label>
+                <input class="form-control" type="number" id="count" name="count" min="1" th:value="${itemRegistration.count}" required>
+            </div>
+            <div class="form-group">
+                <label for="price">가격:</label>
+                <input class="form-control" type="number" id="price" name="price" min="1" th:value="${itemRegistration.price}" required>
+            </div>
+            <div class="form-group">
+                <label for="contents">상품 내용:</label>
+                <textarea class="form-control" id="contents" name="contents" th:text="${itemRegistration.contents}" required></textarea>
+            </div>
+            <div class="form-group mb-3">
+                <div class="input-group">
+                    <label for="imageFile" class="form-label"></label>
+                    <input class="form-control" type="file" id="imageFile" name="imageFile" accept="image/jpeg, image/png" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">등록</button>
+        </form>
     </div>
-    <div>
-        <label for="count">수량:</label>
-        <input type="number" id="count" name="count" th:value="${itemRegistration.count}" required>
-    </div>
-    <div>
-        <label for="price">가격:</label>
-        <input type="number" id="price" name="price" th:value="${itemRegistration.price}" required>
-    </div>
-    <div>
-        <label for="contents">상품 내용:</label>
-        <textarea id="contents" name="contents" required th:text="${itemRegistration.contents}"></textarea>
-    </div>
-    <div>
-        <p>파일 사이즈가 xxx보다 작아야 합니다.</p>
-        <label for="imageFile">이미지:</label>
-        <input type="file" id="imageFile" name="imageFile" accept="image/jpeg, image/png" required>
-    </div>
-    <button type="submit">수정</button>
-</form>
+
+    <!-- 푸터 -->
+    <div th:replace="~{fragment/bodyFooter :: footer}"></div>
+    <script src="/js/bootstrap.bundle.js"></script>
 </body>
 </html>

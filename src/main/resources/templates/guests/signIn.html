@@ -2,69 +2,42 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Login Form</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
+    <title>Sign in</title>
+    <link rel="stylesheet" href="/css/bootstrap.css">
 
-        h1 {
-            text-align: center;
-        }
-
-        form {
-            width: 300px;
-            margin: 0 auto;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-
-        button[type="submit"] {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        .error-message {
-            color: #bd2130;
-            margin-top: 5px;
-            font-size: 12px;
-        }
-    </style>
 </head>
 <body>
-<h1>Login Form</h1>
-<form action="#" th:action th:object="${signIn}" method="post">
-    <div th:if="${#fields.hasGlobalErrors()}">
-        <p th:each="err : ${#fields.globalErrors()}" th:text="${err}" class="error-message"></p>
-    </div>
-    <div>
-        <label for="username">Username:</label>
-        <input type="text" id="username" th:field="*{username}" required>
-        <p th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="error-message"></p>
-    </div>
-    <div>
-        <label for="password">Password:</label>
-        <input type="password" id="password" th:field="*{password}" required>
-        <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error-message"></p>
-    </div>
-    <button type="submit">Login</button>
-</form>
+    <!-- 헤더 -->
+    <div th:replace="~{fragment/bodyHeader :: guestHeader}"></div>
+
+    <!-- 메인 -->
+    <main style="padding-top: 20px; padding-bottom: 20px;">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-4 col-md-6 col-sm-8">
+                    <h1>Sign in</h1>
+                    <form th:action th:object="${signIn}" method="post">
+                        <div th:if="${#fields.hasGlobalErrors()}">
+                            <p th:each="err : ${#fields.globalErrors()}" th:text="${err}" class="error-message"></p>
+                        </div>
+                        <div class="form-group" th:class="${#fields.hasErrors('username')} ? 'has-error'">
+                            <label for="username">Username:</label>
+                            <input type="text" id="username" th:field="*{username}" class="form-control" required>
+                            <p th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="text-danger"></p>
+                        </div>
+                        <div class="form-group" th:class="${#fields.hasErrors('password')} ? 'has-error'">
+                            <label for="password">Password:</label>
+                            <input type="password" id="password" th:field="*{password}" class="form-control" required>
+                            <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-danger"></p>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- 푸터 -->
+    <div th:replace="~{fragment/bodyFooter :: footer}"></div>
+    <script src="/js/bootstrap.bundle.js"></script>
 </body>
 </html>

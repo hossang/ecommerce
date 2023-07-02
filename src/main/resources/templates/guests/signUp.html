@@ -2,117 +2,58 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>회원 가입 페이지</title>
+    <title>Sign up</title>
+    <link rel="stylesheet" href="/css/bootstrap.css">
 </head>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f2f2f2;
-        margin: 0;
-        padding: 0;
-    }
-
-    h1 {
-        text-align: center;
-        margin-top: 20px;
-    }
-
-    form {
-        width: 400px;
-        margin: 20px auto;
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 5px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-
-    label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-    }
-
-    input[type="text"],
-    input[type="password"],
-    input[type="date"],
-    input[type="email"],
-    input[type="tel"] {
-        width: 95%;
-        padding: 8px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        margin-bottom: 10px;
-    }
-
-    .error {
-        color: #bd2130;
-        font-size: 12px;
-        margin-top: 5px;
-    }
-
-    button[type="submit"] {
-        background-color: #4CAF50;
-        color: white;
-        padding: 10px 15px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        width: 100%;
-    }
-
-    ::-webkit-input-placeholder {
-        color: #999;
-    }
-
-    :-moz-placeholder {
-        color: #999;
-    }
-
-    ::-moz-placeholder {
-        color: #999;
-    }
-
-    :-ms-input-placeholder {
-        color: #999;
-    }
-</style>
 <body>
-<h1>회원 가입 페이지</h1>
-<form action="#" th:action="@{/sign-up}" th:object="${userRegistration}" method="post">
-    <div th:if="${errorMessage}">
-        <p th:text="${errorMessage}" class="error-message"></p>
-    </div>
-    <div>
-        <label for="username">아이디:</label>
-        <input type="text" id="username" th:field="*{username}" placeholder="아이디를 입력하세요" required>
-        <p th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="error">Incorrect username</p>
-    </div>
-    <div>
-        <label for="password">비밀번호:</label>
-        <input type="text" id="password" th:field="*{password}" placeholder="비밀번호를 입력하세요" required>
-        <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error">Incorrect password</p>
-    </div>
-    <div>
-        <label for="name">이름:</label>
-        <input type="text" id="name" th:field="*{name}" placeholder="이름을 입력하세요" required>
-        <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="error">Incorrect name</p>
-    </div>
-    <div>
-        <label for="birthdate">생년월일:</label>
-        <input type="date" id="birthdate" th:field="*{birthDate}" placeholder="생년-월-일를 입력하세요" required>
-        <p th:if="${#fields.hasErrors('birthDate')}" th:errors="*{birthDate}" class="error">Incorrect birthDate</p>
-    </div>
-    <div>
-        <label for="email">이메일:</label>
-        <input type="email" id="email" th:field="*{email}" placeholder="이메일을 입력하세요" required>
-        <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error">Incorrect email</p>
-    </div>
-    <div>
-        <label for="phone">휴대전화:</label>
-        <input type="tel" id="phone" th:field="*{phone}" placeholder="휴대번호을 입력하세요" required>
-        <p th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="error">Incorrect phone</p>
-    </div>
-    <button type="submit">가입</button>
-</form>
+    <!-- 헤더 -->
+    <div th:replace="~{fragment/bodyHeader :: guestHeader}"></div>
+
+<!-- 메인 -->
+    <main>
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-6 col-md-8 col-sm-10">
+                    <h1>Sign up</h1>
+                    <form th:action th:object="${userRegistration}" method="post">
+                        <div class="form-group" th:class="${#fields.hasErrors('username')} ? 'has-error'">
+                            <label for="username">아이디:</label>
+                            <input type="text" id="username" th:field="*{username}" class="form-control form-control-sm" placeholder="아이디를 입력하세요" required>
+                            <p th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="text-danger">Incorrect username</p>
+                        </div>
+                        <div class="form-group" th:class="${#fields.hasErrors('password')} ? 'has-error'">
+                            <label for="password">비밀번호:</label>
+                            <input type="password" id="password" th:field="*{password}" class="form-control form-control-sm" placeholder="비밀번호를 입력하세요" required>
+                            <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-danger">Incorrect password</p>
+                        </div>
+                        <div class="form-group" th:class="${#fields.hasErrors('name')} ? 'has-error'">
+                            <label for="name">이름:</label>
+                            <input type="text" id="name" th:field="*{name}" class="form-control form-control-sm" placeholder="이름을 입력하세요" required>
+                            <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger">Incorrect name</p>
+                        </div>
+                        <div class="form-group" th:class="${#fields.hasErrors('birthDate')} ? 'has-error'">
+                            <label for="birthdate">생년월일:</label>
+                            <input type="date" id="birthdate" th:field="*{birthDate}" class="form-control form-control-sm" placeholder="생년-월-일를 입력하세요" required>
+                            <p th:if="${#fields.hasErrors('birthDate')}" th:errors="*{birthDate}" class="text-danger">Incorrect birthDate</p>
+                        </div>
+                        <div class="form-group" th:class="${#fields.hasErrors('email')} ? 'has-error'">
+                            <label for="email">이메일:</label>
+                            <input type="email" id="email" th:field="*{email}" class="form-control form-control-sm" placeholder="이메일을 입력하세요" required>
+                            <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-danger">Incorrect email</p>
+                        </div>
+                        <div class="form-group" th:class="${#fields.hasErrors('phone')} ? 'has-error'">
+                            <label for="phone">휴대전화:</label>
+                            <input type="tel" id="phone" th:field="*{phone}" class="form-control form-control-sm" placeholder="휴대번호을 입력하세요" required>
+                            <p th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="text-danger">Incorrect phone</p>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">가입</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- 푸터 -->
+    <div th:replace="~{fragment/bodyFooter :: footer}"></div>
+    <script src="/js/bootstrap.bundle.js"></script>
 </body>
 </html>
