@@ -2,31 +2,43 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>User List</title>
+    <link rel="stylesheet" href="/css/bootstrap.css">
+
 </head>
 <body>
-<h1>User List</h1>
+<!-- 헤더 -->
+<div th:replace="~{fragment/bodyHeader :: userAdinHeader(${username})}"></div>
 
-<table>
-    <thead>
-    <tr>
-        <th>번호</th>
-        <th>닉네임</th>
-        <th>생성 날짜</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="user : ${boardUsers}">
-        <td th:text="${user.id}"></td>
-        <td th:text="${user.username}"></td>
-        <td th:text="${user.createdDate}"></td>
-    </tr>
-    </tbody>
-</table>
+<div class="container mt-4">
+    <h1 class="mt-4">회원 목록</h1>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>번호</th>
+            <th>닉네임</th>
+            <th>생성 날짜</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="user : ${boardUsers}">
+            <td th:text="${user.id}"></td>
+            <td th:text="${user.username}"></td>
+            <td th:text="${user.createdDate}"></td>
+        </tr>
+        </tbody>
+    </table>
 
-<th:block th:each="page : ${#numbers.sequence(startPage, endPage)}">
-    <a th:if="${page != nowPage}" th:href="@{/admins/{username}/users(username=${username}, page=${page - 1}, searchKeyword=${param.searchKeyword})}" th:text="${page}"></a>
-    <strong th:if="${page == nowPage}" th:text="${page}" style="color: red"></strong>
-</th:block>
+    <div class="pagination justify-content-center">
+        <th:block th:each="page : ${#numbers.sequence(startPage, endPage)}">
+            <a th:if="${page != nowPage}" th:href="@{/admins/{username}/users(username=${username}, page=${page - 1})}" class="page-link" th:text="${page}"></a>
+            <strong th:if="${page == nowPage}" th:text="${page}" class="page-link" style="color: red"></strong>
+        </th:block>
+    </div>
+</div>
+
+<!-- 푸터 -->
+<div th:replace="~{fragment/bodyFooter :: footer}"></div>
+<script src="/js/bootstrap.bundle.js"></script>
 
 </body>
 </html>

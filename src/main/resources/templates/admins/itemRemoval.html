@@ -2,13 +2,23 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Item Withdrawal</title>
+    <title>상품 삭제</title>
+    <link rel="stylesheet" href="/css/bootstrap.css">
 </head>
 <body>
-<h1>Item Withdrawal</h1>
-<form th:action="@{/admins/{username}/items/{id}/remove(username=${username}, id=${id})}" method="post">
-    <p>Are you sure you want to withdraw this item?</p>
-    <button type="submit">삭제</button>
-</form>
+    <!-- 헤더 -->
+    <div th:replace="~{fragment/bodyHeader :: userAdinHeader(${username})}"></div>
+
+    <div class="container d-flex flex-column align-items-center justify-content-center vh-100">
+        <h2 class="text-center mb-4">Are you sure you want to withdraw this item?</h2>
+        <form th:action="@{/admins/{username}/items/{id}/remove(username=${username}, id=${id})}" method="post">
+            <button type="submit" class="btn btn-primary">삭제</button>
+        </form>
+    </div>
+
+    <!-- 푸터 -->
+    <div th:replace="~{fragment/bodyFooter :: footer}"></div>
+
+    <script src="/js/bootstrap.bundle.js"></script>
 </body>
 </html>

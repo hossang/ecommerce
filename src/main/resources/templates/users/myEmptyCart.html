@@ -2,9 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Empty cart</title>
+    <link rel="stylesheet" href="/css/bootstrap.css">
 </head>
 <body>
-장바구니가 비어있습니다.
+<!-- 헤더 -->
+<div th:replace="~{fragment/bodyHeader :: userAdinHeader(${username})}"></div>
+<div class="container d-flex flex-column align-items-center justify-content-center vh-100">
+    <h2 class="text-center mb-4">Your shopping cart is empty.</h2>
+</div>
+<!-- 푸터 -->
+<div th:replace="~{fragment/bodyFooter :: footer}"></div>
+<script src="/js/bootstrap.bundle.js"></script>
 </body>
 </html>

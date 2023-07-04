@@ -2,11 +2,87 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Order Detail</title>
+  <title>주문 상세 페이지</title>
+  <link rel="stylesheet" href="/css/bootstrap.css">
 </head>
+<style>
+  .product-image {
+    width: 75px;
+    height: 100px;
+    object-fit: cover;
+  }
+</style>
 <body>
-<h1>Order Detail for <span th:text="${username}"></span></h1>
-<table>
+<!-- 헤더 -->
+<div th:replace="~{fragment/bodyHeader :: userAdinHeader(${username})}"></div>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>주문 번호</th>
+          <th>주문 상품</th>
+          <th>주문 상태</th>
+          <th>총 주문 가격</th>
+          <th>주문 일자</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td th:text="${boardOrder.id}"></td>
+          <td th:text="${boardOrder.orderLineNames}"></td>
+          <td th:text="${boardOrder.orderStatue}"></td>
+          <td th:text="${boardOrder.totalPrice}"></td>
+          <td th:text="${boardOrder.createDate}"></td>
+        </tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col">
+      <table class="table">
+        <thead>
+        <tr>
+          <th></th>
+          <th>이미지</th>
+          <th>상품명</th>
+          <th>가격</th>
+          <th>수량</th>
+          <th>주문 가격</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- OrderItem 리스트를 반복하여 행 생성 -->
+        <tr th:each="orderItem : ${orderItems}">
+          <td></td>
+          <td class="image-cell">
+            <!-- 이미지 -->
+            <img th:src="|/images/${orderItem.storeFileName}|" class="product-image">
+          </td>
+          <td th:text="${orderItem.name}"></td>
+          <td th:text="${orderItem.price}"></td>
+          <td th:text="${orderItem.count}"></td>
+          <td th:text="${orderItem.orderPrice}"></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="d-flex justify-content-center">
+  <form method="post" th:action="@{/users/{username}/orders/{id}/cancel(username=${username}, id=${boardOrder.id})}" th:if="${boardOrder.orderStatue != '주문 취소'}">
+    <button type="submit" class="btn btn-primary mt-3">주문 취소</button>
+  </form>
+</div>
+
+<!--<table>
   <thead>
   <tr>
     <th>ID</th>
@@ -53,6 +129,10 @@
 </form>
 <form method="get" th:action="@{/users/{username}/orders(username=${username})}">
   <button type="submit">Go Back</button>
-</form>
+</form>-->
+
+<!-- 푸터 -->
+<div th:replace="~{fragment/bodyFooter :: footer}"></div>
+<script src="/js/bootstrap.bundle.js"></script>
 </body>
 </html>

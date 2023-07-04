@@ -2,20 +2,20 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>회원 탈퇴</title>
+    <title>Sign out</title>
     <link rel="stylesheet" href="/css/bootstrap.css">
-
 </head>
 <body>
 <!-- 헤더 -->
 <div th:replace="~{fragment/bodyHeader :: userAdinHeader(${username})}"></div>
 
 <div class="container d-flex flex-column align-items-center justify-content-center vh-100">
-    <h2 class="text-center mb-4">Are you sure you want to delete the account?</h2>
+    <h2 class="text-center mb-4">Are you sure you want to sign out?</h2>
     <form th:action method="post">
-        <button type="submit" class="btn btn-primary">회원 탈퇴</button>
+        <button type="submit" class="btn btn-primary">Sign out</button>
     </form>
 </div>
+
 <!-- 푸터 -->
 <div th:replace="~{fragment/bodyFooter :: footer}"></div>
 <script src="/js/bootstrap.bundle.js"></script>
