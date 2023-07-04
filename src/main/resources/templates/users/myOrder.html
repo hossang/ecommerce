@@ -50,7 +50,7 @@
             </div>
         </div>
     </div>
-    <h2 class="text-center mb-4">주문 가격: <span th:text="${totalPrice}"></span></h2>
+    <h2 class="text-center mb-4">총 주문 가격: <span th:text="${totalPrice}"></span></h2>
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-auto">
@@ -59,27 +59,6 @@
         </div>
     </div>
 </form>
-<!--<div class="container mt-4">
-    <table class="table">
-        <thead>
-
-        </thead>
-        <tbody>
-        <tr th:each="orderItem : ${orderItems}">
-            <td><img th:src="|/images/${orderItem.storeFileName}|" alt="Product Image" class="img-fluid" style="max-width: 100px;"></td>
-            <td th:text="${orderItem.price}"></td>
-            <td th:text="${orderItem.count}"></td>
-            <td th:text="${orderItem.orderPrice}"></td>
-        </tr>
-        </tbody>
-    </table>
-
-    <p>총 가격: <span th:text="${totalPrice}"></span></p>
-
-    <form th:action method="post">
-        <button type="submit" class="btn btn-primary">결제</button>
-    </form>
-</div>-->
 <!-- 푸터 -->
 <div th:replace="~{fragment/bodyFooter :: footer}"></div>
 <script src="/js/bootstrap.bundle.js"></script>

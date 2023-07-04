@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>주문 아이템 목록</title>
+    <title>Cart</title>
     <link rel="stylesheet" href="/css/bootstrap.css">
     <style>
         .product-image {
@@ -18,7 +18,7 @@
 
 <form th:action="@{/users/{username}/orders/{id}/create(username=${username},id=${id})}" method="get">
     <div class="container mt-4">
-        <h1 class = "mt-4">장바구니</h1>
+        <h1 class = "mt-4">Cart</h1>
         <div class="row">
             <div class="col">
                 <table class="table">

@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>상품 상세 페이지</title>
+    <title th:text = "${bulletinItem.name}"></title>
     <link rel="stylesheet" href="/css/bootstrap.css">
 
     <style>
@@ -15,7 +15,12 @@
 
 <body>
     <!-- 헤더 -->
-    <div th:replace="~{fragment/bodyHeader :: guestHeader}"></div>
+    <div th:if="${username == null}">
+        <header th:replace="~{fragment/bodyHeader :: guestHeader}"></header>
+    </div>
+    <div th:if="${username != null}">
+        <header th:replace="~{fragment/bodyHeader :: userAdinHeader(${username})}"></header>
+    </div>
 
     <!-- 메인 -->
     <main style="padding-top: 20px; padding-bottom: 20px;">
