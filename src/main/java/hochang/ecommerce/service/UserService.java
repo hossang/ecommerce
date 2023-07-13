@@ -1,5 +1,6 @@
 package hochang.ecommerce.service;
 
+import hochang.ecommerce.domain.Role;
 import hochang.ecommerce.domain.User;
 import hochang.ecommerce.dto.BoardUser;
 import hochang.ecommerce.dto.SignIn;
@@ -23,8 +24,8 @@ public class UserService {
     private final BCryptPasswordEncoder encoder;
 
     @Transactional
-    public User join(UserRegistration userRegistration) {
-        User user = toUser(userRegistration);
+    public User join(UserRegistration userRegistration, Role role) {
+        User user = toUser(userRegistration, role);
         validateDuplicateUser(user);
         return userRepository.save(user);
 
@@ -70,6 +71,7 @@ public class UserService {
     @Transactional
     public void removeUser(String username) {
         User user = userRepository.findByUsername(username);
+        //+주문과 주소도 삭제해주기
         userRepository.delete(user);
     }
 
@@ -80,13 +82,14 @@ public class UserService {
         }
     }
 
-    private User toUser(UserRegistration userRegistration) {
+    private User toUser(UserRegistration userRegistration, Role role) {
         User user = User.builder().username(userRegistration.getUsername())
                 .password(encoder.encode(userRegistration.getPassword()))
                 .name(userRegistration.getName())
                 .birthDate(userRegistration.getBirthDate())
                 .email(userRegistration.getEmail())
                 .phone(userRegistration.getPhone())
+                .role(role)
                 .build();
         return user;
     }

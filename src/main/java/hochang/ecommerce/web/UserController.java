@@ -1,5 +1,6 @@
 package hochang.ecommerce.web;
 
+import hochang.ecommerce.domain.Role;
 import hochang.ecommerce.dto.BoardUser;
 import hochang.ecommerce.dto.SignIn;
 import hochang.ecommerce.dto.UserRegistration;
@@ -41,7 +42,7 @@ public class UserController {
         if (bindingResult.hasErrors()) {
             return "guests/signUp";
         }
-        userService.join(userRegistration);
+        userService.join(userRegistration, Role.USER);
         return "redirect:/";
     }
 
@@ -98,7 +99,7 @@ public class UserController {
             bindingResult.reject("improperPassword", "비밀번호가 맞지 않습니다.");
             return "users/userProfileModification";
         }
-        return "redirect:/users/{username}";
+        return "redirect:/";
     }
 
     @GetMapping("/users/{username}/remove")

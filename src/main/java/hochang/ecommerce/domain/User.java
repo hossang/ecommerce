@@ -22,6 +22,7 @@ public class User extends BaseTimeEntity {
     @Column(name = "user_id")
     private Long id;
 
+    @Column(unique = true)
     private String username; 
 
     private String password;
@@ -38,14 +39,14 @@ public class User extends BaseTimeEntity {
     private Role role;
 
     @Builder
-    public User(String username, String password, String name, LocalDate birthDate, String email, String phone) {
+    public User(String username, String password, String name, LocalDate birthDate, String email, String phone, Role role) {
         this.username = username;
         this.password = password;
         this.name = name;
         this.birthDate = birthDate;
         this.email = email;
         this.phone = phone;
-        this.role = Role.USER; //관리자 추가
+        this.role = role;
     }
 
     public void modifyProfile(String email, String phone) {
