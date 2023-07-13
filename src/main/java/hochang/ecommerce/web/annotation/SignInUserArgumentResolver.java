@@ -1,4 +1,4 @@
-package hochang.ecommerce.web.argumentresolver;
+package hochang.ecommerce.web.annotation;
 
 import hochang.ecommerce.web.SessionConst;
 import lombok.extern.slf4j.Slf4j;

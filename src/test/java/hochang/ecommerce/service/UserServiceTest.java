@@ -1,5 +1,6 @@
 package hochang.ecommerce.service;
 
+import hochang.ecommerce.domain.Role;
 import hochang.ecommerce.domain.User;
 import hochang.ecommerce.dto.UserRegistration;
 import hochang.ecommerce.repository.UserRepository;
@@ -33,7 +34,7 @@ class UserServiceTest {
         UserRegistration userRegistration = new UserRegistration();
         given(userRepository.save(any(User.class))).willReturn(any(User.class));
         //When
-        User user = userService.join(userRegistration);
+        User user = userService.join(userRegistration, Role.USER);
         //Then
         then(userRepository).should(times(1)).save(any(User.class));
     }
@@ -47,8 +48,8 @@ class UserServiceTest {
                 .willReturn(any(User.class))
                 .willThrow(IllegalStateException.class);
         //When
-        User user = userService.join(userRegistration1);
-        assertThatThrownBy(() -> userService.join(userRegistration2))
+        User user = userService.join(userRegistration1, Role.USER);
+        assertThatThrownBy(() -> userService.join(userRegistration2, Role.USER))
                 .isInstanceOf(IllegalStateException.class);
         //Then
         then(userRepository).should(times(2)).save(any(User.class));

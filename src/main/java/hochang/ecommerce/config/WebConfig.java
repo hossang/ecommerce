@@ -1,6 +1,7 @@
 package hochang.ecommerce.config;
 
-import hochang.ecommerce.web.argumentresolver.SignInUserArgumentResolver;
+import hochang.ecommerce.web.annotation.SignInUserArgumentResolver;
+import hochang.ecommerce.web.interceptor.AuthInterceptor;
 import hochang.ecommerce.web.interceptor.SignInCheckInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -14,7 +15,13 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new SignInCheckInterceptor())
                 .order(1)
-                .addPathPatterns("/users/**", "/admin/**");
+                .addPathPatterns("/users/**", "/admins/**")
+                .excludePathPatterns("/css/**", "/js/**");
+        registry.addInterceptor(new AuthInterceptor())
+                .order(2)
+                .addPathPatterns("/users/**", "/admins/**")
+                .excludePathPatterns("/css/**", "/js/**");
+
     }
 
     @Override

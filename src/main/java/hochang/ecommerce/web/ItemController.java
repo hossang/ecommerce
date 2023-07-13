@@ -4,7 +4,8 @@ import hochang.ecommerce.dto.BoardItem;
 import hochang.ecommerce.dto.BulletinItem;
 import hochang.ecommerce.dto.ItemRegistration;
 import hochang.ecommerce.service.ItemService;
-import hochang.ecommerce.web.argumentresolver.SignIn;
+import hochang.ecommerce.web.annotation.Auth;
+import hochang.ecommerce.web.annotation.SignIn;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -29,6 +30,7 @@ import java.net.MalformedURLException;
 public class ItemController {
     private final ItemService itemService;
 
+    @Auth
     @GetMapping("/admins/{username}/items")
     public String itemList(@PathVariable String username
             , @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable, Model model) {
@@ -46,6 +48,7 @@ public class ItemController {
         return "admins/itemlist";
     }
 
+    @Auth
     @GetMapping("/admins/{username}/items/register")
     public String itemRegistrationFormCreate(@PathVariable String username, ItemRegistration itemRegistration
             , Model model) {
@@ -53,6 +56,7 @@ public class ItemController {
         return "admins/itemRegistration";
     }
 
+    @Auth
     @PostMapping("/admins/{username}/items/register")
     public String itemRegistrationCreate(@PathVariable String username,
                                          ItemRegistration itemRegistration) throws IOException {
@@ -69,6 +73,7 @@ public class ItemController {
         return "guests/itemPurchase";
     }
 
+    @Auth
     @GetMapping("/admins/{username}/items/{id}/modify")
     public String itemRegistrationFormModify(@PathVariable String username
             ,@PathVariable Long id, Model model) {
@@ -78,6 +83,7 @@ public class ItemController {
         return "admins/itemModification";
     }
 
+    @Auth
     @PostMapping("/admins/{username}/items/{id}/modify")
     public String itemRegistrationModify(@PathVariable String username, @PathVariable Long id
             , ItemRegistration itemRegistration) throws IOException {
@@ -86,11 +92,13 @@ public class ItemController {
 
     }
 
+    @Auth
     @GetMapping("/admins/{username}/items/{id}/remove")
     public String itemFormRemove(@PathVariable String username, @PathVariable Long id) {
         return "/admins/itemRemoval";
     }
 
+    @Auth
     @PostMapping("/admins/{username}/items/{id}/remove")
     public String itemRemove(@PathVariable String username, @PathVariable Long id) throws IOException {
         itemService.removeItem(id);

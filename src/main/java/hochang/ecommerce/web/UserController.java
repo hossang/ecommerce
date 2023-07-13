@@ -5,6 +5,7 @@ import hochang.ecommerce.dto.BoardUser;
 import hochang.ecommerce.dto.SignIn;
 import hochang.ecommerce.dto.UserRegistration;
 import hochang.ecommerce.service.UserService;
+import hochang.ecommerce.web.annotation.Auth;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -115,6 +116,7 @@ public class UserController {
         return "redirect:/";
     }
 
+    @Auth
     @GetMapping("/admins/{username}/users")
     public String userList(@PathVariable String username
             , @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable, Model model) {
