@@ -1,7 +1,6 @@
 package hochang.ecommerce.config;
 
 import hochang.ecommerce.web.annotation.SignInUserArgumentResolver;
-import hochang.ecommerce.web.interceptor.AuthInterceptor;
 import hochang.ecommerce.web.interceptor.LogInterceptor;
 import hochang.ecommerce.web.interceptor.SignInCheckInterceptor;
 import org.springframework.context.annotation.Configuration;
@@ -22,11 +21,6 @@ public class WebConfig implements WebMvcConfigurer {
                 .order(2)
                 .addPathPatterns("/users/**", "/admins/**")
                 .excludePathPatterns("/css/**", "/js/**");
-        registry.addInterceptor(new AuthInterceptor())
-                .order(3)
-                .addPathPatterns("/users/**", "/admins/**")
-                .excludePathPatterns("/css/**", "/js/**");
-
     }
 
     @Override

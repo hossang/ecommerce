@@ -10,16 +10,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
+import static org.springframework.security.core.userdetails.User.*;
+
 @Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class UserService {
+public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
 
@@ -38,14 +43,6 @@ public class UserService {
     public UserRegistration findUserRegistrationByUsername(String username) {
         User user = userRepository.findByUsername(username);
         return toUserForm(user);
-    }
-
-    public String signIn(SignIn signIn) {
-        User user = userRepository.findByUsername(signIn.getUsername());
-        if (user == null || !encoder.matches(signIn.getPassword(), user.getPassword())) {
-            return null;
-        }
-        return user.getUsername();
     }
 
     @Transactional
@@ -73,6 +70,24 @@ public class UserService {
         User user = userRepository.findByUsername(username);
         //+주문과 주소도 삭제해주기
         userRepository.delete(user);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        log.info("loadUserByUsername() : {}", username);
+
+        User user = userRepository.findByUsername(username);
+
+        if (user == null) {
+            throw new UsernameNotFoundException(username);
+        }
+        log.info("loadUserByUsername() user.getPassword() : {}", user.getPassword());
+
+        return  builder()
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .roles(user.getRole().toString())
+                .build();
     }
 
     private void validateDuplicateUser(User user) {

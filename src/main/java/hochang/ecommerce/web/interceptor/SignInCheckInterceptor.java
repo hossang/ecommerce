@@ -3,9 +3,11 @@ package hochang.ecommerce.web.interceptor;
 import hochang.ecommerce.web.SessionConst;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.util.StringTokenizer;
 
 @Slf4j
 public class SignInCheckInterceptor implements HandlerInterceptor {
@@ -13,14 +15,20 @@ public class SignInCheckInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String requestURI = request.getRequestURI();
         log.info("인증 체크 인터셉터 실행 {}", requestURI);
+        String username = extractUsernameFromRequestURI(requestURI);
 
         HttpSession session = request.getSession(false);
-
-        if (session == null || session.getAttribute(SessionConst.SIGN_IN_USER) == null) {
+        if (!session.getAttribute(SessionConst.SIGN_IN_USER).equals(username)) {
             log.info("미인증 사용자 요청");
-            response.sendRedirect("/sign-in?redirectURL=" + requestURI);
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
             return false;
         }
         return true;
+    }
+
+    private String extractUsernameFromRequestURI(String requestURI) {
+        StringTokenizer stringTokenizer = new StringTokenizer(requestURI, "/");
+        stringTokenizer.nextToken();
+        return stringTokenizer.nextToken();
     }
 }
