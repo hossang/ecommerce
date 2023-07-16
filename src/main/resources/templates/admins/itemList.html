@@ -22,8 +22,10 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="boardItem : ${boardItems}">
+           <tr th:each="boardItem : ${boardItems}">
                 <td th:text="${boardItem.id}"></td>
+            <!--<tr th:each="boardItem, status : ${boardItems}">
+                <td th:text="${status.index}"></td>-->
                 <td>
                     <a th:href="@{/items/{id}(id=${boardItem.id})}" th:text="${boardItem.name}"></a>
                 </td>
