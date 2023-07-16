@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
   <header th:fragment="guestHeader">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -23,6 +23,7 @@
   </header>
 
   <header th:fragment="userAdinHeader(username)">
+
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="container">
         <a class="navbar-brand" th:href="@{/}">HOCHANG</a>
@@ -37,11 +38,15 @@
                 <span th:text="${username}"></span>
               </a>
               <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li><a class="dropdown-item" th:href="@{/users/{username}/orders(username=${username})}">주문 목록</a></li>
-                <li><a class="dropdown-item" th:href="@{/admins/{username}/users(username=${username})}">회원 목록</a></li>
+                <li>
+                  <a class="dropdown-item" th:href="@{/users/{username}/orders(username=${username})}">주문 목록</a></li>
+                <li sec:authorize="hasAnyAuthority('ROLE_ADMIN')">
+                  <a class="dropdown-item" th:href="@{/admins/{username}/users(username=${username})}">회원 목록</a></li>
                 <li><a class="dropdown-item" th:href="@{/users/{username}/modify(username=${username})}">회원 정보 수정</a></li>
-                <li><a class="dropdown-item" th:href="@{/admins/{username}/items/register(username=${username})}">상품 등록</a></li>
-                <li><a class="dropdown-item" th:href="@{/admins/{username}/items(username=${username})}">상품 목록</a></li>
+                <li sec:authorize="hasAnyAuthority('ROLE_ADMIN')">
+                  <a class="dropdown-item" th:href="@{/admins/{username}/items/register(username=${username})}">상품 등록</a></li>
+                <li sec:authorize="hasAnyAuthority('ROLE_ADMIN')">
+                  <a class="dropdown-item" th:href="@{/admins/{username}/items(username=${username})}">상품 목록</a></li>
                 <li><a class="dropdown-item" th:href="@{/users/{username}/remove(username=${username})}">회원 탈퇴</a></li>
               </ul>
             </li>
@@ -56,5 +61,6 @@
       </div>
     </nav>
   </header>
+
 </body>
 </html>

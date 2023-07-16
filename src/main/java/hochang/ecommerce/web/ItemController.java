@@ -4,7 +4,7 @@ import hochang.ecommerce.dto.BoardItem;
 import hochang.ecommerce.dto.BulletinItem;
 import hochang.ecommerce.dto.ItemRegistration;
 import hochang.ecommerce.service.ItemService;
-import hochang.ecommerce.web.argumentresolver.SignIn;
+import hochang.ecommerce.web.annotation.SignIn;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -82,7 +82,7 @@ public class ItemController {
     public String itemRegistrationModify(@PathVariable String username, @PathVariable Long id
             , ItemRegistration itemRegistration) throws IOException {
         itemService.modifyItem(itemRegistration);
-        return "redirect:admins/{username}/items";
+        return "redirect:/admins/{username}/items";
 
     }
 

@@ -47,6 +47,7 @@
                             <p th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="text-danger">Incorrect phone</p>
                         </div>
                         <button type="submit" class="btn btn-primary mt-3">Sign up</button>
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     </form>
                 </div>
             </div>

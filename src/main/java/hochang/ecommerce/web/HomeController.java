@@ -1,6 +1,6 @@
 package hochang.ecommerce.web;
 
-import hochang.ecommerce.web.argumentresolver.SignIn;
+import hochang.ecommerce.web.annotation.SignIn;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;

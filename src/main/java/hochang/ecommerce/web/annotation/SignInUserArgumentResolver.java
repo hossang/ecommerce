@@ -1,4 +1,4 @@
-package hochang.ecommerce.web.argumentresolver;
+package hochang.ecommerce.web.annotation;
 
 import hochang.ecommerce.web.SessionConst;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,6 @@ public class SignInUserArgumentResolver implements HandlerMethodArgumentResolver
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer
             , NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        log.info("resolveArgument 실행");
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
 
         HttpSession session = request.getSession(false);

@@ -1,5 +1,6 @@
 package hochang.ecommerce.web;
 
+import hochang.ecommerce.domain.Role;
 import hochang.ecommerce.dto.BoardUser;
 import hochang.ecommerce.dto.SignIn;
 import hochang.ecommerce.dto.UserRegistration;
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
@@ -41,46 +41,17 @@ public class UserController {
         if (bindingResult.hasErrors()) {
             return "guests/signUp";
         }
-        userService.join(userRegistration);
+        userService.join(userRegistration, Role.USER);
         return "redirect:/";
     }
 
     @GetMapping("/sign-in")
-    public String signInFormCreate(SignIn signIn) {
+    public String signInFormCreate(SignIn signIn, Model model, @RequestParam(required = false) String error) {
+        if (error != null && error.equals("true")) {
+            model.addAttribute("errorMessage", "아이디 또는 비밀번호를 잘못 입력했습니다.");
+        }
         return "guests/signIn";
     }
-
-    @PostMapping("/sign-in")
-    public String signInCreate(@Valid SignIn signIn, BindingResult bindingResult
-            , HttpServletRequest request, @RequestParam(defaultValue = "/") String redirectURL) {
-        if (bindingResult.hasErrors()) {
-            return "guests/signIn";
-        }
-        String username = userService.signIn(signIn);
-        log.info("username : {}", username);
-        if (username == null) {
-            bindingResult.reject("signInFail", "아이디 또는 비밀번호가 맞지 않습니다.");
-            return "guests/signIn";
-        }
-        HttpSession session = request.getSession();
-        session.setAttribute(SessionConst.SIGN_IN_USER, username);
-        return "redirect:" + redirectURL;
-    }
-
-    @GetMapping("/users/{username}/sign-out")
-    public String signOut(@PathVariable String username) {
-        return "users/signOut";
-    }
-
-    @PostMapping("/users/{username}/sign-out")
-    public String signOutCreate(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.invalidate();
-        }
-        return "redirect:/";
-    }
-
     @GetMapping("/users/{username}/modify")
     public String userRegistrationFormModify(@PathVariable String username, Model model) {
         UserRegistration userRegistration = userService.findUserRegistrationByUsername(username);
@@ -98,7 +69,7 @@ public class UserController {
             bindingResult.reject("improperPassword", "비밀번호가 맞지 않습니다.");
             return "users/userProfileModification";
         }
-        return "redirect:/users/{username}";
+        return "redirect:/";
     }
 
     @GetMapping("/users/{username}/remove")

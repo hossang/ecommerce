@@ -50,6 +50,7 @@
                 </div>
             </div>
             <button type="submit" class="btn btn-primary">등록</button>
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         </form>
     </div>
 

@@ -1,4 +1,4 @@
-package hochang.ecommerce.web.argumentresolver;
+package hochang.ecommerce.web.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
