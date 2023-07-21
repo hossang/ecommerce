@@ -58,13 +58,15 @@ public class ItemService {
 
     @Transactional
     public void modifyItem(ItemRegistration itemRegistration) throws IOException {
-        UploadFile uploadFile = fileStore.storeFile(itemRegistration.getImageFile());
+        String originalFilename = itemRegistration.getImageFile().getOriginalFilename();
         Item item = findItem(itemRegistration.getId());
-        log.info("item.getStoreFileName() = {}", item.getStoreFileName());
-        log.info("uploadFile.getStoreFileName() = {}", uploadFile.getStoreFileName());
+        if (originalFilename.equals(item.getUploadFileName())) {
+            item.modifyItem(itemRegistration);
+            return;
+        }
+        UploadFile uploadFile = fileStore.storeFile(itemRegistration.getImageFile());
         fileStore.deleteFile(item.getStoreFileName());
-        item.modifyItem(itemRegistration.getName(), itemRegistration.getCount(), itemRegistration.getPrice(),
-                itemRegistration.getContents(), uploadFile.getUploadFileName(), uploadFile.getStoreFileName());
+        item.modifyItem(itemRegistration, uploadFile);
     }
 
     @Transactional
@@ -79,7 +81,7 @@ public class ItemService {
         return new UrlResource("file:" + fileStore.getFullPath(filename));
     }
     
-    //
+    //객체 매핑 메서드
     private ItemRegistration toItemRegistration(Item item) {
         ItemRegistration itemRegistration = new ItemRegistration();
         itemRegistration.setId(item.getId());
