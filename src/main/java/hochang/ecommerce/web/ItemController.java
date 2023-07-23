@@ -14,12 +14,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
@@ -37,6 +39,7 @@ public class ItemController {
         int startPage = Math.max(1, nowPage - 4);
         int endPage = Math.min(boardItems.getTotalPages(),nowPage + 5);
 
+        log.info("nowPage : {}", nowPage);
         model.addAttribute("username", username);
         model.addAttribute("boardItems", boardItems);
         model.addAttribute("nowPage", nowPage);
@@ -54,14 +57,18 @@ public class ItemController {
     }
 
     @PostMapping("/admins/{username}/items/register")
-    public String itemRegistrationCreate(@PathVariable String username,
-                                         ItemRegistration itemRegistration) throws IOException {
+    public String itemRegistrationCreate(@PathVariable String username
+            , @Valid ItemRegistration itemRegistration, BindingResult bindingResult) throws IOException {
+        if (bindingResult.hasErrors()) {
+            return "admins/itemRegistration";
+        }
         Long itemId = itemService.save(itemRegistration);
         return "redirect:/admins/{username}/items";
     }
 
     @GetMapping("/items/{id}")
-    public String bulletinItemDetails(@SignIn String username, @PathVariable Long id, Model model, @RequestParam(required = false) String errorMessage) {
+    public String bulletinItemDetails(@SignIn String username
+            , @PathVariable Long id, Model model, @RequestParam(required = false) String errorMessage) {
         BulletinItem bulletinItem = itemService.findBulletinItem(id);
         model.addAttribute("username", username);
         model.addAttribute("errorMessage", errorMessage);
@@ -80,7 +87,10 @@ public class ItemController {
 
     @PostMapping("/admins/{username}/items/{id}/modify")
     public String itemRegistrationModify(@PathVariable String username, @PathVariable Long id
-            , ItemRegistration itemRegistration) throws IOException {
+            , @Valid ItemRegistration itemRegistration, BindingResult bindingResult) throws IOException {
+        if (bindingResult.hasErrors()) {
+            return "admins/itemModification";
+        }
         itemService.modifyItem(itemRegistration);
         return "redirect:/admins/{username}/items";
 

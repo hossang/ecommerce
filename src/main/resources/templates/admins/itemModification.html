@@ -49,6 +49,9 @@
                     <input class="form-control" type="file" id="imageFile" name="imageFile" accept="image/jpeg, image/png" required>
                 </div>
             </div>
+            <div th:if="${errorMessage}">
+                <p th:text="${errorMessage}" class="error-message text-danger"></p>
+            </div>
             <button type="submit" class="btn btn-primary">등록</button>
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         </form>
