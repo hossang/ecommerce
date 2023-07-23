@@ -71,6 +71,10 @@ public class Order extends BaseEntity {
 
     public void cancelOrder() {
         this.status = OrderStatus.CANCEL;
+        restoreItem();
+    }
+
+    public void restoreItem() {
         for (OrderLine orderLine : orderLines) {
             orderLine.getItem().addCount(orderLine.getCount());
         }

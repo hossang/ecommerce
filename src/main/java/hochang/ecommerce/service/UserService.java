@@ -1,10 +1,12 @@
 package hochang.ecommerce.service;
 
+import hochang.ecommerce.domain.Order;
+import hochang.ecommerce.domain.OrderStatus;
 import hochang.ecommerce.domain.Role;
 import hochang.ecommerce.domain.User;
 import hochang.ecommerce.dto.BoardUser;
-import hochang.ecommerce.dto.SignIn;
 import hochang.ecommerce.dto.UserRegistration;
+import hochang.ecommerce.repository.OrderRepository;
 import hochang.ecommerce.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 import static org.springframework.security.core.userdetails.User.*;
 
@@ -26,6 +29,7 @@ import static org.springframework.security.core.userdetails.User.*;
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
     private final BCryptPasswordEncoder encoder;
 
     @Transactional
@@ -68,7 +72,14 @@ public class UserService implements UserDetailsService {
     @Transactional
     public void removeUser(String username) {
         User user = userRepository.findByUsername(username);
-        //+주문과 주소도 삭제해주기
+        Optional<Order> byStatusOrder = orderRepository.findByUserAndStatus(user, OrderStatus.ORDER);
+        if (byStatusOrder.isPresent()) {
+            byStatusOrder.get().restoreItem();
+        }
+        List<Order> byUsersIdOrders = orderRepository.findByUserId(user.getId());
+        if (!byUsersIdOrders.isEmpty()) {
+            orderRepository.deleteAll(byUsersIdOrders);
+        }
         userRepository.delete(user);
     }
 
@@ -96,6 +107,8 @@ public class UserService implements UserDetailsService {
             throw new IllegalStateException("이미 존재하는 회원입니다.");
         }
     }
+
+    //객체 매핑 메서드
 
     private User toUser(UserRegistration userRegistration, Role role) {
         User user = User.builder().username(userRegistration.getUsername())
