@@ -110,7 +110,7 @@ public class OrderService {
         return orderLine;
     }
 
-    //
+    //객체 매핑 메서드
 
     private OrderItem toOrderItem(OrderLine orderLine) {
         OrderItem orderItem = new OrderItem();
@@ -125,14 +125,14 @@ public class OrderService {
 
     private BoardOrder toBoardOrder(Order o) {
         BoardOrder boardOrder = new BoardOrder();
-        StringBuffer stringBuffer = new StringBuffer();
+        StringBuilder stringbuilder = new StringBuilder();
         boardOrder.setId(o.getId());
 
         for (OrderLine orderLine : o.getOrderLines()) {
-            stringBuffer.append(orderLine.getItem().getName()).append(", ");
+            stringbuilder.append(orderLine.getItem().getName()).append(", ");
         }
-        stringBuffer.delete(stringBuffer.length() - 2, stringBuffer.length() - 1);
-        boardOrder.setOrderLineNames(stringBuffer.toString());
+        stringbuilder.delete(stringbuilder.length() - 2, stringbuilder.length() - 1);
+        boardOrder.setOrderLineNames(stringbuilder.toString());
 
         boardOrder.setOrderStatue(OrderStatusConstants.ORDER_STATUS_MAP.get(o.getStatus()));
         boardOrder.setTotalPrice(o.getTotalPrice());

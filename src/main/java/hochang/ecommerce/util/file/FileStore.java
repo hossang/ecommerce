@@ -14,6 +14,9 @@ import java.util.UUID;
 
 @Component
 public class FileStore {
+    private static final int TARGET_WIDTH = 450;
+    private static final int TARGET_HEIGHT = 450;
+
     @Value("${file.dir}")
     private String fileDir;
 
@@ -29,14 +32,13 @@ public class FileStore {
         String storeFileName = createStoreFileName(originalFilename);
 
         BufferedImage bufferedImage = ImageIO.read(multipartFile.getInputStream());
-        bufferedImage = resizeImage(bufferedImage, 450, 450);
+        bufferedImage = resizeImage(bufferedImage, TARGET_WIDTH, TARGET_HEIGHT);
         Path filePath = Path.of(getFullPath(storeFileName));
         ImageIO.write(bufferedImage, "jpg", Files.newOutputStream(filePath));
         return new UploadFile(originalFilename, storeFileName);
     }
 
     public void deleteFile(String filename) throws IOException {
-        //파일이없을 때 에러발생함
         Path filePath = Paths.get(fileDir).resolve(filename).normalize();
         Files.deleteIfExists(filePath);
     }

@@ -43,7 +43,7 @@ public class LogInterceptor implements HandlerInterceptor {
         log.info("RESPONSE [{}][{}]", logId, requestURI);
 
         if (ex != null) {
-            log.error("afterCompletion error!!", ex);
+            log.error("afterCompletion error!! : {}", ex);
         }
     }
 }
