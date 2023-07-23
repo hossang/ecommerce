@@ -107,18 +107,6 @@ public class OrderController {
         return "redirect:/users/{username}/orders";
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public String outOfStock(IllegalArgumentException illegalArgumentException, HttpServletRequest request
-            , RedirectAttributes redirectAttributes) {
-        String referer = request.getHeader("Referer");
-        log.info("referer: {}", referer);
-        if (referer == null) {
-            referer = "/";
-        }
-        redirectAttributes.addAttribute("errorMessage", illegalArgumentException.getMessage());
-        return "redirect:" + referer;
-    }
-
     private Order getOrder(String username, Long itemId, Integer quantity, Optional<Order> optionalOrder) {
         if (!optionalOrder.isPresent()) {
             return orderService.createOrder(username, itemId, quantity);

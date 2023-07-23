@@ -100,12 +100,4 @@ public class UserController {
         model.addAttribute("endPage", endPage);
         return "admins/userList";
     }
-
-    @ExceptionHandler(IllegalStateException.class)
-    public String signUpDuplicateUser(IllegalStateException illegalStateException, RedirectAttributes redirectAttributes) {
-        String errorMessage = illegalStateException.getMessage();
-        log.info("errorMessage : {}", errorMessage);
-        redirectAttributes.addAttribute("errorMessage", errorMessage);
-        return "redirect:/sign-up";
-    }
 }
