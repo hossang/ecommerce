@@ -46,7 +46,7 @@ public class ItemController {
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
 
-        return "admins/itemlist";
+        return "admins/itemList";
     }
 
     @GetMapping("/admins/{username}/items/register")

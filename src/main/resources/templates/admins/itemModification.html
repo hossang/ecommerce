@@ -27,6 +27,7 @@
     <div class="container">
         <form th:action="@{/admins/{username}/items/{id}/modify(username=${username}, id =${itemRegistration.id})}" method="post" enctype="multipart/form-data">
             <h1>상품 수정</h1>
+            <!--vaildate 메시지 추가-->
             <div class="form-group">
                 <label for="name">상품명:</label>
                 <input class="form-control" type="text" id="name" name="name" maxlength="20" th:value="${itemRegistration.name}" required>

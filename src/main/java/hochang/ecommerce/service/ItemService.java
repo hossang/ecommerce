@@ -46,8 +46,10 @@ public class ItemService {
         return item;
     }
 
+    @Transactional
     public BulletinItem findBulletinItem(Long itemId) {
         Item item = findItem(itemId);
+        item.addViews();
         return toBulletinItem(item);
     }
 
@@ -108,6 +110,7 @@ public class ItemService {
         boardItem.setId(item.getId());
         boardItem.setName(item.getName());
         boardItem.setCreatedDate(item.getCreatedDate());
+        boardItem.setViews(item.getViews());
         return boardItem;
     }
 

@@ -17,6 +17,7 @@
                 <th>번호</th>
                 <th>제목</th>
                 <th>생성 날짜</th>
+                <th>조회수</th>
                 <th>수정</th>
                 <th>삭제</th>
             </tr>
@@ -30,6 +31,7 @@
                     <a th:href="@{/items/{id}(id=${boardItem.id})}" th:text="${boardItem.name}"></a>
                 </td>
                 <td th:text="${boardItem.createdDate}"></td>
+                <td th:text="${boardItem.views}"></td>
                 <td>
                     <a th:href="@{/admins/{username}/items/{id}/modify(username=${username}, id=${boardItem.id})}">수정</a>
                 </td>

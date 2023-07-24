@@ -13,5 +13,5 @@ public class BoardItem {
 
     private LocalDateTime createdDate;
 
-    //조회수도 볼수 있으면 좋을듯
+    private long views;
 }

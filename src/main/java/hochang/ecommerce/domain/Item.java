@@ -6,6 +6,9 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -15,6 +18,7 @@ import javax.persistence.Lob;
 
 @Entity
 @Getter
+@DynamicInsert
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Item extends BaseEntity {
     @Id
@@ -30,6 +34,9 @@ public class Item extends BaseEntity {
 
     @Lob
     private String contents;
+
+    @ColumnDefault("0")
+    private long views;
 
     private String uploadFileName;
 
@@ -68,6 +75,10 @@ public class Item extends BaseEntity {
             throw new IllegalArgumentException(stringBuilder.toString());
         }
         this.count = reducedCount;
+    }
+
+    public void addViews() {
+        this.views++;
     }
 
     public void addCount(int count) {
