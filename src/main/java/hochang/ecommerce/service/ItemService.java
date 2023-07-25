@@ -4,6 +4,7 @@ import hochang.ecommerce.domain.Item;
 import hochang.ecommerce.dto.BoardItem;
 import hochang.ecommerce.dto.BulletinItem;
 import hochang.ecommerce.dto.ItemRegistration;
+import hochang.ecommerce.dto.MainItem;
 import hochang.ecommerce.repository.ItemRepository;
 import hochang.ecommerce.util.file.FileStore;
 import hochang.ecommerce.util.file.UploadFile;
@@ -38,6 +39,12 @@ public class ItemService {
         Page<Item> itemPage = itemRepository.findAll(pageable);
         Page<BoardItem> boardItems = itemPage.map(o -> toBoardItem(o));
         return boardItems;
+    }
+
+    public Page<MainItem> findMainItem(Pageable pageable) {
+        Page<Item> itemPage = itemRepository.findAll(pageable);
+        Page<MainItem> mainItems = itemPage.map(o -> toMainItem(o));
+        return mainItems;
     }
 
     private Item findItem(Long itemId) {
@@ -122,5 +129,14 @@ public class ItemService {
         bulletinItem.setContents(item.getContents());
         bulletinItem.setStoreFileName(item.getStoreFileName());
         return bulletinItem;
+    }
+
+    private MainItem toMainItem(Item item) {
+        MainItem mainItem = new MainItem();
+        mainItem.setId(item.getId());
+        mainItem.setName(item.getName());
+        mainItem.setPrice(item.getPrice());
+        mainItem.setStoreFileName(item.getStoreFileName());
+        return mainItem;
     }
 }
