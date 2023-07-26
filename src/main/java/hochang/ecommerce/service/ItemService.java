@@ -78,13 +78,6 @@ public class ItemService {
         item.modifyItem(itemRegistration, uploadFile);
     }
 
-    @Transactional
-    public void removeItem(Long id) throws IOException {
-        Item item = findItem(id);
-        fileStore.deleteFile(item.getStoreFileName());
-        itemRepository.delete(item);
-    }
-
     //
     public Resource getImage(String filename) throws MalformedURLException {
         return new UrlResource("file:" + fileStore.getFullPath(filename));

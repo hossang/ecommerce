@@ -19,7 +19,6 @@
                 <th>생성 날짜</th>
                 <th>조회수</th>
                 <th>수정</th>
-                <th>삭제</th>
             </tr>
             </thead>
             <tbody>
@@ -34,9 +33,6 @@
                 <td th:text="${boardItem.views}"></td>
                 <td>
                     <a th:href="@{/admins/{username}/items/{id}/modify(username=${username}, id=${boardItem.id})}">수정</a>
-                </td>
-                <td>
-                    <a th:href="@{/admins/{username}/items/{id}/remove(username=${username}, id=${boardItem.id})}">삭제</a>
                 </td>
             </tr>
             </tbody>
