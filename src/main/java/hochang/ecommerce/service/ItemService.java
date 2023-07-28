@@ -47,28 +47,22 @@ public class ItemService {
         return mainItems;
     }
 
-    private Item findItem(Long itemId) {
-        Optional<Item> optionalItem = itemRepository.findById(itemId);
-        Item item = optionalItem.get();
-        return item;
-    }
-
     @Transactional
     public BulletinItem findBulletinItem(Long itemId) {
-        Item item = findItem(itemId);
+        Item item = itemRepository.findByIdForUpdate(itemId).get(); //동시성 제어가 필요하다
         item.addViews();
         return toBulletinItem(item);
     }
 
     public ItemRegistration findItemRegistration(Long itemId) {
-        Item item = findItem(itemId);
+        Item item = itemRepository.findById(itemId).get();
         return toItemRegistration(item);
     }
 
     @Transactional
     public void modifyItem(ItemRegistration itemRegistration) throws IOException {
         String originalFilename = itemRegistration.getImageFile().getOriginalFilename();
-        Item item = findItem(itemRegistration.getId());
+        Item item = itemRepository.findById(itemRegistration.getId()).get();
         if (originalFilename.equals(item.getUploadFileName())) {
             item.modifyItem(itemRegistration);
             return;

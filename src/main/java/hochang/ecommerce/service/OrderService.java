@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.LockModeType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,30 +34,14 @@ public class OrderService {
 
     //
     @Transactional
-    public Order createOrder(String username, Long itemId, int quantity) {
-        User user = userRepository.findByUsername(username);
-        OrderLine orderLine = createOrderLine(itemId, quantity);
-        Order order = Order.builder()
-                .user(user)
-                .orderLine(orderLine)
-                .build();
-
-        return orderRepository.save(order);
-    }
-
-    @Transactional
-    public Order addOrderLine(Order order, Long itemId, int quantity) {
-        for (OrderLine orderLine : order.getOrderLines()) {
-            if (orderLine.getItem().getId().equals(itemId)) {
-                orderLine.modifyCount(quantity);
-                order.calculateTotalPrice();
-                return order;
-            }
+    public void order(String username, Long itemId, Integer quantity) {
+        Optional<Order> optionalOrder = findByUserAndStatus(username);
+        if (!optionalOrder.isPresent()) {
+            createOrder(username, itemId, quantity);
+            return;
         }
-        OrderLine orderLine = createOrderLine(itemId, quantity);
-        order.addOrderLine(orderLine);
-        order.calculateTotalPrice();
-        return order;
+        addOrderLine(optionalOrder.get(), itemId, quantity);
+
     }
 
     @Transactional
@@ -65,7 +50,9 @@ public class OrderService {
     }
 
     @Transactional
-    public void cancelOrder(Order order) {
+    public void cancelOrder(Long id) {
+        //동시성 재어 필요
+        Order order = orderRepository.findByIdForUpdate(id).get();
         order.cancelOrder();
     }
 
@@ -89,23 +76,48 @@ public class OrderService {
     }
 
     public BoardOrder findBoardOrder(Long id) {
-        Order order = findOrder(id);
+        Order order = orderRepository.findById(id).get();
         BoardOrder boardOrder = toBoardOrder(order);
         return boardOrder;
     }
 
-    public Order findOrder(Long id) {
-        return orderRepository.findById(id).get();
+    public List<OrderLine> findOrderLines(Long id) {
+        Order order = orderRepository.findById(id).get();
+        return order.getOrderLines();
     }
 
     //
+
+    private Order createOrder(String username, Long itemId, int quantity) {
+        User user = userRepository.findByUsername(username);
+        OrderLine orderLine = createOrderLine(itemId, quantity);
+        Order order = Order.builder()
+                .user(user)
+                .orderLine(orderLine)
+                .build();
+
+        return orderRepository.save(order);
+    }
+    private Order addOrderLine(Order order, Long itemId, int quantity) {
+        for (OrderLine orderLine : order.getOrderLines()) {
+            if (orderLine.getItem().getId().equals(itemId)) {
+                orderLine.modifyCount(quantity); //동시성 제어가 필요하다
+                order.calculateTotalPrice();
+                return order;
+            }
+        }
+        OrderLine orderLine = createOrderLine(itemId, quantity);
+        order.addOrderLine(orderLine);
+        order.calculateTotalPrice();
+        return order;
+    }
 
     private OrderLine createOrderLine(Long itemId, int quantity) {
         Optional<Item> optionalItem = itemRepository.findById(itemId);
         Item item = optionalItem.get();
         OrderLine orderLine = OrderLine.builder()
                 .item(item)
-                .count(quantity)
+                .count(quantity) //동시성 제어가 필요하다
                 .build();
         return orderLine;
     }

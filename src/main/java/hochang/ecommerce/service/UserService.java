@@ -70,12 +70,13 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public void removeUser(String username) {
+    public void removeUser(String username) { //유저 삭제할 때 참조무결성 위반 조심하기
         User user = userRepository.findByUsername(username);
         Optional<Order> byStatusOrder = orderRepository.findByUserAndStatus(user, OrderStatus.ORDER);
         if (byStatusOrder.isPresent()) {
-            byStatusOrder.get().restoreItem();
+            byStatusOrder.get().restoreItem(); //동시성 제어가 필요하다
         }
+
         List<Order> byUsersIdOrders = orderRepository.findByUserId(user.getId());
         if (!byUsersIdOrders.isEmpty()) {
             orderRepository.deleteAll(byUsersIdOrders);

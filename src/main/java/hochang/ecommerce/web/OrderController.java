@@ -13,14 +13,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,8 +45,9 @@ public class OrderController {
     @PostMapping("/users/{username}/orders/cart")
     public String orderLineCreate(@PathVariable String username, @RequestParam(required = false) Long itemId
             , @RequestParam(required = false) Integer quantity) {
-        Optional<Order> optionalOrder = orderService.findByUserAndStatus(username);
-        Order order = getOrder(username, itemId, quantity, optionalOrder);
+        if (itemId != null && quantity != null) {
+            orderService.order(username, itemId, quantity);
+        }
 
         return "redirect:/users/{username}/orders/cart";
     }
@@ -93,7 +91,7 @@ public class OrderController {
     @GetMapping("/users/{username}/orders/{id}")
     public String orderDetail(@PathVariable String username, @PathVariable Long id, Model model) {
         BoardOrder boardOrder = orderService.findBoardOrder(id);
-        List<OrderLine> orderLines = orderService.findOrder(id).getOrderLines();
+        List<OrderLine> orderLines = orderService.findOrderLines(id);
         List<OrderItem> orderItems = orderService.findOrderItems(orderLines);
         model.addAttribute("boardOrder", boardOrder);
         model.addAttribute("orderItems", orderItems);
@@ -102,18 +100,7 @@ public class OrderController {
 
     @PostMapping("/users/{username}/orders/{id}/cancel")
     public String orderCancel(@PathVariable String username, @PathVariable Long id) {
-        Order order = orderService.findOrder(id);
-        orderService.cancelOrder(order);
+        orderService.cancelOrder(id);
         return "redirect:/users/{username}/orders";
-    }
-
-    private Order getOrder(String username, Long itemId, Integer quantity, Optional<Order> optionalOrder) {
-        if (!optionalOrder.isPresent()) {
-            return orderService.createOrder(username, itemId, quantity);
-        }
-        if (itemId == null && quantity == null) {
-            return optionalOrder.get();
-        }
-        return orderService.addOrderLine(optionalOrder.get(), itemId, quantity);
     }
 }
