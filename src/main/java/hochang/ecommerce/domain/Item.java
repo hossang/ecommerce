@@ -21,6 +21,8 @@ import javax.persistence.Lob;
 @DynamicInsert
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Item extends BaseEntity {
+    public static final int ZERO = 0;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "item_id")
@@ -68,11 +70,8 @@ public class Item extends BaseEntity {
 
     public void reduceCount(int count) {
         int reducedCount = this.count - count;
-        if (reducedCount < 0) {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("재고가 부족합니다. ").append(this.name).append(" 의 현재 보유 수량은 ").append(this.count)
-                    .append("개 입니다.");
-            throw new IllegalArgumentException(stringBuilder.toString());
+        if (reducedCount < ZERO) {
+            throw new IllegalArgumentException(createExceptionMessage());
         }
         this.count = reducedCount;
     }
@@ -84,4 +83,9 @@ public class Item extends BaseEntity {
     public void addCount(int count) {
         this.count += count;
     }
+
+    private String createExceptionMessage() {
+        return "재고가 부족합니다. " + this.name + " 의 현재 보유 수량은 " + this.count + "개 입니다.";
+    }
 }
+

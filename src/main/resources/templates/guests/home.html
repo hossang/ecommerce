@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Shopping Mall</title>
-    <link rel="stylesheet" href="/css/bootstrap.css">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
 </head>
 
 <body>
@@ -44,13 +44,13 @@
 
     <div class="pagination justify-content-center">
         <th:block th:each="page : ${#numbers.sequence(startPage, endPage)}">
-            <a th:if="${page != nowPage}" th:href="@{/(page=${page - 1})}" class="page-link" th:text="${page}"></a>
+            <a th:if="${page != nowPage && !mainItems.isEmpty()}" th:href="@{/(page=${page - 1})}" class="page-link" th:text="${page}"></a>
             <strong th:if="${page == nowPage}" th:text="${page}" class="page-link" style="color: red"></strong>
         </th:block>
     </div>
 <!-- 푸터 -->
 <div th:replace="~{fragment/bodyFooter :: footer}"></div>
 
-<script src="/js/bootstrap.bundle.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

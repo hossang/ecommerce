@@ -22,7 +22,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("select o from Order o where o.id =:id")
     Optional<Order> findByIdForUpdate(@Param("id") Long id);
 
-    Page<Order> findByStatusIn(List<OrderStatus> orderStatuses, Pageable pageable);
+    Page<Order> findByStatusInAndUserId(List<OrderStatus> orderStatuses, Long userId, Pageable pageable);
+
 
     List<Order> findByUserId(Long userId);
 }

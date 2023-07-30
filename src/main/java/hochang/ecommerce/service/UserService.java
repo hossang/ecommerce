@@ -53,9 +53,10 @@ public class UserService implements UserDetailsService {
     public Long modifyEmailAndPhone(UserRegistration userRegistration) {
         User user = userRepository.findByUsername(userRegistration.getUsername());
         log.info("user.getId() = {}", user.getId());
-        if (!encoder.matches(userRegistration.getPassword(), user.getPassword())) { //리팩토링
+        if (!encoder.matches(userRegistration.getPassword(), user.getPassword())) { 
             return null;
         }
+        
         user.modifyProfile(userRegistration.getEmail(), userRegistration.getPhone());
         log.info("user.getId() = {}", user.getId());
         log.info("user.getEmail() = {}", user.getEmail());
@@ -65,23 +66,26 @@ public class UserService implements UserDetailsService {
 
     public Page<BoardUser> findBoardUsers(Pageable pageable) {
         Page<User> users = userRepository.findAll(pageable);
-        Page<BoardUser> boardUsers = users.map(o -> toBoardUser(o));
-        return boardUsers;
+        return users.map(this::toBoardUser);
     }
 
     @Transactional
     public void removeUser(String username) { //유저 삭제할 때 참조무결성 위반 조심하기
         User user = userRepository.findByUsername(username);
-        Optional<Order> byStatusOrder = orderRepository.findByUserAndStatus(user, OrderStatus.ORDER);
-        if (byStatusOrder.isPresent()) {
-            byStatusOrder.get().restoreItem(); //동시성 제어가 필요하다
-        }
+        removeItemsInCart(user);
 
         List<Order> byUsersIdOrders = orderRepository.findByUserId(user.getId());
         if (!byUsersIdOrders.isEmpty()) {
             orderRepository.deleteAll(byUsersIdOrders);
         }
         userRepository.delete(user);
+    }
+
+    private void removeItemsInCart(User user) {
+        Optional<Order> orderInCart = orderRepository.findByUserAndStatus(user, OrderStatus.ORDER);
+        if (orderInCart.isPresent()) {
+            orderInCart.get().restoreItem(); //동시성 제어가 필요하다
+        }
     }
 
     @Override
@@ -109,10 +113,8 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    //객체 매핑 메서드
-
     private User toUser(UserRegistration userRegistration, Role role) {
-        User user = User.builder().username(userRegistration.getUsername())
+        return User.builder().username(userRegistration.getUsername())
                 .password(encoder.encode(userRegistration.getPassword()))
                 .name(userRegistration.getName())
                 .birthDate(userRegistration.getBirthDate())
@@ -120,7 +122,6 @@ public class UserService implements UserDetailsService {
                 .phone(userRegistration.getPhone())
                 .role(role)
                 .build();
-        return user;
     }
 
     private UserRegistration toUserForm(User user) {

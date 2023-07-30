@@ -32,8 +32,9 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping("/admins/{username}/items")
-    public String itemList(@PathVariable String username
-            , @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable, Model model) {
+    public String itemList(@PathVariable String username,
+                           @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+                           Model model) {
         Page<BoardItem> boardItems = itemService.findBoardItems(pageable);
         int nowPage = boardItems.getPageable().getPageNumber() + 1;
         int startPage = Math.max(1, nowPage - 4);
@@ -50,19 +51,20 @@ public class ItemController {
     }
 
     @GetMapping("/admins/{username}/items/register")
-    public String itemRegistrationFormCreate(@PathVariable String username, ItemRegistration itemRegistration
-            , Model model) {
+    public String itemRegistrationFormCreate(@PathVariable String username, ItemRegistration itemRegistration,
+                                             Model model) {
         model.addAttribute("username", username);
+        model.addAttribute("itemRegistration", itemRegistration);
         return "admins/itemRegistration";
     }
 
     @PostMapping("/admins/{username}/items/register")
-    public String itemRegistrationCreate(@PathVariable String username
-            , @Valid ItemRegistration itemRegistration, BindingResult bindingResult) throws IOException {
+    public String itemRegistrationCreate(@PathVariable String username, @Valid ItemRegistration itemRegistration,
+                                         BindingResult bindingResult) throws IOException {
         if (bindingResult.hasErrors()) {
             return "admins/itemRegistration";
         }
-        Long itemId = itemService.save(itemRegistration);
+        itemService.save(itemRegistration);
         return "redirect:/admins/{username}/items";
     }
 
@@ -77,8 +79,7 @@ public class ItemController {
     }
 
     @GetMapping("/admins/{username}/items/{id}/modify")
-    public String itemRegistrationFormModify(@PathVariable String username
-            ,@PathVariable Long id, Model model) {
+    public String itemRegistrationFormModify(@PathVariable String username, @PathVariable Long id, Model model) {
         ItemRegistration itemRegistration = itemService.findItemRegistration(id);
         model.addAttribute("username", username);
         model.addAttribute("itemRegistration", itemRegistration);
@@ -86,8 +87,9 @@ public class ItemController {
     }
 
     @PostMapping("/admins/{username}/items/{id}/modify")
-    public String itemRegistrationModify(@PathVariable String username, @PathVariable Long id
-            , @Valid ItemRegistration itemRegistration, BindingResult bindingResult) throws IOException {
+    public String itemRegistrationModify(@PathVariable String username, @PathVariable Long id,
+                                         @Valid ItemRegistration itemRegistration,
+                                         BindingResult bindingResult) throws IOException {
         if (bindingResult.hasErrors()) {
             return "admins/itemModification";
         }

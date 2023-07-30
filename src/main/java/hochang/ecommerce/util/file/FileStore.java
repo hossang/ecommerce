@@ -34,6 +34,7 @@ public class FileStore {
         BufferedImage bufferedImage = ImageIO.read(multipartFile.getInputStream());
         bufferedImage = resizeImage(bufferedImage, TARGET_WIDTH, TARGET_HEIGHT);
         Path filePath = Path.of(getFullPath(storeFileName));
+
         ImageIO.write(bufferedImage, "jpg", Files.newOutputStream(filePath));
         return new UploadFile(originalFilename, storeFileName);
     }

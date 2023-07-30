@@ -16,9 +16,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -37,47 +38,50 @@ public class ItemService {
 
     public Page<BoardItem> findBoardItems(Pageable pageable) {
         Page<Item> itemPage = itemRepository.findAll(pageable);
-        Page<BoardItem> boardItems = itemPage.map(o -> toBoardItem(o));
-        return boardItems;
+        return itemPage.map(this::toBoardItem);
     }
 
     public Page<MainItem> findMainItem(Pageable pageable) {
         Page<Item> itemPage = itemRepository.findAll(pageable);
-        Page<MainItem> mainItems = itemPage.map(o -> toMainItem(o));
-        return mainItems;
+        return itemPage.map(this::toMainItem);
     }
 
     @Transactional
     public BulletinItem findBulletinItem(Long itemId) {
-        Item item = itemRepository.findByIdForUpdate(itemId).get(); //동시성 제어가 필요하다
+        Item item = itemRepository.findByIdForUpdate(itemId)
+                .orElseThrow(EntityNotFoundException::new); //동시성 제어가 필요하다
         item.addViews();
         return toBulletinItem(item);
     }
 
     public ItemRegistration findItemRegistration(Long itemId) {
-        Item item = itemRepository.findById(itemId).get();
+        Item item = itemRepository.findById(itemId).orElseThrow(EntityNotFoundException::new);
         return toItemRegistration(item);
     }
 
     @Transactional
     public void modifyItem(ItemRegistration itemRegistration) throws IOException {
         String originalFilename = itemRegistration.getImageFile().getOriginalFilename();
-        Item item = itemRepository.findById(itemRegistration.getId()).get();
-        if (originalFilename.equals(item.getUploadFileName())) {
+
+        Item item = itemRepository.findById(itemRegistration.getId()).orElseThrow(EntityNotFoundException::new);
+        if (isImageNameSamePreviousImageName(originalFilename, item)) {
             item.modifyItem(itemRegistration);
             return;
         }
+
         UploadFile uploadFile = fileStore.storeFile(itemRegistration.getImageFile());
         fileStore.deleteFile(item.getStoreFileName());
         item.modifyItem(itemRegistration, uploadFile);
     }
 
-    //
     public Resource getImage(String filename) throws MalformedURLException {
         return new UrlResource("file:" + fileStore.getFullPath(filename));
     }
-    
-    //객체 매핑 메서드
+
+    private static boolean isImageNameSamePreviousImageName(String originalFilename, Item item) {
+        return originalFilename != null && originalFilename.equals(item.getUploadFileName());
+    }
+
     private ItemRegistration toItemRegistration(Item item) {
         ItemRegistration itemRegistration = new ItemRegistration();
         itemRegistration.setId(item.getId());

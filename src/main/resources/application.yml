@@ -18,7 +18,7 @@ spring:
   jpa:
     hibernate:
       #데이터베이스 초기화 전략
-      ddl-auto: validate
+      ddl-auto: none
     properties:
       hibernate:
         #실행되는 쿼리 콘솔 출력
@@ -30,6 +30,7 @@ spring:
     multipart:
       max-file-size: 20MB
       max-request-size: 100MB
+
 logging.level:
   org.hibernate.SQL: debug
 # org.hibernate.type: trace
