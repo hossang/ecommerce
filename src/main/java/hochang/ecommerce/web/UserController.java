@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
@@ -99,13 +98,5 @@ public class UserController {
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
         return "admins/userList";
-    }
-
-    @ExceptionHandler(IllegalStateException.class)
-    public String signUpDuplicateUser(IllegalStateException illegalStateException, RedirectAttributes redirectAttributes) {
-        String errorMessage = illegalStateException.getMessage();
-        log.info("errorMessage : {}", errorMessage);
-        redirectAttributes.addAttribute("errorMessage", errorMessage);
-        return "redirect:/sign-up";
     }
 }

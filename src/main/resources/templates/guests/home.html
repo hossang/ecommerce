@@ -3,89 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <title>Shopping Mall</title>
-    <link rel="stylesheet" href="/css/bootstrap.css">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
 </head>
 
 <body>
     <!-- 헤더 -->
-    <div th:replace="~{fragment/bodyHeader :: guestHeader}"></div>
+    <div th:if="${username==null}">
+        <header th:replace="~{fragment/bodyHeader :: guestHeader}"></header>
+    </div>
+    <div th:unless="${username==null}">
+        <header th:replace="~{fragment/bodyHeader :: userAdinHeader(${username})}"></header>
+    </div>
 
     <!-- 메인 섹션 -->
     <main style="padding-top: 20px; padding-bottom: 20px;">
-        <!--<section class="jumbotron text-center">
+        <section class="jumbotron text-center">
             <div class="container">
                 <h1>Welcome to our Shopping Mall</h1>
                 <p>We have a wide selection of products for you to choose from.</p>
-                <a href="#" class="btn btn-primary">Shop Now</a>
             </div>
-        </section>-->
-
-        <div id="carouselExampleIndicators" class="carousel slide">
-            <div class="carousel-indicators">
-                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
-            </div>
-            <div class="carousel-inner">
-                <div class="carousel-item active">
-                    <img src="..." class="d-block w-100" alt="...">
-                </div>
-                <div class="carousel-item">
-                    <img src="..." class="d-block w-100" alt="...">
-                </div>
-                <div class="carousel-item">
-                    <img src="..." class="d-block w-100" alt="...">
-                </div>
-            </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Next</span>
-            </button>
-        </div>
+        </section>
 
         <section class="container">
             <div class="row">
-                <div class="col-lg-4">
-                    <div class="card">
-                        <img src="image1.jpg" class="card-img-top" alt="Image 1">
-                        <div class="card-body">
-                            <h5 class="card-title">Product 1</h5>
-                            <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                            <a href="#" class="btn btn-primary">View Details</a>
+                <th:block th:each="mainItem : ${mainItems}">
+                    <div class="col-lg-3">
+                        <div class="card">
+                            <img th:src="|/images/${mainItem.storeFileName}|"  class="img-fluid">
+                            <div class="card-body">
+                                <h5 class="card-title" th:text="${mainItem.name}"></h5>
+                                <p class="card-text" th:text="${mainItem.price + '원'}"></p>
+                                <a th:href="@{/items/{id}(id=${mainItem.id})}" class="btn btn-primary">View Details</a>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="card">
-                        <img src="image2.jpg" class="card-img-top" alt="Image 2">
-                        <div class="card-body">
-                            <h5 class="card-title">Product 2</h5>
-                            <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                            <a href="#" class="btn btn-primary">View Details</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="card">
-                        <img src="image3.jpg" class="card-img-top" alt="Image 3">
-                        <div class="card-body">
-                            <h5 class="card-title">Product 3</h5>
-                            <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                            <a href="#" class="btn btn-primary">View Details</a>
-                        </div>
-                    </div>
-                </div>
+                </th:block>
             </div>
         </section>
     </main>
 
+    <div class="pagination justify-content-center">
+        <th:block th:each="page : ${#numbers.sequence(startPage, endPage)}">
+            <a th:if="${page != nowPage && !mainItems.isEmpty()}" th:href="@{/(page=${page - 1})}" class="page-link" th:text="${page}"></a>
+            <strong th:if="${page == nowPage}" th:text="${page}" class="page-link" style="color: red"></strong>
+        </th:block>
+    </div>
 <!-- 푸터 -->
 <div th:replace="~{fragment/bodyFooter :: footer}"></div>
 
-<script src="/js/bootstrap.bundle.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

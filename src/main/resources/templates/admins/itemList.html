@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>상품 목록</title>
-    <link rel="stylesheet" href="/css/bootstrap.css">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
 </head>
 <body>
     <!-- 헤더 -->
@@ -17,8 +17,8 @@
                 <th>번호</th>
                 <th>제목</th>
                 <th>생성 날짜</th>
+                <th>조회수</th>
                 <th>수정</th>
-                <th>삭제</th>
             </tr>
             </thead>
             <tbody>
@@ -30,11 +30,9 @@
                     <a th:href="@{/items/{id}(id=${boardItem.id})}" th:text="${boardItem.name}"></a>
                 </td>
                 <td th:text="${boardItem.createdDate}"></td>
+                <td th:text="${boardItem.views}"></td>
                 <td>
                     <a th:href="@{/admins/{username}/items/{id}/modify(username=${username}, id=${boardItem.id})}">수정</a>
-                </td>
-                <td>
-                    <a th:href="@{/admins/{username}/items/{id}/remove(username=${username}, id=${boardItem.id})}">삭제</a>
                 </td>
             </tr>
             </tbody>
@@ -42,7 +40,7 @@
 
         <div class="pagination justify-content-center">
             <th:block th:each="page : ${#numbers.sequence(startPage, endPage)}">
-                <a th:if="${page != nowPage}" th:href="@{/admins/{username}/items(username=${username}, page=${page - 1})}" class="page-link" th:text="${page}"></a>
+                <a th:if="${page != nowPage && !boardItems.isEmpty()}" th:href="@{/admins/{username}/items(username=${username}, page=${page - 1})}" class="page-link" th:text="${page}"></a>
                 <strong th:if="${page == nowPage}" th:text="${page}" class="page-link" style="color: red"></strong>
             </th:block>
         </div>
@@ -52,6 +50,6 @@
     <!-- 푸터 -->
     <div th:replace="~{fragment/bodyFooter :: footer}"></div>
 
-    <script src="/js/bootstrap.bundle.js"></script>
+    <script src="/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

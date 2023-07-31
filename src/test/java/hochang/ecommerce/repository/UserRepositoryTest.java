@@ -1,5 +1,6 @@
 package hochang.ecommerce.repository;
 
+import hochang.ecommerce.domain.Role;
 import hochang.ecommerce.domain.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,7 @@ class UserRepositoryTest {
                 .birthDate(LocalDate.of(1234, 12, 1))
                 .email("adsf@asdf.com")
                 .phone("12345678912")
+                .role(Role.USER)
                 .build();
 
         userRepository.save(user);

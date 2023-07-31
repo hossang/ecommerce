@@ -1,10 +1,12 @@
 package hochang.ecommerce.service;
 
+import hochang.ecommerce.domain.Order;
+import hochang.ecommerce.domain.OrderStatus;
 import hochang.ecommerce.domain.Role;
 import hochang.ecommerce.domain.User;
 import hochang.ecommerce.dto.BoardUser;
-import hochang.ecommerce.dto.SignIn;
 import hochang.ecommerce.dto.UserRegistration;
+import hochang.ecommerce.repository.OrderRepository;
 import hochang.ecommerce.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 import static org.springframework.security.core.userdetails.User.*;
 
@@ -26,6 +29,7 @@ import static org.springframework.security.core.userdetails.User.*;
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
     private final BCryptPasswordEncoder encoder;
 
     @Transactional
@@ -49,9 +53,10 @@ public class UserService implements UserDetailsService {
     public Long modifyEmailAndPhone(UserRegistration userRegistration) {
         User user = userRepository.findByUsername(userRegistration.getUsername());
         log.info("user.getId() = {}", user.getId());
-        if (!encoder.matches(userRegistration.getPassword(), user.getPassword())) { //리팩토링
+        if (!encoder.matches(userRegistration.getPassword(), user.getPassword())) { 
             return null;
         }
+        
         user.modifyProfile(userRegistration.getEmail(), userRegistration.getPhone());
         log.info("user.getId() = {}", user.getId());
         log.info("user.getEmail() = {}", user.getEmail());
@@ -61,15 +66,26 @@ public class UserService implements UserDetailsService {
 
     public Page<BoardUser> findBoardUsers(Pageable pageable) {
         Page<User> users = userRepository.findAll(pageable);
-        Page<BoardUser> boardUsers = users.map(o -> toBoardUser(o));
-        return boardUsers;
+        return users.map(this::toBoardUser);
     }
 
     @Transactional
-    public void removeUser(String username) {
+    public void removeUser(String username) { //유저 삭제할 때 참조무결성 위반 조심하기
         User user = userRepository.findByUsername(username);
-        //+주문과 주소도 삭제해주기
+        removeItemsInCart(user);
+
+        List<Order> byUsersIdOrders = orderRepository.findByUserId(user.getId());
+        if (!byUsersIdOrders.isEmpty()) {
+            orderRepository.deleteAll(byUsersIdOrders);
+        }
         userRepository.delete(user);
+    }
+
+    private void removeItemsInCart(User user) {
+        Optional<Order> orderInCart = orderRepository.findByUserAndStatus(user, OrderStatus.ORDER);
+        if (orderInCart.isPresent()) {
+            orderInCart.get().restoreItem(); //동시성 제어가 필요하다
+        }
     }
 
     @Override
@@ -93,12 +109,12 @@ public class UserService implements UserDetailsService {
     private void validateDuplicateUser(User user) {
         User findUser = userRepository.findByUsername(user.getUsername());
         if (findUser != null) {
-            throw new IllegalStateException("이미 존재하는 회원입니다.");
+            throw new IllegalStateException();
         }
     }
 
     private User toUser(UserRegistration userRegistration, Role role) {
-        User user = User.builder().username(userRegistration.getUsername())
+        return User.builder().username(userRegistration.getUsername())
                 .password(encoder.encode(userRegistration.getPassword()))
                 .name(userRegistration.getName())
                 .birthDate(userRegistration.getBirthDate())
@@ -106,7 +122,6 @@ public class UserService implements UserDetailsService {
                 .phone(userRegistration.getPhone())
                 .role(role)
                 .build();
-        return user;
     }
 
     private UserRegistration toUserForm(User user) {

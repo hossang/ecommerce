@@ -25,14 +25,14 @@ import java.util.List;
 @Getter
 @Table(name = "orders")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Order extends BaseTimeEntity {
+public class Order extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "orders_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "users_id")
     private User user;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -71,6 +71,10 @@ public class Order extends BaseTimeEntity {
 
     public void cancelOrder() {
         this.status = OrderStatus.CANCEL;
+        restoreItem();
+    }
+
+    public void restoreItem() {
         for (OrderLine orderLine : orderLines) {
             orderLine.getItem().addCount(orderLine.getCount());
         }

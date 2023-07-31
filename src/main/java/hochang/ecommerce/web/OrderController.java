@@ -13,14 +13,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,13 +29,13 @@ public class OrderController {
     private final OrderService orderService;
 
     @GetMapping("/users/{username}/orders/cart")
-    public String orderLineList(@PathVariable String username, @RequestParam(required = false) Long itemId
-            , @RequestParam(required = false) Integer quantity, Model model) {
+    public String orderLineList(@PathVariable String username, @RequestParam(required = false) Long itemId,
+                                @RequestParam(required = false) Integer quantity, Model model) {
         Optional<Order> optionalOrder = orderService.findByUserAndStatus(username);
         if (!optionalOrder.isPresent() && itemId == null && quantity == null) {
             return "users/myEmptyCart";
         }
-        Order order = optionalOrder.get();
+        Order order = optionalOrder.orElseThrow(EntityNotFoundException::new);
         List<OrderItem> orderItems = orderService.findOrderItems(order.getOrderLines());
         model.addAttribute("username", username);
         model.addAttribute("id", order.getId());
@@ -46,10 +44,11 @@ public class OrderController {
     }
 
     @PostMapping("/users/{username}/orders/cart")
-    public String orderLineCreate(@PathVariable String username, @RequestParam(required = false) Long itemId
-            , @RequestParam(required = false) Integer quantity) {
-        Optional<Order> optionalOrder = orderService.findByUserAndStatus(username);
-        Order order = getOrder(username, itemId, quantity, optionalOrder);
+    public String orderLineCreate(@PathVariable String username, @RequestParam(required = false) Long itemId,
+                                  @RequestParam(required = false) Integer quantity) {
+        if (itemId != null && quantity != null) {
+            orderService.order(username, itemId, quantity);
+        }
 
         return "redirect:/users/{username}/orders/cart";
     }
@@ -60,7 +59,7 @@ public class OrderController {
         if (!optionalOrder.isPresent()) {
             return "users/myEmptyCart";
         }
-        Order order = optionalOrder.get();
+        Order order = optionalOrder.orElseThrow(EntityNotFoundException::new);
         model.addAttribute("totalPrice", order.getTotalPrice());
         List<OrderItem> orderItems = orderService.findOrderItems(order.getOrderLines());
         model.addAttribute("orderItems", orderItems);
@@ -69,15 +68,16 @@ public class OrderController {
 
     @PostMapping("/users/{username}/orders/{id}/create")
     public String orderCreate(@PathVariable String username, @PathVariable Long id) {
-        Order order = orderService.findByUserAndStatus(username).get();
+        Order order = orderService.findByUserAndStatus(username).orElseThrow(EntityNotFoundException::new);
         orderService.completeOrder(order);
         return "redirect:/users/{username}/orders";
     }
 
     @GetMapping("/users/{username}/orders")
-    public String orderList(@PathVariable String username
-            , @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable, Model model) {
-        Page<BoardOrder> boardOrders = orderService.findBoardOrders(pageable);
+    public String orderList(@PathVariable String username,
+                            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+                            Model model) {
+        Page<BoardOrder> boardOrders = orderService.findBoardOrders(pageable, username);
         int nowPage = boardOrders.getPageable().getPageNumber() + 1;
         int startPage = Math.max(1, nowPage - 4);
         int endPage = Math.min(boardOrders.getTotalPages(),nowPage + 5);
@@ -93,7 +93,7 @@ public class OrderController {
     @GetMapping("/users/{username}/orders/{id}")
     public String orderDetail(@PathVariable String username, @PathVariable Long id, Model model) {
         BoardOrder boardOrder = orderService.findBoardOrder(id);
-        List<OrderLine> orderLines = orderService.findOrder(id).getOrderLines();
+        List<OrderLine> orderLines = orderService.findOrderLines(id);
         List<OrderItem> orderItems = orderService.findOrderItems(orderLines);
         model.addAttribute("boardOrder", boardOrder);
         model.addAttribute("orderItems", orderItems);
@@ -102,30 +102,7 @@ public class OrderController {
 
     @PostMapping("/users/{username}/orders/{id}/cancel")
     public String orderCancel(@PathVariable String username, @PathVariable Long id) {
-        Order order = orderService.findOrder(id);
-        orderService.cancelOrder(order);
+        orderService.cancelOrder(id);
         return "redirect:/users/{username}/orders";
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public String outOfStock(IllegalArgumentException illegalArgumentException, HttpServletRequest request
-            , RedirectAttributes redirectAttributes) {
-        String referer = request.getHeader("Referer");
-        log.info("referer: {}", referer);
-        if (referer == null) {
-            referer = "/";
-        }
-        redirectAttributes.addAttribute("errorMessage", illegalArgumentException.getMessage());
-        return "redirect:" + referer;
-    }
-
-    private Order getOrder(String username, Long itemId, Integer quantity, Optional<Order> optionalOrder) {
-        if (!optionalOrder.isPresent()) {
-            return orderService.createOrder(username, itemId, quantity);
-        }
-        if (itemId == null && quantity == null) {
-            return optionalOrder.get();
-        }
-        return orderService.addOrderLine(optionalOrder.get(), itemId, quantity);
     }
 }

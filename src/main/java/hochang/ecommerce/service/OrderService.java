@@ -18,45 +18,31 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 
 @Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class OrderService {
+    public static final int COMMA = 2;
+    public static final int BLANK = 1;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
 
-    //
     @Transactional
-    public Order createOrder(String username, Long itemId, int quantity) {
-        User user = userRepository.findByUsername(username);
-        OrderLine orderLine = createOrderLine(itemId, quantity);
-        Order order = Order.builder()
-                .user(user)
-                .orderLine(orderLine)
-                .build();
-
-        return orderRepository.save(order);
-    }
-
-    @Transactional
-    public Order addOrderLine(Order order, Long itemId, int quantity) {
-        for (OrderLine orderLine : order.getOrderLines()) {
-            if (orderLine.getItem().getId().equals(itemId)) {
-                orderLine.modifyCount(quantity);
-                order.calculateTotalPrice();
-                return order;
-            }
+    public void order(String username, Long itemId, Integer quantity) {
+        Optional<Order> optionalOrder = findByUserAndStatus(username);
+        if (!optionalOrder.isPresent()) {
+            createOrder(username, itemId, quantity);
+            return;
         }
-        OrderLine orderLine = createOrderLine(itemId, quantity);
-        order.addOrderLine(orderLine);
-        order.calculateTotalPrice();
-        return order;
+        addOrderLineInOrder(optionalOrder.orElseThrow(EntityNotFoundException::new), itemId, quantity);
     }
 
     @Transactional
@@ -65,7 +51,9 @@ public class OrderService {
     }
 
     @Transactional
-    public void cancelOrder(Order order) {
+    public void cancelOrder(Long id) {
+        //동시성 재어 필요
+        Order order = orderRepository.findByIdForUpdate(id).orElseThrow(EntityNotFoundException::new);
         order.cancelOrder();
     }
 
@@ -82,35 +70,70 @@ public class OrderService {
         return orderItems;
     }
 
-    public Page<BoardOrder> findBoardOrders(Pageable pageable) {
-        Page<Order> orderPage = orderRepository.findByStatusIn(List.of(OrderStatus.COMPLETE, OrderStatus.CANCEL), pageable);
-        Page<BoardOrder> boardOrders = orderPage.map(o -> toBoardOrder(o));
-        return boardOrders;
+    public Page<BoardOrder> findBoardOrders(Pageable pageable, String username) {
+        User user = userRepository.findByUsername(username);
+        Page<Order> orderPage = orderRepository.findByStatusInAndUserId(List.of(OrderStatus.COMPLETE, OrderStatus.CANCEL),
+                user.getId(), pageable);
+        return orderPage.map(this::toBoardOrder);
     }
 
     public BoardOrder findBoardOrder(Long id) {
-        Order order = findOrder(id);
-        BoardOrder boardOrder = toBoardOrder(order);
-        return boardOrder;
+        Order order = orderRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        return toBoardOrder(order);
     }
 
-    public Order findOrder(Long id) {
-        return orderRepository.findById(id).get();
+    public List<OrderLine> findOrderLines(Long id) {
+        Order order = orderRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        return order.getOrderLines();
     }
 
-    //
+    private Order createOrder(String username, Long itemId, int quantity) {
+        User user = userRepository.findByUsername(username);
+        OrderLine orderLine = createOrderLine(itemId, quantity);
+        Order order = Order.builder()
+                .user(user)
+                .orderLine(orderLine)
+                .build();
+
+        return orderRepository.save(order);
+    }
+
+    private Order addOrderLineInOrder(Order order, Long itemId, int quantity) {
+        for (OrderLine orderLine : order.getOrderLines()) {
+            if (isItemInOrderLine(itemId, orderLine)) {
+                orderLine.modifyCount(quantity); //동시성 제어가 필요하다
+                order.calculateTotalPrice();
+                return order;
+            }
+        }
+
+        OrderLine orderLine = createOrderLine(itemId, quantity);
+        order.addOrderLine(orderLine);
+        order.calculateTotalPrice();
+        return order;
+    }
 
     private OrderLine createOrderLine(Long itemId, int quantity) {
-        Optional<Item> optionalItem = itemRepository.findById(itemId);
-        Item item = optionalItem.get();
+        Item item = itemRepository.findById(itemId).orElseThrow(EntityNotFoundException::new);
         OrderLine orderLine = OrderLine.builder()
                 .item(item)
-                .count(quantity)
+                .count(quantity) //동시성 제어가 필요하다
                 .build();
         return orderLine;
     }
 
-    //
+    private boolean isItemInOrderLine(Long itemId, OrderLine orderLine) {
+        return orderLine.getItem().getId().equals(itemId);
+    }
+
+    private String makeOrderLineNames(Order o) {
+        StringBuilder stringbuilder = new StringBuilder();
+        for (OrderLine orderLine : o.getOrderLines()) {
+            stringbuilder.append(orderLine.getItem().getName()).append(", ");
+        }
+        stringbuilder.delete(stringbuilder.length() - COMMA, stringbuilder.length() - BLANK);
+        return stringbuilder.toString();
+    }
 
     private OrderItem toOrderItem(OrderLine orderLine) {
         OrderItem orderItem = new OrderItem();
@@ -125,15 +148,8 @@ public class OrderService {
 
     private BoardOrder toBoardOrder(Order o) {
         BoardOrder boardOrder = new BoardOrder();
-        StringBuffer stringBuffer = new StringBuffer();
         boardOrder.setId(o.getId());
-
-        for (OrderLine orderLine : o.getOrderLines()) {
-            stringBuffer.append(orderLine.getItem().getName()).append(", ");
-        }
-        stringBuffer.delete(stringBuffer.length() - 2, stringBuffer.length() - 1);
-        boardOrder.setOrderLineNames(stringBuffer.toString());
-
+        boardOrder.setOrderLineNames(makeOrderLineNames(o));
         boardOrder.setOrderStatue(OrderStatusConstants.ORDER_STATUS_MAP.get(o.getStatus()));
         boardOrder.setTotalPrice(o.getTotalPrice());
         boardOrder.setCreateDate(o.getCreatedDate());

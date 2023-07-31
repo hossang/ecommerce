@@ -2,16 +2,15 @@ package hochang.ecommerce.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class BoardItem {
+public class MainItem {
     private Long id;
 
     private String name;
 
-    private LocalDateTime createdDate;
+    private long price;
 
-    private long views;
+    private String storeFileName;
 }

@@ -17,21 +17,30 @@ import java.io.IOException;
 @Slf4j
 public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        String username = authentication.getName();
-        log.info("authentication.getName() : {}", username);
-        HttpSession session = request.getSession();
-        session.setAttribute(SessionConst.SIGN_IN_USER, username);
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+                                        Authentication authentication) throws IOException, ServletException {
+        saveUsernameToSession(request, authentication);
 
-        // 이전 URL 가져오기
+        redirectToPreviousUrl(request, response, authentication);
+    }
+
+    private void redirectToPreviousUrl(HttpServletRequest request, HttpServletResponse response,
+                                       Authentication authentication) throws IOException, ServletException {
         RequestCache requestCache = new HttpSessionRequestCache();
         SavedRequest savedRequest = requestCache.getRequest(request, response);
         if (savedRequest != null) {
             String targetUrl = savedRequest.getRedirectUrl();
-            // 이전 URL로 리다이렉트
+            log.info("targetUrl : {}", targetUrl);
             getRedirectStrategy().sendRedirect(request, response, targetUrl);
         } else {
             super.onAuthenticationSuccess(request, response, authentication);
         }
+    }
+
+    private static void saveUsernameToSession(HttpServletRequest request, Authentication authentication) {
+        String username = authentication.getName();
+        log.info("authentication.getName() : {}", username);
+        HttpSession session = request.getSession();
+        session.setAttribute(SessionConst.SIGN_IN_USER, username);
     }
 }
