@@ -1,0 +1,4 @@
+[submodule "config"]
+	path = config
+	url = https://github.com/hossang/ecommerce-sub
+	branch = main
