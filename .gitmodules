@@ -1,0 +1,4 @@
+[submodule "src/main/ecommoerce-sub"]
+	path = src/main/ecommoerce-sub
+	url = https://github.com/hossang/ecommoerce-sub
+	branch = main
