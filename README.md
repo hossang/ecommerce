@@ -47,5 +47,13 @@
 |/admins/{username}/items/{id}/modify|Get||
 |/admins/{username}/items/{id}/modify|Post||
 ||||
-||||
-
+|/users/{username}/orders/cart|Get||
+|/users/{username}/orders/cart|Post||
+|/users/{username}/orders/{id}/create|Get||
+|/users/{username}/orders/{id}/create|Post||
+|/users/{username}/orders|Get||
+|/users/{username}/orders/{id}|Get||
+|/users/{username}/orders/{id}cancel|Post||
+<!--
+이미지 api도 넣어줘야 하나?
+-->
