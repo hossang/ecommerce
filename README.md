@@ -31,9 +31,21 @@
 |URL|Method|Description|
 |---|---|---|
 |/|Get|-|
-| | | |
+||||
+|/sign-up|Get||
+|/sign-up|Post||
+|/sign-in|Get||
+|/users/{username}/modify|Post||
+|/users/{username}/remove|Get||
+|/users/{username}/remove|Post||
+|/admins/{username}/users|Get||
+||||
+|/admins/{username}/items|Get||
+|/admins/{username}/items/register|Get||
+|/admins/{username}/items/register|Post||
+|/items/{id}|Get||
+|/admins/{username}/items/{id}/modify|Get||
+|/admins/{username}/items/{id}/modify|Post||
 ||||
 ||||
-||||
-||||
-||||
+
