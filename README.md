@@ -19,10 +19,11 @@
   + 인가되지 않은 사용자가 리소스에 접근하는 것을 막아야 한다
 
 + 주문 관리
+  + 상품의 재고가 있다면 회원은 아이템을 주문할 수 있다 
   + 주문 완료상태일 때, 주문 취소할 수 있다
  
 ## 3. 기술 스택
-자바, 스프링부트, JPA, MySQL, Redis
+자바17, 스프링부트, JPA, MySQL, Redis
 
 ## 4. ERD
 ![image](https://github.com/hossang/ecommerce/assets/60059710/0aec0e3a-2ae8-49eb-a347-4799bf268a4b)
