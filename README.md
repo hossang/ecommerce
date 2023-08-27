@@ -30,3 +30,4 @@
 ## 5. API 설계
 |URL|Method|Description|
 |---|---|---|
+|/|Get|-|
