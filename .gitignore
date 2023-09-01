@@ -40,3 +40,6 @@ out/
 src/main/resources/application-prod.yml
 src/main/resources/application-dev.yml
 src/test/resources/application-test.yml
+
+### init ###
+src/main/java/hochang/ecommerce/sample/

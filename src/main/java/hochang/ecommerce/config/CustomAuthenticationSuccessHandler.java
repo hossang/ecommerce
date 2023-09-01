@@ -32,9 +32,9 @@ public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             String targetUrl = savedRequest.getRedirectUrl();
             log.info("targetUrl : {}", targetUrl);
             getRedirectStrategy().sendRedirect(request, response, targetUrl);
-        } else {
-            super.onAuthenticationSuccess(request, response, authentication);
+            return;
         }
+        super.onAuthenticationSuccess(request, response, authentication);
     }
 
     private static void saveUsernameToSession(HttpServletRequest request, Authentication authentication) {
