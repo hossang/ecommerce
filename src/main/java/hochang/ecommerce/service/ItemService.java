@@ -6,20 +6,22 @@ import hochang.ecommerce.dto.BulletinItem;
 import hochang.ecommerce.dto.ItemRegistration;
 import hochang.ecommerce.dto.MainItem;
 import hochang.ecommerce.repository.ItemRepository;
-import hochang.ecommerce.util.file.FileStore;
+import hochang.ecommerce.util.file.S3FileStore;
 import hochang.ecommerce.util.file.UploadFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
 import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 
 @Slf4j
 @Service
@@ -27,7 +29,11 @@ import java.net.MalformedURLException;
 @RequiredArgsConstructor
 public class ItemService {
     private final ItemRepository itemRepository;
-    private final FileStore fileStore;
+    private final S3FileStore fileStore;
+    private final S3Client s3Client;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
 
     @Transactional
     public Long save(ItemRegistration itemRegistration) throws IOException {
@@ -70,12 +76,19 @@ public class ItemService {
         }
 
         UploadFile uploadFile = fileStore.storeFile(itemRegistration.getImageFile());
-        fileStore.deleteFile(item.getStoreFileName());
+        fileStore.deleteS3File(item.getStoreFileName());
         item.modifyItem(itemRegistration, uploadFile);
     }
 
-    public Resource getImage(String filename) throws MalformedURLException {
-        return new UrlResource("file:" + fileStore.getFullPath(filename));
+    public byte[] getImage(String filename) {
+        GetObjectRequest objectRequest = GetObjectRequest
+                .builder()
+                .key(fileStore.getS3FullPath(filename))
+                .bucket(bucket)
+                .build();
+
+        ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(objectRequest);
+        return objectBytes.asByteArray();
     }
 
     private static boolean isImageNameSamePreviousImageName(String originalFilename, Item item) {
