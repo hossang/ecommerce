@@ -37,7 +37,8 @@ public class OrderService {
 
     @Transactional
     public void order(String username, Long itemId, Integer quantity) {
-        Optional<Order> optionalOrder = findByUserAndStatus(username);
+        User user = userRepository.findByUsername(username);
+        Optional<Order> optionalOrder = orderRepository.findByUserAndStatusForUpdate(user, OrderStatus.ORDER);
         if (!optionalOrder.isPresent()) {
             createOrder(username, itemId, quantity);
             return;
@@ -52,12 +53,11 @@ public class OrderService {
 
     @Transactional
     public void cancelOrder(Long id) {
-        //동시성 재어 필요
+        //동시성 재어 필요하다
         Order order = orderRepository.findByIdForUpdate(id).orElseThrow(EntityNotFoundException::new);
         order.cancelOrder();
     }
 
-    @Transactional
     public Optional<Order> findByUserAndStatus(String username) {
         User user = userRepository.findByUsername(username);
         return orderRepository.findByUserAndStatus(user, OrderStatus.ORDER);
@@ -130,7 +130,7 @@ public class OrderService {
     private String makeOrderLineNames(Order o) {
         StringBuilder stringbuilder = new StringBuilder();
         for (OrderLine orderLine : o.getOrderLines()) {
-            stringbuilder.append(orderLine.getItem().getName()).append(", ");
+            stringbuilder.append(orderLine.getItem().getName()).append(", "); //N + 1
         }
         stringbuilder.delete(stringbuilder.length() - COMMA, stringbuilder.length() - BLANK);
         return stringbuilder.toString();
@@ -139,7 +139,7 @@ public class OrderService {
     private OrderItem toOrderItem(OrderLine orderLine) {
         OrderItem orderItem = new OrderItem();
         orderItem.setItemId(orderLine.getItem().getId());
-        orderItem.setName(orderLine.getItem().getName());
+        orderItem.setName(orderLine.getItem().getName()); //N + 1
         orderItem.setPrice(orderLine.getItem().getPrice());
         orderItem.setCount(orderLine.getCount());
         orderItem.setOrderPrice(orderLine.getOrderPrice());

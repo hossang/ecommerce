@@ -82,7 +82,7 @@ public class UserService implements UserDetailsService {
     }
 
     private void removeItemsInCart(User user) {
-        Optional<Order> orderInCart = orderRepository.findByUserAndStatus(user, OrderStatus.ORDER);
+        Optional<Order> orderInCart = orderRepository.findByUserAndStatusForUpdate(user, OrderStatus.ORDER);
         if (orderInCart.isPresent()) {
             orderInCart.get().restoreItem(); //동시성 제어가 필요하다
         }

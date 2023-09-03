@@ -16,6 +16,9 @@ import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select o from Order o where o.user=:user and o.status =:status")
+    Optional<Order> findByUserAndStatusForUpdate(@Param("user") User user, @Param("status") OrderStatus status);
+
     Optional<Order> findByUserAndStatus(User user, OrderStatus status);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
