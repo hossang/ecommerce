@@ -73,8 +73,8 @@ public class OrderService {
 
     public Page<BoardOrder> findBoardOrders(Pageable pageable, String username) {
         User user = userRepository.findByUsername(username);
-        Page<Order> orderPage = orderRepository.findByStatusInAndUserId(List.of(OrderStatus.COMPLETE, OrderStatus.CANCEL),
-                user.getId(), pageable);
+        Page<Order> orderPage = orderRepository.findByUserIdAndStatusIn(user.getId()
+                , List.of(OrderStatus.COMPLETE, OrderStatus.CANCEL), pageable);
         return orderPage.map(this::toBoardOrder);
     }
 
