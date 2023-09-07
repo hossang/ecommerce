@@ -19,12 +19,43 @@
   + 인가되지 않은 사용자가 리소스에 접근하는 것을 막아야 한다
 
 + 주문 관리
+  + 상품의 재고가 있다면 회원은 아이템을 주문할 수 있다 
   + 주문 완료상태일 때, 주문 취소할 수 있다
  
 ## 3. 기술 스택
-자바, 스프링부트, JPA, MySQL, Redis
+자바17, 스프링부트, JPA, MySQL, Redis
 
 ## 4. ERD
 ![image](https://github.com/hossang/ecommerce/assets/60059710/0aec0e3a-2ae8-49eb-a347-4799bf268a4b)
-
+<!--
 ## 5. API 설계
+|URL|Method|Description|
+|---|---|---|
+|/|Get|메인 화면 페이지|
+||||
+|/sign-up|Get|회원가입 페이지|
+|/sign-up|Post|회원가입|
+|/sign-in|Get|로그인 페이지|
+|/users/{username}/modify|Get|회원 정보 수정 페이지|
+|/users/{username}/modify|Post|회원 정보 수정|
+|/users/{username}/remove|Get|회원 삭제 페이지|
+|/users/{username}/remove|Post|회원 삭제|
+|/admins/{username}/users|Get|회원 리스트 조회|
+||||
+|/admins/{username}/items|Get|아이템 리스트 조회|
+|/admins/{username}/items/register|Get|아이템 등록 페이지|
+|/admins/{username}/items/register|Post|아이템 등록|
+|/items/{id}|Get|아이템 상세 페이지|
+|/admins/{username}/items/{id}/modify|Get|아이템 수정 페이지|
+|/admins/{username}/items/{id}/modify|Post|아이템 수정|
+||||
+|/users/{username}/orders/cart|Get|장바구니 페이지|
+|/users/{username}/orders/cart|Post|아이템 장바구니에 등록|
+|/users/{username}/orders/{id}/create|Get|결제 페이지|
+|/users/{username}/orders/{id}/create|Post|결제|
+|/users/{username}/orders|Get|주문 리스트 조회|
+|/users/{username}/orders/{id}|Get|상세 주문 페이지|
+|/users/{username}/orders/{id}cancel|Post|주문 취소|
+
+이미지 api도 넣어줘야 하나?
+-->
