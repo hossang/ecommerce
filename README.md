@@ -29,6 +29,7 @@
 ![image](https://github.com/hossang/ecommerce/assets/60059710/0aec0e3a-2ae8-49eb-a347-4799bf268a4b)
 
 ## 5. 화면
-![쇼핑몰  화면](https://github.com/hossang/ecommerce/assets/60059710/cf0cc7a0-5dd9-49bf-9453-10af8f782cdb)
+![쇼핑몰  화면](https://github.com/hossang/ecommerce/assets/60059710/c52810e2-720b-4574-8192-9eb517d08018)
+
 
 
