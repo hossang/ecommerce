@@ -23,13 +23,14 @@
   + 주문 완료상태일 때, 주문 취소할 수 있다
  
 ## 3. 기술 스택
-자바17, 스프링부트, JPA, MySQL, Redis
+자바17, 스프링부트, JPA, MySQL, Redis, AWS
 
 ## 4. ERD
 ![image](https://github.com/hossang/ecommerce/assets/60059710/0aec0e3a-2ae8-49eb-a347-4799bf268a4b)
 
 ## 5. 화면
-![쇼핑몰  화면](https://github.com/hossang/ecommerce/assets/60059710/c52810e2-720b-4574-8192-9eb517d08018)
+![쇼핑몰  화면](https://github.com/hossang/ecommerce/assets/60059710/6c171eee-b407-472f-a382-503a579a97ae)
+
 
 
 
