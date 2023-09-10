@@ -23,7 +23,7 @@
   + 주문 완료상태일 때, 주문 취소할 수 있다
  
 ## 3. 기술 스택
-자바17, 스프링부트, JPA, MySQL, Redis, AWS
+Java 17, Spring Boot, JPA, MySQL, Redis, AWS
 
 ## 4. ERD
 ![image](https://github.com/hossang/ecommerce/assets/60059710/0aec0e3a-2ae8-49eb-a347-4799bf268a4b)
@@ -31,6 +31,9 @@
 ## 5. 화면
 ![쇼핑몰  화면](https://github.com/hossang/ecommerce/assets/60059710/6c171eee-b407-472f-a382-503a579a97ae)
 
-
+## 6. 관심 사항
++ Lock을 통한 동시성 보장
++ BatchSize를 통한 N + 1 문제 해결
++ Redis를 사용해 상태정보를 웹 서버로부터 분리
 
 
