@@ -14,20 +14,27 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Lob;
+import javax.persistence.Table;
+import java.util.List;
 
 @Entity
 @Getter
 @DynamicInsert
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(indexes = @Index(name = "idx_views", columnList = "views"))
 public class Item extends BaseEntity {
-    public static final int ZERO = 0;
+    private static final int ZERO = 0;
+    private static final List<String> INSUFFICIENT_COUNT = List.of("재고가 부족합니다. ",
+            " 의 현재 보유 수량은 ", "개 입니다.");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "item_id")
     private Long id;
 
+    @Column(length = 40)
     private String name;
 
     private int count;
@@ -85,7 +92,8 @@ public class Item extends BaseEntity {
     }
 
     private String createExceptionMessage() {
-        return "재고가 부족합니다. " + this.name + " 의 현재 보유 수량은 " + this.count + "개 입니다.";
+        return INSUFFICIENT_COUNT.get(0) + this.name + INSUFFICIENT_COUNT.get(1)
+                + this.count + INSUFFICIENT_COUNT.get(2);
     }
 }
 

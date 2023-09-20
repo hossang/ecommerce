@@ -14,9 +14,10 @@ import javax.persistence.MappedSuperclass;
 @EntityListeners(AuditingEntityListener.class)
 public abstract class BaseEntity extends BaseTimeEntity {
     @CreatedBy
-    @Column(updatable = false)
+    @Column(updatable = false, length = 20)
     private String createdBy;
 
     @LastModifiedBy
+    @Column(length = 20)
     private String modifiedBy;
 }

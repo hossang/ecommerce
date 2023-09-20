@@ -40,6 +40,7 @@ public class Order extends BaseEntity {
     private List<OrderLine> orderLines = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 10)
     private OrderStatus status;
 
     private long totalPrice;

@@ -24,20 +24,24 @@ public class User extends BaseTimeEntity {
     @Column(name = "users_id")
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, length = 20)
     private String username; 
 
     private String password;
 
+    @Column(length = 10)
     private String name;
 
     private LocalDate birthDate;
 
+    @Column(length = 40)
     private String email;
 
+    @Column(length = 11)
     private String phone;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 5)
     private Role role;
 
     @Builder

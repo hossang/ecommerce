@@ -29,8 +29,9 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class OrderService {
-    public static final int COMMA = 2;
-    public static final int BLANK = 1;
+    private static final int COMMA = 2;
+    private static final int BLANK = 1;
+
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
