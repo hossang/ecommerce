@@ -14,7 +14,7 @@ import javax.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 
-public interface OrderRepository extends JpaRepository<Order, Long> {
+public interface OrderRepository extends JpaRepository<Order, Long>, OrderRepositoryCustom {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select o from Order o where o.user=:user and o.status =:status")
     Optional<Order> findByUserAndStatusForUpdate(@Param("user") User user, @Param("status") OrderStatus status);
@@ -24,8 +24,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select o from Order o where o.id =:id")
     Optional<Order> findByIdForUpdate(@Param("id") Long id);
-
-    Page<Order> findByUserIdAndStatusIn(Long userId, List<OrderStatus> orderStatuses, Pageable pageable);
 
     List<Order> findByUserId(Long userId);
 }

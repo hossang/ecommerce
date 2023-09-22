@@ -74,9 +74,7 @@ public class OrderController {
     }
 
     @GetMapping("/users/{username}/orders")
-    public String orderList(@PathVariable String username,
-                            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
-                            Model model) {
+    public String orderList(@PathVariable String username, @PageableDefault Pageable pageable, Model model) {
         Page<BoardOrder> boardOrders = orderService.findBoardOrders(pageable, username);
         int nowPage = boardOrders.getPageable().getPageNumber() + 1;
         int startPage = Math.max(1, nowPage - 4);

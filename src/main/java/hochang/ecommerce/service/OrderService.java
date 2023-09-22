@@ -74,7 +74,7 @@ public class OrderService {
 
     public Page<BoardOrder> findBoardOrders(Pageable pageable, String username) {
         User user = userRepository.findByUsername(username);
-        Page<Order> orderPage = orderRepository.findByUserIdAndStatusIn(user.getId()
+        Page<Order> orderPage = orderRepository.findOrdersWithCoveringIndex(user.getId()
                 , List.of(OrderStatus.COMPLETE, OrderStatus.CANCEL), pageable);
         return orderPage.map(this::toBoardOrder);
     }
