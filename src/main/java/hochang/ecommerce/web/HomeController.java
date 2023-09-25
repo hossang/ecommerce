@@ -22,7 +22,7 @@ public class HomeController {
     public String homePage(@SignIn String username,
                            @PageableDefault(sort = "views", direction = Sort.Direction.DESC, size = 8) Pageable pageable,
                            Model model) {
-        Page<MainItem> mainItems = itemService.findMainItem(pageable);
+        Page<MainItem> mainItems = itemService.findMainItems(pageable);
         int nowPage = mainItems.getPageable().getPageNumber() + 1;
         int startPage = Math.max(1, nowPage - 4);
         int endPage = Math.min(mainItems.getTotalPages(),nowPage + 5);

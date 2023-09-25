@@ -47,9 +47,8 @@ public class ItemService {
         return itemPage.map(this::toBoardItem);
     }
 
-    public Page<MainItem> findMainItem(Pageable pageable) {
-        Page<Item> itemPage = itemRepository.findAll(pageable);
-        return itemPage.map(this::toMainItem);
+    public Page<MainItem> findMainItems(Pageable pageable) {
+        return itemRepository.findMainItemsWithCoveringIndex(pageable);
     }
 
     @Transactional
@@ -133,14 +132,5 @@ public class ItemService {
         bulletinItem.setContents(item.getContents());
         bulletinItem.setStoreFileName(item.getStoreFileName());
         return bulletinItem;
-    }
-
-    private MainItem toMainItem(Item item) {
-        MainItem mainItem = new MainItem();
-        mainItem.setId(item.getId());
-        mainItem.setName(item.getName());
-        mainItem.setPrice(item.getPrice());
-        mainItem.setStoreFileName(item.getStoreFileName());
-        return mainItem;
     }
 }

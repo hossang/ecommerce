@@ -6,12 +6,14 @@ import hochang.ecommerce.domain.Order;
 import hochang.ecommerce.domain.OrderStatus;
 import hochang.ecommerce.domain.QOrder;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
@@ -38,11 +40,11 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
                 .orderBy(order.id.desc())
                 .fetch();
 
-        long total = jpaQueryFactory
-                .selectFrom(order)
+        Long total = jpaQueryFactory
+                .select(order.id.count())
+                .from(order)
                 .where(andBooleanExpression)
-                .fetch()
-                .size();
+                .fetchOne();
 
         return new PageImpl<>(orders, pageable, total);
     }

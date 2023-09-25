@@ -133,7 +133,9 @@ public class OrderService {
         for (OrderLine orderLine : o.getOrderLines()) {
             stringbuilder.append(orderLine.getItem().getName()).append(", "); //N + 1
         }
-        stringbuilder.delete(stringbuilder.length() - COMMA, stringbuilder.length() - BLANK);
+        if (!stringbuilder.isEmpty()) {
+            stringbuilder.delete(stringbuilder.length() - COMMA, stringbuilder.length() - BLANK);
+        }
         return stringbuilder.toString();
     }
 

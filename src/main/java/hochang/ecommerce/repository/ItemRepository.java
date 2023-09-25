@@ -12,7 +12,7 @@ import javax.persistence.LockModeType;
 import java.util.Optional;
 
 
-public interface ItemRepository extends JpaRepository<Item, Long> {
+public interface ItemRepository extends JpaRepository<Item, Long>, ItemRepositoryCustom {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select i from Item i where i.id =:id")
     Optional<Item> findByIdForUpdate(@Param("id") Long id);
