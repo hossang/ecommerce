@@ -83,10 +83,6 @@ public class Item extends BaseEntity {
         this.count = reducedCount;
     }
 
-    public void addViews() {
-        this.views++;
-    }
-
     public void addCount(int count) {
         this.count += count;
     }

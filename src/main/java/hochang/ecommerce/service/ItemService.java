@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import software.amazon.awssdk.core.ResponseBytes;
@@ -22,12 +23,17 @@ import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
 import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ItemService {
+    private static final ConcurrentMap<Long, Long> VIEWS_INCREMENT = new ConcurrentHashMap<>();
+    private static final Long ZERO = 0L;
+    private static final Long ONE = 1L;
     private final ItemRepository itemRepository;
     private final S3FileStore fileStore;
     private final S3Client s3Client;
@@ -51,11 +57,10 @@ public class ItemService {
         return itemRepository.findMainItemsWithCoveringIndex(pageable);
     }
 
-    @Transactional
     public BulletinItem findBulletinItem(Long itemId) {
-        Item item = itemRepository.findByIdForUpdate(itemId)
+        Item item = itemRepository.findById(itemId)
                 .orElseThrow(EntityNotFoundException::new); //동시성 제어가 필요하다
-        item.addViews();
+        VIEWS_INCREMENT.put(itemId, VIEWS_INCREMENT.getOrDefault(itemId, ZERO) + ONE);
         return toBulletinItem(item);
     }
 
@@ -88,6 +93,15 @@ public class ItemService {
 
         ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(objectRequest);
         return objectBytes.asByteArray();
+    }
+
+    @Transactional
+    @Scheduled(fixedRate = 3600000)
+    public void modifyViews() {
+        for (Long id : VIEWS_INCREMENT.keySet()) {
+            itemRepository.incrementViewsById(id, VIEWS_INCREMENT.get(id));
+        }
+        VIEWS_INCREMENT.clear();
     }
 
     private static boolean isImageNameSamePreviousImageName(String originalFilename, Item item) {
