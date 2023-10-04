@@ -7,7 +7,7 @@ import hochang.ecommerce.domain.OrderStatus;
 import hochang.ecommerce.domain.User;
 import hochang.ecommerce.dto.BoardOrder;
 import hochang.ecommerce.dto.OrderItem;
-import hochang.ecommerce.dto.OrderStatusConstants;
+import hochang.ecommerce.constants.OrderStatusConstants;
 import hochang.ecommerce.repository.ItemRepository;
 import hochang.ecommerce.repository.OrderRepository;
 import hochang.ecommerce.repository.UserRepository;
@@ -154,7 +154,7 @@ public class OrderService {
         BoardOrder boardOrder = new BoardOrder();
         boardOrder.setId(o.getId());
         boardOrder.setOrderLineNames(makeOrderLineNames(o));
-        boardOrder.setOrderStatue(OrderStatusConstants.ORDER_STATUS_MAP.get(o.getStatus()));
+        boardOrder.setOrderStatue(OrderStatusConstants.ORDER_STATUSES.get(o.getStatus()));
         boardOrder.setTotalPrice(o.getTotalPrice());
         boardOrder.setCreateDate(o.getCreatedDate());
         return boardOrder;

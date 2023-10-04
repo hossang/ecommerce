@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -53,10 +54,10 @@ public class UserService implements UserDetailsService {
     public Long modifyEmailAndPhone(UserRegistration userRegistration) {
         User user = userRepository.findByUsername(userRegistration.getUsername());
         log.info("user.getId() = {}", user.getId());
-        if (!encoder.matches(userRegistration.getPassword(), user.getPassword())) { 
+        if (!encoder.matches(userRegistration.getPassword(), user.getPassword())) {
             return null;
         }
-        
+
         user.modifyProfile(userRegistration.getEmail(), userRegistration.getPhone());
         log.info("user.getId() = {}", user.getId());
         log.info("user.getEmail() = {}", user.getEmail());
@@ -90,16 +91,13 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        log.info("loadUserByUsername() : {}", username);
-
         User user = userRepository.findByUsername(username);
 
         if (user == null) {
             throw new UsernameNotFoundException(username);
         }
-        log.info("loadUserByUsername() user.getPassword() : {}", user.getPassword());
 
-        return  builder()
+        return builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
                 .roles(user.getRole().toString())

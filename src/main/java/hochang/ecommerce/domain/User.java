@@ -1,9 +1,11 @@
 package hochang.ecommerce.domain;
 
+import hochang.ecommerce.constants.NumberConstants;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -13,6 +15,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.time.LocalDate;
+
+import static hochang.ecommerce.constants.NumberConstants.*;
 
 @Entity
 @Getter
@@ -24,24 +28,24 @@ public class User extends BaseTimeEntity {
     @Column(name = "users_id")
     private Long id;
 
-    @Column(unique = true, length = 20)
-    private String username; 
+    @Column(unique = true, length = INT_20)
+    private String username;
 
     private String password;
 
-    @Column(length = 10)
+    @Column(length = INT_10)
     private String name;
 
     private LocalDate birthDate;
 
-    @Column(length = 40)
+    @Column(length = INT_40)
     private String email;
 
-    @Column(length = 11)
+    @Column(length = INT_11)
     private String phone;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 5)
+    @Column(length = INT_5)
     private Role role;
 
     @Builder

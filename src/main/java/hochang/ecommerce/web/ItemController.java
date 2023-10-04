@@ -25,6 +25,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import javax.validation.Valid;
 import java.io.IOException;
 
+import static hochang.ecommerce.web.PageConstants.END_RANGE;
+import static hochang.ecommerce.web.PageConstants.PREVENTION_NEGATIVE_NUMBERS;
+import static hochang.ecommerce.web.PageConstants.PREVENTION_ZERO;
+import static hochang.ecommerce.web.PageConstants.START_RANGE;
+
 @Slf4j
 @Controller
 @RequiredArgsConstructor
@@ -36,9 +41,9 @@ public class ItemController {
                            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
                            Model model) {
         Page<BoardItem> boardItems = itemService.findBoardItems(pageable);
-        int nowPage = boardItems.getPageable().getPageNumber() + 1;
-        int startPage = Math.max(1, nowPage - 4);
-        int endPage = Math.min(boardItems.getTotalPages(),nowPage + 5);
+        int nowPage = boardItems.getPageable().getPageNumber() + PREVENTION_ZERO;
+        int startPage = Math.max(PREVENTION_NEGATIVE_NUMBERS, nowPage - START_RANGE);
+        int endPage = Math.min(boardItems.getTotalPages(), nowPage + END_RANGE);
 
         log.info("nowPage : {}", nowPage);
         model.addAttribute("username", username);

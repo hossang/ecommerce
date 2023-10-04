@@ -1,6 +1,6 @@
 package hochang.ecommerce.config;
 
-import hochang.ecommerce.web.SessionConst;
+import hochang.ecommerce.constants.SessionConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -41,6 +41,6 @@ public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String username = authentication.getName();
         log.info("authentication.getName() : {}", username);
         HttpSession session = request.getSession();
-        session.setAttribute(SessionConst.SIGN_IN_USER, username);
+        session.setAttribute(SessionConstant.SIGN_IN_USER, username);
     }
 }

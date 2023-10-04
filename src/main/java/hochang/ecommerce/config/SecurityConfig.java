@@ -19,17 +19,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .formLogin()
+                .formLogin()
                 .loginPage("/sign-in")
                 .successHandler(customAuthenticationSuccessHandler())
                 .usernameParameter("username")
                 .failureUrl("/sign-in?error=true")
                 .and()
-            .logout()
+                .logout()
                 .logoutRequestMatcher(new AntPathRequestMatcher("/users/*/sign-out"))
                 .logoutSuccessUrl("/");
         http
-            .authorizeRequests()
+                .authorizeRequests()
                 .antMatchers("/admins/**").hasRole("ADMIN")
                 .antMatchers("/users/**").hasAnyRole("ADMIN", "USER")
                 .anyRequest().permitAll();

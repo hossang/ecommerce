@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
         if (referer == null) {
             referer = "/";
         }
-        redirectAttributes.addAttribute(ERROR_MESSAGE, "파일 사이즈가 "+ FILE_SIZE +"MB 미만이어" +
+        redirectAttributes.addAttribute(ERROR_MESSAGE, "파일 사이즈가 " + FILE_SIZE + "MB 미만이어" +
                 "야 합니다.");
         return "redirect:" + referer;
     }

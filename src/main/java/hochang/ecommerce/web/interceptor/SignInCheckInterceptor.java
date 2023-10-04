@@ -1,6 +1,6 @@
 package hochang.ecommerce.web.interceptor;
 
-import hochang.ecommerce.web.SessionConst;
+import hochang.ecommerce.constants.SessionConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -18,7 +18,7 @@ public class SignInCheckInterceptor implements HandlerInterceptor {
         String username = extractUsernameFromRequestURI(requestURI);
 
         HttpSession session = request.getSession(false);
-        if (!session.getAttribute(SessionConst.SIGN_IN_USER).equals(username)) {
+        if (!session.getAttribute(SessionConstant.SIGN_IN_USER).equals(username)) {
             log.info("미인증 사용자 요청");
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
             return false;

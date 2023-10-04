@@ -1,5 +1,6 @@
 package hochang.ecommerce.service;
 
+import hochang.ecommerce.constants.NumberConstants;
 import hochang.ecommerce.domain.Item;
 import hochang.ecommerce.dto.BoardItem;
 import hochang.ecommerce.dto.BulletinItem;
@@ -26,14 +27,15 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import static hochang.ecommerce.constants.NumberConstants.*;
+
 @Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ItemService {
-    private static final ConcurrentMap<Long, Long> VIEWS_INCREMENT = new ConcurrentHashMap<>();
-    private static final Long ZERO = 0L;
-    private static final Long ONE = 1L;
+    private static final ConcurrentMap<Long, Long> VIEWS_INCREMENTS = new ConcurrentHashMap<>();
+    private static final int ONE_HOUR = 3600000;
     private final ItemRepository itemRepository;
     private final S3FileStore fileStore;
     private final S3Client s3Client;
@@ -60,7 +62,7 @@ public class ItemService {
     public BulletinItem findBulletinItem(Long itemId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(EntityNotFoundException::new); //동시성 제어가 필요하다
-        VIEWS_INCREMENT.put(itemId, VIEWS_INCREMENT.getOrDefault(itemId, ZERO) + ONE);
+        VIEWS_INCREMENTS.put(itemId, VIEWS_INCREMENTS.getOrDefault(itemId, LONG_0) + LONG_1);
         return toBulletinItem(item);
     }
 
@@ -96,12 +98,12 @@ public class ItemService {
     }
 
     @Transactional
-    @Scheduled(fixedRate = 3600000)
+    @Scheduled(fixedRate = ONE_HOUR)
     public void modifyViews() {
-        for (Long id : VIEWS_INCREMENT.keySet()) {
-            itemRepository.incrementViewsById(id, VIEWS_INCREMENT.get(id));
+        for (Long id : VIEWS_INCREMENTS.keySet()) {
+            itemRepository.incrementViewsById(id, VIEWS_INCREMENTS.get(id));
         }
-        VIEWS_INCREMENT.clear();
+        VIEWS_INCREMENTS.clear();
     }
 
     private static boolean isImageNameSamePreviousImageName(String originalFilename, Item item) {

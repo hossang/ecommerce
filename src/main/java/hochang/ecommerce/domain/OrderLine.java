@@ -17,7 +17,9 @@ import javax.persistence.ManyToOne;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class OrderLine extends BaseEntity{
+public class OrderLine extends BaseEntity {
+    private static final long ZERO_PRICE = 0L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "orderLine_id")
@@ -28,13 +30,12 @@ public class OrderLine extends BaseEntity{
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="item_id")
+    @JoinColumn(name = "item_id")
     private Item item;
 
     private int count;
 
     private long orderPrice;
-
 
     @Builder
     public OrderLine(Item item, int count) {
@@ -44,7 +45,6 @@ public class OrderLine extends BaseEntity{
         calculateOrderPrice();
     }
 
-    //
     public void addOrder(Order order) {
         this.order = order;
     }
@@ -56,7 +56,6 @@ public class OrderLine extends BaseEntity{
     }
 
     private void calculateOrderPrice() {
-        this.orderPrice = 0L;
         this.orderPrice = item.getPrice() * count;
     }
 }

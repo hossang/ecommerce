@@ -22,6 +22,11 @@ import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 
+import static hochang.ecommerce.web.PageConstants.END_RANGE;
+import static hochang.ecommerce.web.PageConstants.PREVENTION_NEGATIVE_NUMBERS;
+import static hochang.ecommerce.web.PageConstants.PREVENTION_ZERO;
+import static hochang.ecommerce.web.PageConstants.START_RANGE;
+
 @Slf4j
 @Controller
 @RequiredArgsConstructor
@@ -54,7 +59,7 @@ public class OrderController {
     }
 
     @GetMapping("/users/{username}/orders/{id}/create")
-    public String  orderDetails(@PathVariable String username, @PathVariable Long id, Model model) {
+    public String orderDetails(@PathVariable String username, @PathVariable Long id, Model model) {
         Optional<Order> optionalOrder = orderService.findByUserAndStatus(username);
         if (!optionalOrder.isPresent()) {
             return "users/myEmptyCart";
@@ -76,9 +81,9 @@ public class OrderController {
     @GetMapping("/users/{username}/orders")
     public String orderList(@PathVariable String username, @PageableDefault Pageable pageable, Model model) {
         Page<BoardOrder> boardOrders = orderService.findBoardOrders(pageable, username);
-        int nowPage = boardOrders.getPageable().getPageNumber() + 1;
-        int startPage = Math.max(1, nowPage - 4);
-        int endPage = Math.min(boardOrders.getTotalPages(),nowPage + 5);
+        int nowPage = boardOrders.getPageable().getPageNumber() + PREVENTION_ZERO;
+        int startPage = Math.max(PREVENTION_NEGATIVE_NUMBERS, nowPage - START_RANGE);
+        int endPage = Math.min(boardOrders.getTotalPages(), nowPage + END_RANGE);
 
         model.addAttribute("username", username);
         model.addAttribute("boardOrders", boardOrders);

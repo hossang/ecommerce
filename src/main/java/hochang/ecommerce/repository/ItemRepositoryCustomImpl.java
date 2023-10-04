@@ -15,7 +15,7 @@ import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
-public class ItemRepositoryCustomImpl implements ItemRepositoryCustom{
+public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override

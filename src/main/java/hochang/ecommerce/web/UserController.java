@@ -19,8 +19,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+
+import static hochang.ecommerce.web.PageConstants.END_RANGE;
+import static hochang.ecommerce.web.PageConstants.PREVENTION_NEGATIVE_NUMBERS;
+import static hochang.ecommerce.web.PageConstants.PREVENTION_ZERO;
+import static hochang.ecommerce.web.PageConstants.START_RANGE;
 
 @Slf4j
 @Controller
@@ -51,6 +57,7 @@ public class UserController {
         }
         return "guests/signIn";
     }
+
     @GetMapping("/users/{username}/modify")
     public String userRegistrationFormModify(@PathVariable String username, Model model) {
         UserRegistration userRegistration = userService.findUserRegistrationByUsername(username);
@@ -88,9 +95,9 @@ public class UserController {
     public String userList(@PathVariable String username
             , @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable, Model model) {
         Page<BoardUser> boardUsers = userService.findBoardUsers(pageable);
-        int nowPage = boardUsers.getPageable().getPageNumber() + 1;
-        int startPage = Math.max(1, nowPage - 4);
-        int endPage = Math.min(boardUsers.getTotalPages(), nowPage + 5);
+        int nowPage = boardUsers.getPageable().getPageNumber() + PREVENTION_ZERO;
+        int startPage = Math.max(PREVENTION_NEGATIVE_NUMBERS, nowPage - START_RANGE);
+        int endPage = Math.min(boardUsers.getTotalPages(), nowPage + END_RANGE);
 
         model.addAttribute("username", username);
         model.addAttribute("boardUsers", boardUsers);
