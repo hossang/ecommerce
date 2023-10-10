@@ -1,6 +1,5 @@
 package hochang.ecommerce.service;
 
-import hochang.ecommerce.constants.NumberConstants;
 import hochang.ecommerce.domain.Item;
 import hochang.ecommerce.dto.BoardItem;
 import hochang.ecommerce.dto.BulletinItem;
@@ -12,18 +11,18 @@ import hochang.ecommerce.util.file.UploadFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
 import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -36,6 +35,7 @@ import static hochang.ecommerce.constants.NumberConstants.*;
 public class ItemService {
     private static final ConcurrentMap<Long, Long> VIEWS_INCREMENTS = new ConcurrentHashMap<>();
     private static final int ONE_HOUR = 3600000;
+    private static final String CLOUDFRONT_DOMAIN = "https://d14cet1pxkvpbm.cloudfront.net/";
     private final ItemRepository itemRepository;
     private final S3FileStore fileStore;
     private final S3Client s3Client;
@@ -86,15 +86,9 @@ public class ItemService {
         item.modifyItem(itemRegistration, uploadFile);
     }
 
-    public byte[] getImage(String filename) {
-        GetObjectRequest objectRequest = GetObjectRequest
-                .builder()
-                .key(fileStore.getS3FullPath(filename))
-                .bucket(bucket)
-                .build();
-
-        ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(objectRequest);
-        return objectBytes.asByteArray();
+    public Resource getImage(String filename) throws MalformedURLException {
+        String url = CLOUDFRONT_DOMAIN + fileStore.getS3FullPath(filename);
+        return new UrlResource(url);
     }
 
     @Transactional

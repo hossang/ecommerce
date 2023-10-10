@@ -7,11 +7,11 @@ import hochang.ecommerce.service.ItemService;
 import hochang.ecommerce.web.annotation.SignIn;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.net.MalformedURLException;
 
 import static hochang.ecommerce.web.PageConstants.END_RANGE;
 import static hochang.ecommerce.web.PageConstants.PREVENTION_NEGATIVE_NUMBERS;
@@ -103,10 +103,9 @@ public class ItemController {
 
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    @GetMapping(value = "/images/{filename}", produces = "image/jpeg")
-    public byte[] downloadImage(@PathVariable String filename) {
+    @GetMapping("/images/{filename}")
+    public Resource downloadImage(@PathVariable String filename) throws MalformedURLException {
         return itemService.getImage(filename);
     }
 }

@@ -26,6 +26,7 @@ public class S3FileStore {
     private static final int TARGET_HEIGHT = 450;
     private static final int EXTENSION_POSITION = 1;
     private static final String S3_PATH = "ecommerce/";
+    private static final String PUBLIC_MAX_AGE_3600 = "public,max-age=3600";
 
     private final S3Client s3Client;
 
@@ -54,7 +55,9 @@ public class S3FileStore {
                 .bucket(bucket)
                 .key(S3_PATH + storeFileName)
                 .acl(ObjectCannedACL.BUCKET_OWNER_FULL_CONTROL)
+                .cacheControl(PUBLIC_MAX_AGE_3600)
                 .build();
+
         s3Client.putObject(putObjectRequest, filePath);
         deleteLocalFile(filePath);
         return new UploadFile(originalFilename, storeFileName);
