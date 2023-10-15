@@ -8,13 +8,16 @@ import hochang.ecommerce.dto.MainItem;
 import hochang.ecommerce.repository.ItemRepository;
 import hochang.ecommerce.util.file.S3FileStore;
 import hochang.ecommerce.util.file.UploadFile;
+import hochang.ecommerce.util.serialization.JSONUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,9 +37,10 @@ import static hochang.ecommerce.constants.NumberConstants.*;
 @RequiredArgsConstructor
 public class ItemService {
     private static final ConcurrentMap<Long, Long> VIEWS_INCREMENTS = new ConcurrentHashMap<>();
-    private static final int ONE_HOUR = 3600000;
+    private static final int HALF_AN_HOUR = 1_800_000;
     private static final String CLOUDFRONT_DOMAIN = "https://d14cet1pxkvpbm.cloudfront.net/";
     private final ItemRepository itemRepository;
+    private final JSONUtil jsonUtil;
     private final S3FileStore fileStore;
     private final S3Client s3Client;
 
@@ -92,7 +96,7 @@ public class ItemService {
     }
 
     @Transactional
-    @Scheduled(fixedRate = ONE_HOUR)
+    @Scheduled(fixedRate = HALF_AN_HOUR)
     public void modifyViews() {
         for (Long id : VIEWS_INCREMENTS.keySet()) {
             itemRepository.incrementViewsById(id, VIEWS_INCREMENTS.get(id));
