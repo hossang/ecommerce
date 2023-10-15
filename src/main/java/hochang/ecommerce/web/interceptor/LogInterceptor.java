@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Slf4j
 public class LogInterceptor implements HandlerInterceptor {
-    public static final String LOG_ID = "logId";
+    private static final String LOG_ID = "logId";
 
 
     @Override

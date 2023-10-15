@@ -7,7 +7,7 @@ import hochang.ecommerce.domain.OrderStatus;
 import hochang.ecommerce.domain.User;
 import hochang.ecommerce.dto.BoardOrder;
 import hochang.ecommerce.dto.OrderItem;
-import hochang.ecommerce.dto.OrderStatusConstants;
+import hochang.ecommerce.constants.OrderStatusConstants;
 import hochang.ecommerce.repository.ItemRepository;
 import hochang.ecommerce.repository.OrderRepository;
 import hochang.ecommerce.repository.UserRepository;
@@ -29,8 +29,9 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class OrderService {
-    public static final int COMMA = 2;
-    public static final int BLANK = 1;
+    private static final int COMMA = 2;
+    private static final int BLANK = 1;
+
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
@@ -73,7 +74,7 @@ public class OrderService {
 
     public Page<BoardOrder> findBoardOrders(Pageable pageable, String username) {
         User user = userRepository.findByUsername(username);
-        Page<Order> orderPage = orderRepository.findByUserIdAndStatusIn(user.getId()
+        Page<Order> orderPage = orderRepository.findOrdersWithCoveringIndex(user.getId()
                 , List.of(OrderStatus.COMPLETE, OrderStatus.CANCEL), pageable);
         return orderPage.map(this::toBoardOrder);
     }
@@ -132,7 +133,9 @@ public class OrderService {
         for (OrderLine orderLine : o.getOrderLines()) {
             stringbuilder.append(orderLine.getItem().getName()).append(", "); //N + 1
         }
-        stringbuilder.delete(stringbuilder.length() - COMMA, stringbuilder.length() - BLANK);
+        if (!stringbuilder.isEmpty()) {
+            stringbuilder.delete(stringbuilder.length() - COMMA, stringbuilder.length() - BLANK);
+        }
         return stringbuilder.toString();
     }
 
@@ -151,7 +154,7 @@ public class OrderService {
         BoardOrder boardOrder = new BoardOrder();
         boardOrder.setId(o.getId());
         boardOrder.setOrderLineNames(makeOrderLineNames(o));
-        boardOrder.setOrderStatue(OrderStatusConstants.ORDER_STATUS_MAP.get(o.getStatus()));
+        boardOrder.setStatus(OrderStatusConstants.ORDER_STATUSES.get(o.getStatus()));
         boardOrder.setTotalPrice(o.getTotalPrice());
         boardOrder.setCreateDate(o.getCreatedDate());
         return boardOrder;

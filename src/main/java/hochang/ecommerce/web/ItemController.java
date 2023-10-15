@@ -7,11 +7,11 @@ import hochang.ecommerce.service.ItemService;
 import hochang.ecommerce.web.annotation.SignIn;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,10 +20,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.net.MalformedURLException;
+
+import static hochang.ecommerce.web.PageConstants.END_RANGE;
+import static hochang.ecommerce.web.PageConstants.PREVENTION_NEGATIVE_NUMBERS;
+import static hochang.ecommerce.web.PageConstants.PREVENTION_ZERO;
+import static hochang.ecommerce.web.PageConstants.START_RANGE;
 
 @Slf4j
 @Controller
@@ -36,9 +41,9 @@ public class ItemController {
                            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
                            Model model) {
         Page<BoardItem> boardItems = itemService.findBoardItems(pageable);
-        int nowPage = boardItems.getPageable().getPageNumber() + 1;
-        int startPage = Math.max(1, nowPage - 4);
-        int endPage = Math.min(boardItems.getTotalPages(),nowPage + 5);
+        int nowPage = boardItems.getPageable().getPageNumber() + PREVENTION_ZERO;
+        int startPage = Math.max(PREVENTION_NEGATIVE_NUMBERS, nowPage - START_RANGE);
+        int endPage = Math.min(boardItems.getTotalPages(), nowPage + END_RANGE);
 
         log.info("nowPage : {}", nowPage);
         model.addAttribute("username", username);
@@ -98,10 +103,9 @@ public class ItemController {
 
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    @GetMapping(value = "/images/{filename}", produces = "image/jpeg")
-    public byte[] downloadImage(@PathVariable String filename) {
+    @GetMapping("/images/{filename}")
+    public Resource downloadImage(@PathVariable String filename) throws MalformedURLException {
         return itemService.getImage(filename);
     }
 }

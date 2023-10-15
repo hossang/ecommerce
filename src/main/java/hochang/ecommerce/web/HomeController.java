@@ -13,19 +13,27 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import static hochang.ecommerce.web.PageConstants.END_RANGE;
+import static hochang.ecommerce.web.PageConstants.PREVENTION_NEGATIVE_NUMBERS;
+import static hochang.ecommerce.web.PageConstants.PREVENTION_ZERO;
+import static hochang.ecommerce.web.PageConstants.START_RANGE;
+
 @Slf4j
 @Controller
 @RequiredArgsConstructor
 public class HomeController {
+    private static final int PAGE_SIZE = 8;
+
     private final ItemService itemService;
+
     @GetMapping("/")
     public String homePage(@SignIn String username,
-                           @PageableDefault(sort = "views", direction = Sort.Direction.DESC, size = 8) Pageable pageable,
+                           @PageableDefault(sort = "views", direction = Sort.Direction.DESC, size = PAGE_SIZE) Pageable pageable,
                            Model model) {
-        Page<MainItem> mainItems = itemService.findMainItem(pageable);
-        int nowPage = mainItems.getPageable().getPageNumber() + 1;
-        int startPage = Math.max(1, nowPage - 4);
-        int endPage = Math.min(mainItems.getTotalPages(),nowPage + 5);
+        Page<MainItem> mainItems = itemService.findMainItems(pageable);
+        int nowPage = mainItems.getPageable().getPageNumber() + PREVENTION_ZERO;
+        int startPage = Math.max(PREVENTION_NEGATIVE_NUMBERS, nowPage - START_RANGE);
+        int endPage = Math.min(mainItems.getTotalPages(), nowPage + END_RANGE);
 
         model.addAttribute("username", username);
         model.addAttribute("mainItems", mainItems);

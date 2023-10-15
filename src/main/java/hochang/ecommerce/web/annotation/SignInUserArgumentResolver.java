@@ -1,6 +1,6 @@
 package hochang.ecommerce.web.annotation;
 
-import hochang.ecommerce.web.SessionConst;
+import hochang.ecommerce.constants.SessionConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -32,6 +32,6 @@ public class SignInUserArgumentResolver implements HandlerMethodArgumentResolver
         if (session == null) {
             return null;
         }
-        return session.getAttribute(SessionConst.SIGN_IN_USER);
+        return session.getAttribute(SessionConstant.SIGN_IN_USER);
     }
 }

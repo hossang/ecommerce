@@ -11,9 +11,9 @@ import javax.servlet.http.HttpServletRequest;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    public static final String ERROR_MESSAGE = "errorMessage";
-    public static final String REFERER = "Referer";
-    public static final int FILE_SIZE = 20;
+    private static final String ERROR_MESSAGE = "errorMessage";
+    private static final String REFERER = "Referer";
+    private static final int FILE_SIZE = 20;
 
     @ExceptionHandler(MultipartException.class)
     public String exceedFileSize(RedirectAttributes redirectAttributes, HttpServletRequest request) {
@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
         if (referer == null) {
             referer = "/";
         }
-        redirectAttributes.addAttribute(ERROR_MESSAGE, "파일 사이즈가 "+ FILE_SIZE +"MB 미만이어" +
+        redirectAttributes.addAttribute(ERROR_MESSAGE, "파일 사이즈가 " + FILE_SIZE + "MB 미만이어" +
                 "야 합니다.");
         return "redirect:" + referer;
     }

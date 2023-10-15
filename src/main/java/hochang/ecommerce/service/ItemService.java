@@ -8,27 +8,39 @@ import hochang.ecommerce.dto.MainItem;
 import hochang.ecommerce.repository.ItemRepository;
 import hochang.ecommerce.util.file.S3FileStore;
 import hochang.ecommerce.util.file.UploadFile;
+import hochang.ecommerce.util.serialization.JSONUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
 import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+import static hochang.ecommerce.constants.NumberConstants.*;
 
 @Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ItemService {
+    private static final ConcurrentMap<Long, Long> VIEWS_INCREMENTS = new ConcurrentHashMap<>();
+    private static final int HALF_AN_HOUR = 1_800_000;
+    private static final String CLOUDFRONT_DOMAIN = "https://d14cet1pxkvpbm.cloudfront.net/";
     private final ItemRepository itemRepository;
+    private final JSONUtil jsonUtil;
     private final S3FileStore fileStore;
     private final S3Client s3Client;
 
@@ -47,16 +59,14 @@ public class ItemService {
         return itemPage.map(this::toBoardItem);
     }
 
-    public Page<MainItem> findMainItem(Pageable pageable) {
-        Page<Item> itemPage = itemRepository.findAll(pageable);
-        return itemPage.map(this::toMainItem);
+    public Page<MainItem> findMainItems(Pageable pageable) {
+        return itemRepository.findMainItemsWithCoveringIndex(pageable);
     }
 
-    @Transactional
     public BulletinItem findBulletinItem(Long itemId) {
-        Item item = itemRepository.findByIdForUpdate(itemId)
+        Item item = itemRepository.findById(itemId)
                 .orElseThrow(EntityNotFoundException::new); //동시성 제어가 필요하다
-        item.addViews();
+        VIEWS_INCREMENTS.put(itemId, VIEWS_INCREMENTS.getOrDefault(itemId, LONG_0) + LONG_1);
         return toBulletinItem(item);
     }
 
@@ -80,15 +90,18 @@ public class ItemService {
         item.modifyItem(itemRegistration, uploadFile);
     }
 
-    public byte[] getImage(String filename) {
-        GetObjectRequest objectRequest = GetObjectRequest
-                .builder()
-                .key(fileStore.getS3FullPath(filename))
-                .bucket(bucket)
-                .build();
+    public Resource getImage(String filename) throws MalformedURLException {
+        String url = CLOUDFRONT_DOMAIN + fileStore.getS3FullPath(filename);
+        return new UrlResource(url);
+    }
 
-        ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(objectRequest);
-        return objectBytes.asByteArray();
+    @Transactional
+    @Scheduled(fixedRate = HALF_AN_HOUR)
+    public void modifyViews() {
+        for (Long id : VIEWS_INCREMENTS.keySet()) {
+            itemRepository.incrementViewsById(id, VIEWS_INCREMENTS.get(id));
+        }
+        VIEWS_INCREMENTS.clear();
     }
 
     private static boolean isImageNameSamePreviousImageName(String originalFilename, Item item) {
@@ -133,14 +146,5 @@ public class ItemService {
         bulletinItem.setContents(item.getContents());
         bulletinItem.setStoreFileName(item.getStoreFileName());
         return bulletinItem;
-    }
-
-    private MainItem toMainItem(Item item) {
-        MainItem mainItem = new MainItem();
-        mainItem.setId(item.getId());
-        mainItem.setName(item.getName());
-        mainItem.setPrice(item.getPrice());
-        mainItem.setStoreFileName(item.getStoreFileName());
-        return mainItem;
     }
 }

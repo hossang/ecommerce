@@ -1,5 +1,6 @@
 package hochang.ecommerce.domain;
 
+import hochang.ecommerce.constants.NumberConstants;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,11 +23,14 @@ import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 
+import static hochang.ecommerce.constants.NumberConstants.*;
+
 @Entity
 @Getter
 @Table(name = "orders", indexes = @Index(name = "idx_user_status", columnList = "users_id, status"))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order extends BaseEntity {
+    private static final long ZERO_PRICE = 0L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "orders_id")
@@ -40,6 +44,7 @@ public class Order extends BaseEntity {
     private List<OrderLine> orderLines = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
+    @Column(length = INT_10)
     private OrderStatus status;
 
     private long totalPrice;
@@ -52,15 +57,13 @@ public class Order extends BaseEntity {
         calculateTotalPrice();
     }
 
-    //연관관계 메서드
     public void addOrderLine(OrderLine orderLine) {
         orderLines.add(orderLine);
         orderLine.addOrder(this);
     }
 
-    //비즈니스 메소드
     public void calculateTotalPrice() {
-        this.totalPrice = 0L;
+        this.totalPrice = ZERO_PRICE;
         for (OrderLine orderLine : orderLines) {
             this.totalPrice += orderLine.getOrderPrice();
         }

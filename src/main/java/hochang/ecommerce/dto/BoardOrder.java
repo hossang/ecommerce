@@ -12,7 +12,7 @@ public class BoardOrder {
 
     private String orderLineNames;
 
-    private String orderStatue;
+    private String status;
 
     private long totalPrice;
 
