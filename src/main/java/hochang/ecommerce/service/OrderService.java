@@ -154,7 +154,7 @@ public class OrderService {
         BoardOrder boardOrder = new BoardOrder();
         boardOrder.setId(o.getId());
         boardOrder.setOrderLineNames(makeOrderLineNames(o));
-        boardOrder.setOrderStatue(OrderStatusConstants.ORDER_STATUSES.get(o.getStatus()));
+        boardOrder.setStatus(OrderStatusConstants.ORDER_STATUSES.get(o.getStatus()));
         boardOrder.setTotalPrice(o.getTotalPrice());
         boardOrder.setCreateDate(o.getCreatedDate());
         return boardOrder;
