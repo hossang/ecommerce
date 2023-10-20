@@ -65,9 +65,7 @@ public class Item extends BaseEntity {
     }
 
     public void modifyItem(ItemRegistration itemRegistration) {
-        this.name = itemRegistration.getName();
         this.count = itemRegistration.getCount();
-        this.price = itemRegistration.getPrice();
         this.contents = itemRegistration.getContents();
     }
 

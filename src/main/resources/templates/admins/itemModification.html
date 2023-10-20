@@ -29,7 +29,7 @@
             <h1>상품 수정</h1>
             <div class="form-group" th:class="${#fields.hasErrors('name')} ? 'has-error'">
                 <label for="name">상품명:</label>
-                <input class="form-control" type="text" id="name" name="name" maxlength="20" th:value="${itemRegistration.name}" required>
+                <input class="form-control" type="text" id="name" name="name" maxlength="20" th:value="${itemRegistration.name}" disabled>
                 <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></p>
             </div>
             <div class="form-group" th:class="${#fields.hasErrors('count')} ? 'has-error'">
@@ -39,7 +39,7 @@
             </div>
             <div class="form-group" th:class="${#fields.hasErrors('price')} ? 'has-error'">
                 <label for="price">가격:</label>
-                <input class="form-control" type="number" id="price" name="price" min="1" th:value="${itemRegistration.price}" required>
+                <input class="form-control" type="number" id="price" name="price" min="1" th:value="${itemRegistration.price}" disabled>
                 <p th:if="${#fields.hasErrors('price')}" th:errors="*{price}" class="text-danger"></p>
             </div>
             <div class="form-group" th:class="${#fields.hasErrors('contents')} ? 'has-error'">
