@@ -41,7 +41,7 @@ public class OrderController {
             return "users/myEmptyCart";
         }
         Order order = optionalOrder.orElseThrow(EntityNotFoundException::new);
-        List<OrderItem> orderItems = orderService.findOrderItems(order.getOrderLines());
+        List<OrderItem> orderItems = orderService.findOrderItems(order.getOrderLines(), order.getId());
         model.addAttribute("username", username);
         model.addAttribute("id", order.getId());
         model.addAttribute("orderItems", orderItems);
@@ -66,7 +66,7 @@ public class OrderController {
         }
         Order order = optionalOrder.orElseThrow(EntityNotFoundException::new);
         model.addAttribute("totalPrice", order.getTotalPrice());
-        List<OrderItem> orderItems = orderService.findOrderItems(order.getOrderLines());
+        List<OrderItem> orderItems = orderService.findOrderItems(order.getOrderLines(), order.getId());
         model.addAttribute("orderItems", orderItems);
         return "users/myOrder";
     }
@@ -97,7 +97,7 @@ public class OrderController {
     public String orderDetail(@PathVariable String username, @PathVariable Long id, Model model) {
         BoardOrder boardOrder = orderService.findBoardOrder(id);
         List<OrderLine> orderLines = orderService.findOrderLines(id);
-        List<OrderItem> orderItems = orderService.findOrderItems(orderLines);
+        List<OrderItem> orderItems = orderService.findOrderItems(orderLines, id);
         model.addAttribute("boardOrder", boardOrder);
         model.addAttribute("orderItems", orderItems);
         return "users/orderDetail";
