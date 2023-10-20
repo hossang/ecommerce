@@ -8,7 +8,6 @@ import hochang.ecommerce.dto.MainItem;
 import hochang.ecommerce.repository.ItemRepository;
 import hochang.ecommerce.util.file.S3FileStore;
 import hochang.ecommerce.util.file.UploadFile;
-import hochang.ecommerce.util.serialization.JSONUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +16,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +38,6 @@ public class ItemService {
     private static final int HALF_AN_HOUR = 1_800_000;
     private static final String CLOUDFRONT_DOMAIN = "https://d14cet1pxkvpbm.cloudfront.net/";
     private final ItemRepository itemRepository;
-    private final JSONUtil jsonUtil;
     private final S3FileStore fileStore;
     private final S3Client s3Client;
 
@@ -59,15 +56,20 @@ public class ItemService {
         return itemPage.map(this::toBoardItem);
     }
 
+    @Cacheable(cacheNames = "findMainItems", key = "#pageable.pageSize.toString().concat('-').concat(#pageable.pageNumber)")
     public Page<MainItem> findMainItems(Pageable pageable) {
         return itemRepository.findMainItemsWithCoveringIndex(pageable);
     }
 
+    //HTTP 캐싱의 대상
     public BulletinItem findBulletinItem(Long itemId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(EntityNotFoundException::new); //동시성 제어가 필요하다
-        VIEWS_INCREMENTS.put(itemId, VIEWS_INCREMENTS.getOrDefault(itemId, LONG_0) + LONG_1);
         return toBulletinItem(item);
+    }
+
+    public void increaseViews(Long itemId) {
+        VIEWS_INCREMENTS.put(itemId, VIEWS_INCREMENTS.getOrDefault(itemId, LONG_0) + LONG_1);
     }
 
     public ItemRegistration findItemRegistration(Long itemId) {
