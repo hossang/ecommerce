@@ -15,4 +15,5 @@ public abstract class NumberConstants {
     public static final long LONG_0 = 0L;
     public static final long LONG_1 = 1L;
 
+    public static final long LONG_30 = 30L;
 }

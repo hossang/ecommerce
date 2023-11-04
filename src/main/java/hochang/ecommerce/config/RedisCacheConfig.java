@@ -1,5 +1,10 @@
 package hochang.ecommerce.config;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import hochang.ecommerce.constants.CacheConstants;
+import hochang.ecommerce.constants.NumberConstants;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +22,11 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+
+import static hochang.ecommerce.constants.CacheConstants.*;
+import static hochang.ecommerce.constants.NumberConstants.*;
 
 
 @Configuration
@@ -26,9 +36,6 @@ public class RedisCacheConfig {
 
     @Value("${spring.cache-redis.port}")
     private int port;
-
-    @Value("${spring.cache-redis.ttl}")
-    private long ttl;
 
     @Bean
     @Primary
@@ -41,14 +48,25 @@ public class RedisCacheConfig {
 
     @Bean
     public CacheManager cacheManager() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        objectMapper.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.NON_FINAL);
+
         RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))
-                .entryTtl(Duration.ofMinutes(ttl))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer(objectMapper)))
+                .entryTtl(Duration.ofMinutes(LONG_30))
                 .disableCachingNullValues()
                 .computePrefixWith(CacheKeyPrefix.simple());
+
+        Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
+        cacheConfigurations.put(FIND_MAIN_ITEMS, redisCacheConfiguration.entryTtl(Duration.ofMinutes(LONG_1)));
+        cacheConfigurations.put(FIND_ORDER_ITEMS, redisCacheConfiguration.entryTtl(Duration.ofDays(LONG_1)));
+
+
         return RedisCacheManager.RedisCacheManagerBuilder
                 .fromConnectionFactory(cacheRedisConnectionFactory())
+                .withInitialCacheConfigurations(cacheConfigurations)
                 .cacheDefaults(redisCacheConfiguration).build();
     }
 

@@ -1,5 +1,6 @@
 package hochang.ecommerce.service;
 
+import hochang.ecommerce.constants.CacheConstants;
 import hochang.ecommerce.domain.Item;
 import hochang.ecommerce.dto.BoardItem;
 import hochang.ecommerce.dto.BulletinItem;
@@ -27,6 +28,7 @@ import java.net.MalformedURLException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import static hochang.ecommerce.constants.CacheConstants.*;
 import static hochang.ecommerce.constants.NumberConstants.*;
 
 @Slf4j
@@ -56,7 +58,7 @@ public class ItemService {
         return itemPage.map(this::toBoardItem);
     }
 
-    @Cacheable(cacheNames = "findMainItems", key = "#pageable.pageSize.toString().concat('-').concat(#pageable.pageNumber)")
+    @Cacheable(cacheNames = FIND_MAIN_ITEMS, key = "#pageable.pageSize.toString().concat('-').concat(#pageable.pageNumber)")
     public Page<MainItem> findMainItems(Pageable pageable) {
         return itemRepository.findMainItemsWithCoveringIndex(pageable);
     }
@@ -136,7 +138,7 @@ public class ItemService {
         boardItem.setId(item.getId());
         boardItem.setName(item.getName());
         boardItem.setCreatedDate(item.getCreatedDate());
-        boardItem.setViews(item.getViews());
+        boardItem.setViews(item.getViews() + VIEWS_INCREMENTS.getOrDefault(item.getId(), LONG_0));
         return boardItem;
     }
 
