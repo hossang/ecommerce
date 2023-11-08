@@ -1,4 +1,4 @@
-package hochang.ecommerce.constants;
+package hochang.ecommerce.service;
 
 import hochang.ecommerce.domain.OrderStatus;
 

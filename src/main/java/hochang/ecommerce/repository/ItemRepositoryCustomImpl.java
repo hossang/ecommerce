@@ -5,6 +5,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import hochang.ecommerce.domain.QItem;
 import hochang.ecommerce.dto.MainItem;
+import hochang.ecommerce.util.serialization.PageImplDeserializer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -25,8 +26,8 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
         List<Long> ids = getIdsWithCoveringIndex(pageable, item);
         List<MainItem> mainItems = getMainItemsWithIds(item, ids);
         JPAQuery<Long> total = getTotal(item);
-
-        return PageableExecutionUtils.getPage(mainItems, pageable, total::fetchOne);
+        //return PageableExecutionUtils.getPage(mainItems, pageable, total::fetchOne);
+        return new PageImplDeserializer<>(mainItems, pageable, total.fetchOne());
     }
 
     private JPAQuery<Long> getTotal(QItem item) {
