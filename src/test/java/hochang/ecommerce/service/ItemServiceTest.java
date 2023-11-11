@@ -122,7 +122,7 @@ class ItemServiceTest {
         for (int i = 0; i < threadCount; i++) {
             executorService.submit(() -> {
                 try {
-                    item.addViews();
+                    itemService.findBulletinItem(item.getId());
                 } finally {
                     // 스레드 작업 완료시 latch 값을 감소시킴
                     latch.countDown();

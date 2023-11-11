@@ -1,6 +1,5 @@
 package hochang.ecommerce.config;
 
-import hochang.ecommerce.constants.NumberConstants;
 import hochang.ecommerce.web.annotation.SignInUserArgumentResolver;
 import hochang.ecommerce.web.interceptor.LogInterceptor;
 import hochang.ecommerce.web.interceptor.SignInCheckInterceptor;

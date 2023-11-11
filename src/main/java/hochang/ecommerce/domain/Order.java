@@ -1,6 +1,5 @@
 package hochang.ecommerce.domain;
 
-import hochang.ecommerce.constants.NumberConstants;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;

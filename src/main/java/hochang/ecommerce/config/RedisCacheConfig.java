@@ -1,10 +1,7 @@
 package hochang.ecommerce.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import hochang.ecommerce.constants.CacheConstants;
-import hochang.ecommerce.constants.NumberConstants;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;

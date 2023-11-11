@@ -1,6 +1,5 @@
 package hochang.ecommerce.dto;
 
-import hochang.ecommerce.constants.NumberConstants;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;

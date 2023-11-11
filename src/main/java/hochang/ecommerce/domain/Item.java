@@ -1,6 +1,5 @@
 package hochang.ecommerce.domain;
 
-import hochang.ecommerce.constants.NumberConstants;
 import hochang.ecommerce.dto.ItemRegistration;
 import hochang.ecommerce.util.file.UploadFile;
 import lombok.AccessLevel;

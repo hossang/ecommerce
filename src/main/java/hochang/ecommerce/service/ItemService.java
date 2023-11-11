@@ -1,6 +1,5 @@
 package hochang.ecommerce.service;
 
-import hochang.ecommerce.constants.CacheConstants;
 import hochang.ecommerce.domain.Item;
 import hochang.ecommerce.dto.BoardItem;
 import hochang.ecommerce.dto.BulletinItem;
@@ -63,7 +62,6 @@ public class ItemService {
         return itemRepository.findMainItemsWithCoveringIndex(pageable);
     }
 
-    //HTTP 캐싱의 대상
     public BulletinItem findBulletinItem(Long itemId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(EntityNotFoundException::new); //동시성 제어가 필요하다
