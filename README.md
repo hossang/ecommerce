@@ -1,6 +1,10 @@
 # E-commerce
 물건을 사고 파는 온라인 쇼핑몰 
 
+## 0. 학습 목표
++ 그동안 학습했던 Spring, JPA를 활용해 보기
++ ┏가상 면접 사례로 배우는 대규모 시스템 설계 기초┛ 의 내용 구현해 보기
+
 ## 1. 개요
 + 개발 인원 : 1명
 + 개발 기간 : 23.3.29 ~
@@ -31,10 +35,14 @@ Java 17, Spring Boot, JPA, MySQL, Redis, AWS
 ## 5. 화면
 ![쇼핑몰  화면](https://github.com/hossang/ecommerce/assets/60059710/6c171eee-b407-472f-a382-503a579a97ae)
 
-## 6. 관심 사항
-+ AWS를 통한 배포
-+ 쿼리 최적화를 통한 성능 향상
+## 6. 아키텍처
+![3-Tier-Solution-Architecture](https://github.com/hossang/ecommerce/assets/60059710/df4ad1d7-0f31-4807-a23a-faa9ca98a1d2)
+
+## 7. 관심 사항
++ 캐싱을 통한 성능 향상
++ 쿼리 튜닝을 통한 성능 향상
 + BatchSize를 통한 N + 1 문제 해결
++ AWS를 통한 배포(url : dlghckd.store)
 + Redis를 사용해 상태정보를 웹 서버로부터 분리
 + Lock을 통한 상품 재고와 게시글 조회수의 데이터 일관성 유지
 
