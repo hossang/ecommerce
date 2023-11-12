@@ -36,7 +36,7 @@ Java 17, Spring Boot, JPA, MySQL, Redis, AWS
 ![쇼핑몰  화면](https://github.com/hossang/ecommerce/assets/60059710/6c171eee-b407-472f-a382-503a579a97ae)
 
 ## 6. 아키텍처
-![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/167061d4-9947-4a3e-8a73-4303d15074d9/02f70318-255c-4730-939b-b21643d12f3c/Untitled.png)
+![3-Tier-Solution-Architecture](https://github.com/hossang/ecommerce/assets/60059710/df4ad1d7-0f31-4807-a23a-faa9ca98a1d2)
 
 ## 7. 관심 사항
 + 캐싱을 통한 성능 향상
