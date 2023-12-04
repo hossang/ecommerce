@@ -1,5 +1,5 @@
 # E-commerce
-물건을 사고 파는 온라인 쇼핑몰 
+물건을 사고 파는 온라인 쇼핑몰 (www.dlghckd.store)
 
 ## 0. 학습 목표
 + 그동안 학습했던 Spring, JPA를 활용해 보기
@@ -36,7 +36,7 @@ Java 17, Spring Boot, JPA, MySQL, Redis, AWS
 ![쇼핑몰  화면](https://github.com/hossang/ecommerce/assets/60059710/6c171eee-b407-472f-a382-503a579a97ae)
 
 ## 6. 아키텍처
-![3-Tier-Solution-Architecture](https://github.com/hossang/ecommerce/assets/60059710/df4ad1d7-0f31-4807-a23a-faa9ca98a1d2)
+![아키텍처](https://github.com/hossang/ecommerce/assets/60059710/670b4d0d-5ee8-439e-a766-97e9907010b7)
 
 ## 7. 관심 사항
 + 캐싱을 통한 성능 향상
