@@ -39,10 +39,10 @@ Java 17, Spring Boot, JPA, MySQL, Redis, AWS
 ![아키텍처](https://github.com/hossang/ecommerce/assets/60059710/670b4d0d-5ee8-439e-a766-97e9907010b7)
 
 ## 7. 관심 사항
++ AWS를 통한 배포
 + 캐싱을 통한 성능 향상
 + 쿼리 튜닝을 통한 성능 향상
 + BatchSize를 통한 N + 1 문제 해결
-+ AWS를 통한 배포(url : dlghckd.store)
 + Redis를 사용해 상태정보를 웹 서버로부터 분리
 + Lock을 통한 상품 재고와 게시글 조회수의 데이터 일관성 유지
 
