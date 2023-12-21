@@ -63,17 +63,6 @@ public class Item extends BaseEntity {
         this.storeFileName = storeFileName;
     }
 
-    public void modifyItem(ItemRegistration itemRegistration) {
-        this.count = itemRegistration.getCount();
-        this.contents = itemRegistration.getContents();
-    }
-
-    public void modifyItem(ItemRegistration itemRegistration, UploadFile uploadFile) {
-        modifyItem(itemRegistration);
-        this.uploadFileName = uploadFile.getUploadFileName();
-        this.storeFileName = uploadFile.getStoreFileName();
-    }
-
     public void reduceCount(int count) {
         int reducedCount = this.count - count;
         if (reducedCount < EMPTY) {

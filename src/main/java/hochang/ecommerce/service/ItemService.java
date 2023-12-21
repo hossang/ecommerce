@@ -80,16 +80,11 @@ public class ItemService {
     @Transactional
     public void modifyItem(ItemRegistration itemRegistration) throws IOException {
         String originalFilename = itemRegistration.getImageFile().getOriginalFilename();
-
         Item item = itemRepository.findById(itemRegistration.getId()).orElseThrow(EntityNotFoundException::new);
-        if (isImageNameSamePreviousImageName(originalFilename, item)) {
-            item.modifyItem(itemRegistration);
-            return;
-        }
-
-        UploadFile uploadFile = fileStore.storeFile(itemRegistration.getImageFile());
         fileStore.deleteS3File(item.getStoreFileName());
-        item.modifyItem(itemRegistration, uploadFile);
+        UploadFile uploadFile = fileStore.storeFile(itemRegistration.getImageFile());
+        itemRepository.modifyItem(item.getId(), itemRegistration.getCount(), itemRegistration.getContents(),
+                uploadFile.getUploadFileName(), uploadFile.getStoreFileName());
     }
 
     public Resource getImage(String filename) throws MalformedURLException {
@@ -104,10 +99,6 @@ public class ItemService {
             itemRepository.incrementViewsById(id, VIEWS_INCREMENTS.get(id));
         }
         VIEWS_INCREMENTS.clear();
-    }
-
-    private static boolean isImageNameSamePreviousImageName(String originalFilename, Item item) {
-        return originalFilename != null && originalFilename.equals(item.getUploadFileName());
     }
 
     private ItemRegistration toItemRegistration(Item item) {
