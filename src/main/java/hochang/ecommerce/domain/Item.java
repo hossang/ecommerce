@@ -1,7 +1,5 @@
 package hochang.ecommerce.domain;
 
-import hochang.ecommerce.dto.ItemRegistration;
-import hochang.ecommerce.util.file.UploadFile;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,11 +9,14 @@ import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.util.List;
 
@@ -75,7 +76,7 @@ public class Item extends BaseEntity {
         this.count += count;
     }
 
-    private String createExceptionMessage() {
+    public String createExceptionMessage() {
         return INSUFFICIENT_STOCK_MESSAGES.get(INT_0) + this.name + INSUFFICIENT_STOCK_MESSAGES.get(INT_1)
                 + this.count + INSUFFICIENT_STOCK_MESSAGES.get(INT_2);
     }

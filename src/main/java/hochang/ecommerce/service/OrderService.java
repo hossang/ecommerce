@@ -41,14 +41,14 @@ public class OrderService {
 
     @Transactional
     @CacheEvict(cacheNames = FIND_ORDER_ITEMS, key = "#result.id")
-    public Order order(String username, Long itemId, Integer quantity) {
+    public Order addOrderLineInCart(String username, Long itemId, Integer quantity) {
         User user = userRepository.findByUsername(username);
         Optional<Order> optionalOrder = orderRepository.findByUserAndStatusForUpdate(user, OrderStatus.ORDER);
         if (!optionalOrder.isPresent()) {
             return createOrder(username, itemId, quantity);
 
         }
-        return addOrderLineInOrder(optionalOrder.orElseThrow(EntityNotFoundException::new), itemId, quantity);
+        return addOrderLine(optionalOrder.orElseThrow(EntityNotFoundException::new), itemId, quantity);
     }
 
     @Transactional
@@ -77,6 +77,10 @@ public class OrderService {
         return orderItems;
     }
 
+    public OrderItem findOrderItem(Item item, Integer quantity) {
+        return toOrderItem(item,quantity);
+    }
+
     public Page<BoardOrder> findBoardOrders(Pageable pageable, String username) {
         User user = userRepository.findByUsername(username);
         Page<Order> orderPage = orderRepository.findOrdersWithCoveringIndex(user.getId()
@@ -94,7 +98,8 @@ public class OrderService {
         return order.getOrderLines();
     }
 
-    private Order createOrder(String username, Long itemId, int quantity) {
+    @Transactional
+    public Order createOrder(String username, Long itemId, int quantity) {
         User user = userRepository.findByUsername(username);
         OrderLine orderLine = createOrderLine(itemId, quantity);
         Order order = Order.builder()
@@ -105,7 +110,7 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    private Order addOrderLineInOrder(Order order, Long itemId, int quantity) {
+    private Order addOrderLine(Order order, Long itemId, int quantity) {
         for (OrderLine orderLine : order.getOrderLines()) {
             if (isItemInOrderLine(itemId, orderLine)) {
                 orderLine.modifyCount(quantity); //동시성 제어가 필요하다
@@ -154,6 +159,19 @@ public class OrderService {
         orderItem.setStoreFileName(orderLine.getItem().getStoreFileName());
         return orderItem;
     }
+
+
+    private OrderItem toOrderItem(Item item, Integer quantity) {
+        OrderItem orderItem = new OrderItem();
+        orderItem.setItemId(item.getId());
+        orderItem.setName(item.getName());
+        orderItem.setPrice(item.getPrice());
+        orderItem.setCount(quantity);
+        orderItem.setOrderPrice(item.getPrice() * quantity);
+        orderItem.setStoreFileName(item.getStoreFileName());
+        return orderItem;
+    }
+
 
     private BoardOrder toBoardOrder(Order o) {
         BoardOrder boardOrder = new BoardOrder();

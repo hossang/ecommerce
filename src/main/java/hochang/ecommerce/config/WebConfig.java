@@ -28,8 +28,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/css/**", "/js/**", "/*.ico", "/error");
         registry.addInterceptor(new SignInCheckInterceptor())
                 .order(INT_2)
-                .addPathPatterns("/users/**", "/admins/**", "/*.ico", "/error")
-                .excludePathPatterns("/css/**", "/js/**");
+                .addPathPatterns("/users/**", "/admins/**")
+                .excludePathPatterns("/css/**", "/js/**", "/*.ico", "/error");
 
         WebContentInterceptor webContentInterceptor = getCacheControlInterceptor();
         registry.addInterceptor(webContentInterceptor)

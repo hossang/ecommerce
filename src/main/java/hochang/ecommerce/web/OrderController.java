@@ -1,15 +1,16 @@
 package hochang.ecommerce.web;
 
+import hochang.ecommerce.domain.Item;
 import hochang.ecommerce.domain.Order;
 import hochang.ecommerce.domain.OrderLine;
 import hochang.ecommerce.dto.BoardOrder;
 import hochang.ecommerce.dto.OrderItem;
+import hochang.ecommerce.service.ItemService;
 import hochang.ecommerce.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,12 +33,17 @@ import static hochang.ecommerce.web.PageConstants.START_RANGE;
 @RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;
+    private final ItemService itemService;
+
 
     @GetMapping("/users/{username}/orders/cart")
     public String orderLineList(@PathVariable String username, @RequestParam(required = false) Long itemId,
                                 @RequestParam(required = false) Integer quantity, Model model) {
+        if (isInsufficientQuerystring(itemId, quantity)) {
+            return "error/400";
+        }
         Optional<Order> optionalOrder = orderService.findByUserAndStatus(username);
-        if (!optionalOrder.isPresent() && itemId == null && quantity == null) {
+        if (isEmptyCart(itemId, quantity, optionalOrder)) {
             return "users/myEmptyCart";
         }
         Order order = optionalOrder.orElseThrow(EntityNotFoundException::new);
@@ -51,8 +57,8 @@ public class OrderController {
     @PostMapping("/users/{username}/orders/cart")
     public String orderLineCreate(@PathVariable String username, @RequestParam(required = false) Long itemId,
                                   @RequestParam(required = false) Integer quantity) {
-        if (itemId != null && quantity != null) {
-            orderService.order(username, itemId, quantity);
+        if (isItemsToAddInCart(itemId, quantity)) {
+            orderService.addOrderLineInCart(username, itemId, quantity);
         }
 
         return "redirect:/users/{username}/orders/cart";
@@ -68,7 +74,7 @@ public class OrderController {
         model.addAttribute("totalPrice", order.getTotalPrice());
         List<OrderItem> orderItems = orderService.findOrderItems(order.getOrderLines(), order.getId());
         model.addAttribute("orderItems", orderItems);
-        return "users/myOrder";
+        return "users/myOrders";
     }
 
     @PostMapping("/users/{username}/orders/{id}/create")
@@ -77,6 +83,31 @@ public class OrderController {
         orderService.completeOrder(order);
         return "redirect:/users/{username}/orders";
     }
+
+    @GetMapping("/users/{username}/orders/create")
+    public String orderDetails(@PathVariable String username, @RequestParam(required = false) Long itemId,
+                               @RequestParam(required = false) Integer quantity, Model model) {
+        if (isInsufficientQuerystring(itemId, quantity)) {
+            return "error/400";
+        }
+        Optional<Item> optionalItem = itemService.findById(itemId);
+        Item item = optionalItem.orElseThrow(EntityNotFoundException::new);
+        if (item.getCount() < quantity) {
+            throw new IllegalArgumentException(item.createExceptionMessage());
+        }
+        OrderItem orderItem = orderService.findOrderItem(item, quantity);
+        model.addAttribute("totalPrice", orderItem.getOrderPrice());
+        model.addAttribute("orderItem", orderItem);
+        return "users/myOrder";
+    }
+
+    @PostMapping("/users/{username}/orders/create")
+    public String orderCreate(@PathVariable String username, OrderItem orderItem) {
+        Order order = orderService.createOrder(username, orderItem.getItemId(), orderItem.getCount());
+        orderService.completeOrder(order);
+        return "redirect:/users/{username}/orders";
+    }
+
 
     @GetMapping("/users/{username}/orders")
     public String orderList(@PathVariable String username, @PageableDefault Pageable pageable, Model model) {
@@ -107,5 +138,17 @@ public class OrderController {
     public String orderCancel(@PathVariable String username, @PathVariable Long id) {
         orderService.cancelOrder(id);
         return "redirect:/users/{username}/orders";
+    }
+
+    private static boolean isEmptyCart(Long itemId, Integer quantity, Optional<Order> optionalOrder) {
+        return !optionalOrder.isPresent() && itemId == null && quantity == null;
+    }
+
+    private static boolean isInsufficientQuerystring(Long itemId, Integer quantity) {
+        return (itemId != null && quantity == null) || (itemId == null && quantity != null);
+    }
+
+    private static boolean isItemsToAddInCart(Long itemId, Integer quantity) {
+        return itemId != null && quantity != null;
     }
 }

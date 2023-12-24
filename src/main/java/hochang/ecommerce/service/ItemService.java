@@ -24,6 +24,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -79,7 +80,6 @@ public class ItemService {
 
     @Transactional
     public void modifyItem(ItemRegistration itemRegistration) throws IOException {
-        String originalFilename = itemRegistration.getImageFile().getOriginalFilename();
         Item item = itemRepository.findById(itemRegistration.getId()).orElseThrow(EntityNotFoundException::new);
         fileStore.deleteS3File(item.getStoreFileName());
         UploadFile uploadFile = fileStore.storeFile(itemRegistration.getImageFile());
@@ -99,6 +99,11 @@ public class ItemService {
             itemRepository.incrementViewsById(id, VIEWS_INCREMENTS.get(id));
         }
         VIEWS_INCREMENTS.clear();
+    }
+
+
+    public Optional<Item> findById(Long itemId) {
+        return itemRepository.findById(itemId);
     }
 
     private ItemRegistration toItemRegistration(Item item) {
