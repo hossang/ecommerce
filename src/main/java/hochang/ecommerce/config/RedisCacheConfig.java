@@ -58,7 +58,7 @@ public class RedisCacheConfig {
 
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
         cacheConfigurations.put(FIND_MAIN_ITEMS, redisCacheConfiguration.entryTtl(Duration.ofMinutes(LONG_1)));
-        cacheConfigurations.put(FIND_ORDER_ITEMS, redisCacheConfiguration.entryTtl(Duration.ofDays(LONG_1)));
+        cacheConfigurations.put(FIND_BULLETIN_ITEM, redisCacheConfiguration.entryTtl(Duration.ofDays(LONG_1)));
 
 
         return RedisCacheManager.RedisCacheManagerBuilder

@@ -12,6 +12,7 @@ import hochang.ecommerce.util.file.UploadFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -64,10 +65,11 @@ public class ItemService {
     public Page<MainItem> findMainItems(Pageable pageable) {
         return itemRepository.findMainItemsWithCoveringIndex(pageable);
     }
-
+    
+    @Cacheable(cacheNames = FIND_BULLETIN_ITEM, key = "#itemId")
     public BulletinItem findBulletinItem(Long itemId) {
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(EntityNotFoundException::new); //동시성 제어가 필요하다
+                .orElseThrow(EntityNotFoundException::new);
         return toBulletinItem(item);
     }
 
@@ -81,6 +83,7 @@ public class ItemService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = FIND_BULLETIN_ITEM, key = "#itemRegistration.id")
     public void modifyItem(ItemRegistration itemRegistration) throws IOException {
         Item item = itemRepository.findById(itemRegistration.getId()).orElseThrow(EntityNotFoundException::new);
         fileStore.deleteS3File(item.getStoreFileName());

@@ -12,8 +12,6 @@ import hochang.ecommerce.repository.OrderRepository;
 import hochang.ecommerce.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,8 +21,6 @@ import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static hochang.ecommerce.constants.CacheConstants.*;
 
 
 @Slf4j
@@ -40,7 +36,6 @@ public class OrderService {
     private final ItemRepository itemRepository;
 
     @Transactional
-    @CacheEvict(cacheNames = FIND_ORDER_ITEMS, key = "#result.id")
     public Order addOrderLineInCart(String username, Long itemId, Integer quantity) {
         User user = userRepository.findByUsername(username);
         Optional<Order> optionalOrder = orderRepository.findByUserAndStatusForUpdate(user, OrderStatus.ORDER);
@@ -68,7 +63,6 @@ public class OrderService {
         return orderRepository.findByUserAndStatus(user, OrderStatus.ORDER);
     }
 
-    @Cacheable(cacheNames = FIND_ORDER_ITEMS, key = "#orderId")
     public List<OrderItem> findOrderItems(List<OrderLine> orderLines, Long orderId) {
         List<OrderItem> orderItems = new ArrayList<>();
         for (OrderLine orderLine : orderLines) {
