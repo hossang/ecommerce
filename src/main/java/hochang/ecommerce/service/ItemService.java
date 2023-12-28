@@ -1,6 +1,7 @@
 package hochang.ecommerce.service;
 
 import hochang.ecommerce.domain.Item;
+import hochang.ecommerce.domain.ItemContent;
 import hochang.ecommerce.dto.BoardItem;
 import hochang.ecommerce.dto.BulletinItem;
 import hochang.ecommerce.dto.ItemRegistration;
@@ -49,7 +50,8 @@ public class ItemService {
     @Transactional
     public Long save(ItemRegistration itemRegistration) throws IOException {
         UploadFile uploadFile = fileStore.storeFile(itemRegistration.getImageFile());
-        Item item = toItem(itemRegistration, uploadFile);
+        ItemContent itemContent = createItemContent(itemRegistration);
+        Item item = createItem(itemRegistration, uploadFile, itemContent);
         return itemRepository.save(item).getId();
     }
 
@@ -83,8 +85,9 @@ public class ItemService {
         Item item = itemRepository.findById(itemRegistration.getId()).orElseThrow(EntityNotFoundException::new);
         fileStore.deleteS3File(item.getStoreFileName());
         UploadFile uploadFile = fileStore.storeFile(itemRegistration.getImageFile());
-        itemRepository.modifyItem(item.getId(), itemRegistration.getCount(), itemRegistration.getContents(),
-                uploadFile.getUploadFileName(), uploadFile.getStoreFileName());
+        item.getItemContent().modifyContents(itemRegistration.getContents());
+        itemRepository.modifyItem(item.getId(), itemRegistration.getCount(), uploadFile.getUploadFileName(),
+                uploadFile.getStoreFileName());
     }
 
     public Resource getImage(String filename) throws MalformedURLException {
@@ -112,16 +115,16 @@ public class ItemService {
         itemRegistration.setName(item.getName());
         itemRegistration.setCount(item.getCount());
         itemRegistration.setPrice(item.getPrice());
-        itemRegistration.setContents(item.getContents());
+        itemRegistration.setContents(item.getItemContent().getContents());
         return itemRegistration;
     }
 
-    private Item toItem(ItemRegistration itemRegistration, UploadFile uploadFile) {
+    private Item createItem(ItemRegistration itemRegistration, UploadFile uploadFile, ItemContent itemContent) {
         return Item.builder()
                 .name(itemRegistration.getName())
                 .count(itemRegistration.getCount())
                 .price(itemRegistration.getPrice())
-                .contents(itemRegistration.getContents())
+                .itemContent(itemContent)
                 .uploadFileName(uploadFile.getUploadFileName())
                 .storeFileName(uploadFile.getStoreFileName())
                 .build();
@@ -141,8 +144,17 @@ public class ItemService {
         bulletinItem.setId(item.getId());
         bulletinItem.setName(item.getName());
         bulletinItem.setPrice(item.getPrice());
-        bulletinItem.setContents(item.getContents());
+        bulletinItem.setContents(item.getItemContent().getContents());
         bulletinItem.setStoreFileName(item.getStoreFileName());
         return bulletinItem;
     }
+
+
+    private ItemContent createItemContent(ItemRegistration itemRegistration) {
+        return ItemContent.builder()
+                .contents(itemRegistration.getContents())
+                .build();
+
+    }
+
 }

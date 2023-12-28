@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -16,6 +17,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.util.List;
@@ -37,15 +39,16 @@ public class Item extends BaseEntity {
     @Column(name = "item_id")
     private Long id;
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "item_content_id")
+    private ItemContent itemContent;
+
     @Column(length = INT_40)
     private String name;
 
     private int count;
 
     private long price;
-
-    @Lob
-    private String contents;
 
     @ColumnDefault("0")
     private long views;
@@ -55,11 +58,11 @@ public class Item extends BaseEntity {
     private String storeFileName;
 
     @Builder
-    public Item(String name, int count, long price, String contents, String uploadFileName, String storeFileName) {
+    public Item(String name, int count, long price, ItemContent itemContent, String uploadFileName, String storeFileName) {
         this.name = name;
         this.count = count;
         this.price = price;
-        this.contents = contents;
+        this.itemContent = itemContent;
         this.uploadFileName = uploadFileName;
         this.storeFileName = storeFileName;
     }

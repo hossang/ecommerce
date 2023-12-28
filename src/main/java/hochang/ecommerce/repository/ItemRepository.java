@@ -14,9 +14,9 @@ public interface ItemRepository extends JpaRepository<Item, Long>, ItemRepositor
     void incrementViewsById(@Param("itemId") Long itemId, @Param("increment") Long increment);
 
     @Modifying
-    @Query("update Item i set i.count = :count, i.contents = :contents, i.uploadFileName = :uploadFileName," +
+    @Query("update Item i set i.count = :count, i.uploadFileName = :uploadFileName," +
             " i.storeFileName = :storeFileName where i.id = :itemId")
-    void modifyItem(@Param("itemId") Long itemId, @Param("count") int count, @Param("contents") String contents,
+    void modifyItem(@Param("itemId") Long itemId, @Param("count") int count,
                     @Param("uploadFileName") String uploadFileName, @Param("storeFileName") String storeFileName);
 
     Page<Item> findAll(Pageable pageable);
