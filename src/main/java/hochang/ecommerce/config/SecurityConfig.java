@@ -30,8 +30,8 @@ public class SecurityConfig {
                 .logoutSuccessUrl("/");
         http
                 .authorizeRequests()
-                .antMatchers("/admins/**").hasRole("ADMIN")
-                .antMatchers("/users/**").hasAnyRole("ADMIN", "USER")
+                .mvcMatchers("/admins/**").hasRole("ADMIN")
+                .mvcMatchers("/users/**").hasAnyRole("ADMIN", "USER")
                 .anyRequest().permitAll();
         return http.build();
     }
