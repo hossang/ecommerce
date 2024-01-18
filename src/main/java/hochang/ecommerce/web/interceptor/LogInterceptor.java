@@ -7,6 +7,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.StringTokenizer;
 import java.util.UUID;
 
 @Slf4j
@@ -17,22 +18,23 @@ public class LogInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String requestURI = request.getRequestURI();
-
-        String uuid = UUID.randomUUID().toString();
-        request.setAttribute(LOG_ID, uuid);
+        String logId = UUID.randomUUID().toString().substring(0, 8);
+        request.setAttribute(LOG_ID, logId);
 
         if (handler instanceof HandlerMethod == false) {
             return true;
         }
         HandlerMethod handlerMethod = (HandlerMethod) handler;
 
-        log.info("REQUEST [{}][{}][{}]", uuid, requestURI, handlerMethod);
+        log.info("REQUEST [{}][{}][{}]", logId, requestURI, handlerMethod);
         return true;
     }
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        log.info("postHandle [{}]", modelAndView);
+        if (modelAndView instanceof ModelAndView) {
+            log.info("postHandle [{}]", modelAndView);
+        }
     }
 
     @Override

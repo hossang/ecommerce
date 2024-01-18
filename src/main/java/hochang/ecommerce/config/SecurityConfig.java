@@ -8,7 +8,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 @Configuration
 @EnableWebSecurity
@@ -18,6 +20,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        HandlerMappingIntrospector handlerMappingIntrospector = new HandlerMappingIntrospector();
         http
                 .formLogin()
                 .loginPage("/sign-in")
@@ -26,7 +29,7 @@ public class SecurityConfig {
                 .failureUrl("/sign-in?error=true")
                 .and()
                 .logout()
-                .logoutRequestMatcher(new AntPathRequestMatcher("/users/*/sign-out"))
+                .logoutRequestMatcher(new MvcRequestMatcher(handlerMappingIntrospector, "/users/*/sign-out"))
                 .logoutSuccessUrl("/");
         http
                 .authorizeRequests()

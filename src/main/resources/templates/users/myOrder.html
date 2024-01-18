@@ -12,13 +12,13 @@
         }
     </style>
 </head>
-<body class = "d-flex flex-column min-vh-100">
+<body class="d-flex flex-column min-vh-100">
 <!-- 헤더 -->
 <div th:replace="~{fragment/bodyHeader :: userAdinHeader(${username})}"></div>
 
 <form th:action th:object="${orderItem}" method="post">
     <div class="container mt-4">
-        <h1 class = "mt-4">결제 페이지</h1>
+        <h1 class="mt-4">결제 페이지</h1>
         <div class="row">
             <div class="col">
                 <table class="table">
@@ -33,19 +33,19 @@
                     </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td></td>
-                            <td class="image-cell">
-                                <!-- 이미지 -->
-                                <img th:src="|/images/${orderItem.storeFileName}|" class="product-image">
-                            </td>
-                            <input type="hidden" th:name="itemId" th:value="${orderItem.itemId}">
-                            <input type="hidden" th:name="count" th:value="${orderItem.count}">
-                            <td th:text="${orderItem.name}"></td>
-                            <td th:text="${orderItem.price}"></td>
-                            <td th:text="${orderItem.count}"></td>
-                            <td th:text="${orderItem.orderPrice}"></td>
-                        </tr>
+                    <tr>
+                        <td></td>
+                        <td class="image-cell">
+                            <!-- 이미지 -->
+                            <img th:src="|/images/${orderItem.storeFileName}|" class="product-image">
+                        </td>
+                        <input type="hidden" th:name="itemId" th:value="${orderItem.itemId}">
+                        <input type="hidden" th:name="count" th:value="${orderItem.count}">
+                        <td th:text="${orderItem.name}"></td>
+                        <td th:text="${orderItem.price}"></td>
+                        <td th:text="${orderItem.count}"></td>
+                        <td th:text="${orderItem.orderPrice}"></td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -53,6 +53,43 @@
     </div>
     <div th:if="${errorMessage}">
         <p th:text="${errorMessage}" class="error-message text-danger"></p>
+    </div>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col">
+                <div th:if="${orderAddresses.size()==0}">
+                    배송지가 없습니다.
+                </div>
+                <div th:unless="${orderAddresses.size()==0}">
+                    <select id="shippingAddress" name="shippingAddress" class="form-select">
+                        <option value="">배송지를 선택하세요</option>
+                        <th:block th:each="orderAddress : ${orderAddresses}">
+                            <option th:value="${orderAddress}" th:text="${orderAddress.address} + ' ' + ${orderAddress.detailAddress}"></option>
+                        </th:block>
+                    </select>
+                </div>
+
+                <!-- 라디오 헤드
+                <div th:unless="${orderAddresses.size()==0}" th:each="orderAddress, iterStat : ${orderAddresses}">
+                    <label>배송지 선택:</label>
+                    <div class="form-check">
+                        <input type="radio" th:id="'addressRadio' + ${iterStat.index}" th:name="shippingAddress" th:value="${orderAddress}" class="form-check-input">
+                        <label th:for="'addressRadio' + ${iterStat.index}" class="form-check-label" th:text="${orderAddress.getAddress()} + ' ' + ${orderAddress.getDetailAddress()}"></label>
+                    </div>
+                </div>-->
+                <!--다음 배송지 api-->
+                <input type="text" id="sample4_postcode" placeholder="우편번호">
+                <input type="button" class="btn btn-primary mt-2" onclick="sample4_execDaumPostcode()" value="우편번호 찾기"><br>
+                <input type="text" id="sample4_roadAddress" placeholder="도로명주소">
+                <input type="text" id="sample4_jibunAddress" placeholder="지번주소">
+                <span id="guide" style="color:#999;display:none"></span>
+                <input type="text" id="sample4_detailAddress" placeholder="상세주소">
+                <input type="text" id="sample4_extraAddress" placeholder="참고항목">
+
+                <!--배송지 추가-->
+                <button type="button" class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#addAddressModal">배송지 추가</button>
+            </div>
+        </div>
     </div>
     <h2 class="text-center mb-4">총 주문 가격: <span th:text="${totalPrice}"></span></h2>
     <div class="container">
@@ -64,8 +101,95 @@
     </div>
     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 </form>
+
+<!--&lt;!&ndash; 배송지 추가 모달 &ndash;&gt; 라디오헤드
+<div class="modal fade" id="addAddressModal" tabindex="-1" aria-labelledby="addAddressModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addAddressModalLabel">배송지 추가</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                &lt;!&ndash; 새로운 배송지 추가 폼 &ndash;&gt;
+                <form th:action="@{/users/{username}/shippingAddresses/register(username=${username})}" th:object="${FreshOrderAddress}" method="post">
+                    &lt;!&ndash; 필요한 입력 필드들 추가 &ndash;&gt;
+                    <div class="mb-3">
+                        <label for="address" class="form-label">주소:</label>
+                        <input type="text" class="form-control" id="address" name="address" th:value="${FreshOrderAddress.address}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="detailAddress" class="form-label">상세주소:</label>
+                        <input type="text" class="form-control" id="detailAddress" name="detailAddress" th:value="${FreshOrderAddress.detailAddress}" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">추가하기</button>
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>-->
+
 <!-- 푸터 -->
 <div th:replace="~{fragment/bodyFooter :: footer}"></div>
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script>
+    //본 예제에서는 도로명 주소 표기 방식에 대한 법령에 따라, 내려오는 데이터를 조합하여 올바른 주소를 구성하는 방법을 설명합니다.
+    function sample4_execDaumPostcode() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+                // 도로명 주소의 노출 규칙에 따라 주소를 표시한다.
+                // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+                var roadAddr = data.roadAddress; // 도로명 주소 변수
+                var extraRoadAddr = ''; // 참고 항목 변수
+
+                // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+                // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+                if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+                    extraRoadAddr += data.bname;
+                }
+                // 건물명이 있고, 공동주택일 경우 추가한다.
+                if(data.buildingName !== '' && data.apartment === 'Y'){
+                    extraRoadAddr += (extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                }
+                // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+                if(extraRoadAddr !== ''){
+                    extraRoadAddr = ' (' + extraRoadAddr + ')';
+                }
+
+                // 우편번호와 주소 정보를 해당 필드에 넣는다.
+                document.getElementById('sample4_postcode').value = data.zonecode;
+                document.getElementById("sample4_roadAddress").value = roadAddr;
+                document.getElementById("sample4_jibunAddress").value = data.jibunAddress;
+
+                // 참고항목 문자열이 있을 경우 해당 필드에 넣는다.
+                if(roadAddr !== ''){
+                    document.getElementById("sample4_extraAddress").value = extraRoadAddr;
+                } else {
+                    document.getElementById("sample4_extraAddress").value = '';
+                }
+
+                var guideTextBox = document.getElementById("guide");
+                // 사용자가 '선택 안함'을 클릭한 경우, 예상 주소라는 표시를 해준다.
+                if(data.autoRoadAddress) {
+                    var expRoadAddr = data.autoRoadAddress + extraRoadAddr;
+                    guideTextBox.innerHTML = '(예상 도로명 주소 : ' + expRoadAddr + ')';
+                    guideTextBox.style.display = 'block';
+
+                } else if(data.autoJibunAddress) {
+                    var expJibunAddr = data.autoJibunAddress;
+                    guideTextBox.innerHTML = '(예상 지번 주소 : ' + expJibunAddr + ')';
+                    guideTextBox.style.display = 'block';
+                } else {
+                    guideTextBox.innerHTML = '';
+                    guideTextBox.style.display = 'none';
+                }
+            }
+        }).open();
+    }
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

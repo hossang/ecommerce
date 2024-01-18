@@ -57,7 +57,7 @@ public class RedisCacheConfig {
                 .computePrefixWith(CacheKeyPrefix.simple());
 
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-        cacheConfigurations.put(FIND_MAIN_ITEMS, redisCacheConfiguration.entryTtl(Duration.ofMinutes(LONG_1)));
+        cacheConfigurations.put(FIND_MAIN_ITEMS_WITH_COVERING_INDEX, redisCacheConfiguration.entryTtl(Duration.ofMinutes(LONG_1)));
         cacheConfigurations.put(FIND_BULLETIN_ITEM, redisCacheConfiguration.entryTtl(Duration.ofDays(LONG_1)));
 
 

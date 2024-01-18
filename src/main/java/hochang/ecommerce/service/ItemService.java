@@ -5,6 +5,7 @@ import hochang.ecommerce.domain.ItemContent;
 import hochang.ecommerce.dto.BoardItem;
 import hochang.ecommerce.dto.BulletinItem;
 import hochang.ecommerce.dto.ItemRegistration;
+import hochang.ecommerce.dto.ItemSearch;
 import hochang.ecommerce.dto.MainItem;
 import hochang.ecommerce.repository.ItemRepository;
 import hochang.ecommerce.util.file.S3FileStore;
@@ -61,9 +62,13 @@ public class ItemService {
         return itemPage.map(this::toBoardItem);
     }
 
-    @Cacheable(cacheNames = FIND_MAIN_ITEMS, key = "#pageable.pageSize.toString().concat('-').concat(#pageable.pageNumber)")
-    public Page<MainItem> findMainItems(Pageable pageable) {
+    @Cacheable(cacheNames = FIND_MAIN_ITEMS_WITH_COVERING_INDEX, key = "#pageable.pageSize.toString().concat('-').concat(#pageable.pageNumber)")
+    public Page<MainItem> findMainItemsWithCoveringIndex(Pageable pageable) {
         return itemRepository.findMainItemsWithCoveringIndex(pageable);
+    }
+
+    public Page<MainItem> findSearchedMainItems(Pageable pageable, ItemSearch itemSearch) {
+        return itemRepository.findSearchedMainItems(pageable, itemSearch);
     }
     
     @Cacheable(cacheNames = FIND_BULLETIN_ITEM, key = "#itemId")
@@ -133,6 +138,13 @@ public class ItemService {
                 .build();
     }
 
+    private ItemContent createItemContent(ItemRegistration itemRegistration) {
+        return ItemContent.builder()
+                .contents(itemRegistration.getContents())
+                .build();
+
+    }
+
     private BoardItem toBoardItem(Item item) {
         BoardItem boardItem = new BoardItem();
         boardItem.setId(item.getId());
@@ -151,13 +163,4 @@ public class ItemService {
         bulletinItem.setStoreFileName(item.getStoreFileName());
         return bulletinItem;
     }
-
-
-    private ItemContent createItemContent(ItemRegistration itemRegistration) {
-        return ItemContent.builder()
-                .contents(itemRegistration.getContents())
-                .build();
-
-    }
-
 }

@@ -14,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import static hochang.ecommerce.web.PageConstants.END_RANGE;
+import static hochang.ecommerce.web.PageConstants.PAGE_SIZE_MAIN_ITEM;
 import static hochang.ecommerce.web.PageConstants.PREVENTION_NEGATIVE_NUMBERS;
 import static hochang.ecommerce.web.PageConstants.PREVENTION_ZERO;
 import static hochang.ecommerce.web.PageConstants.START_RANGE;
@@ -22,15 +23,15 @@ import static hochang.ecommerce.web.PageConstants.START_RANGE;
 @Controller
 @RequiredArgsConstructor
 public class HomeController {
-    private static final int PAGE_SIZE = 8;
+
 
     private final ItemService itemService;
 
     @GetMapping("/")
     public String homePage(@SignIn String username,
-                           @PageableDefault(sort = "views", direction = Sort.Direction.DESC, size = PAGE_SIZE) Pageable pageable,
+                           @PageableDefault(sort = "views", direction = Sort.Direction.DESC, size = PAGE_SIZE_MAIN_ITEM) Pageable pageable,
                            Model model) {
-        Page<MainItem> mainItems = itemService.findMainItems(pageable);
+        Page<MainItem> mainItems = itemService.findMainItemsWithCoveringIndex(pageable);
         int nowPage = mainItems.getPageable().getPageNumber() + PREVENTION_ZERO;
         int startPage = Math.max(PREVENTION_NEGATIVE_NUMBERS, nowPage - START_RANGE);
         int endPage = Math.min(mainItems.getTotalPages(), nowPage + END_RANGE);

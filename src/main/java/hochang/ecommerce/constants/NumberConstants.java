@@ -5,7 +5,7 @@ public abstract class NumberConstants {
     public static final int INT_1 = 1;
     public static final int INT_2 = 2;
     public static final int INT_3 = 3;
-
+    public static final int INT_4 = 4;
     public static final int INT_5 = 5;
 
     public static final int INT_10 = 10;

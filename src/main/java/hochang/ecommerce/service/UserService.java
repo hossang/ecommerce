@@ -35,7 +35,7 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public User join(UserRegistration userRegistration, Role role) {
-        User user = toUser(userRegistration, role);
+        User user = createUser(userRegistration, role);
         validateDuplicateUser(user);
         return userRepository.save(user);
 
@@ -111,7 +111,7 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    private User toUser(UserRegistration userRegistration, Role role) {
+    private User createUser(UserRegistration userRegistration, Role role) {
         return User.builder().username(userRegistration.getUsername())
                 .password(encoder.encode(userRegistration.getPassword()))
                 .name(userRegistration.getName())

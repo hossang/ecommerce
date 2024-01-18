@@ -3,6 +3,8 @@ package hochang.ecommerce.web;
 import hochang.ecommerce.dto.BoardItem;
 import hochang.ecommerce.dto.BulletinItem;
 import hochang.ecommerce.dto.ItemRegistration;
+import hochang.ecommerce.dto.ItemSearch;
+import hochang.ecommerce.dto.MainItem;
 import hochang.ecommerce.service.ItemService;
 import hochang.ecommerce.web.annotation.SignIn;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 
 import static hochang.ecommerce.web.PageConstants.END_RANGE;
+import static hochang.ecommerce.web.PageConstants.PAGE_SIZE_MAIN_ITEM;
 import static hochang.ecommerce.web.PageConstants.PREVENTION_NEGATIVE_NUMBERS;
 import static hochang.ecommerce.web.PageConstants.PREVENTION_ZERO;
 import static hochang.ecommerce.web.PageConstants.START_RANGE;
@@ -102,6 +105,23 @@ public class ItemController {
         itemService.modifyItem(itemRegistration);
         return "redirect:/admins/{username}/items";
 
+    }
+
+    @GetMapping("/items/search")
+    public String searchedItemList(@PageableDefault(sort = "views", direction = Sort.Direction.DESC,
+            size = PAGE_SIZE_MAIN_ITEM) Pageable pageable, ItemSearch itemSearch, Model model) {
+        Page<MainItem> searchedMainItems = itemService.findSearchedMainItems(pageable, itemSearch);
+
+        int nowPage = searchedMainItems.getPageable().getPageNumber() + PREVENTION_ZERO;
+        int startPage = Math.max(PREVENTION_NEGATIVE_NUMBERS, nowPage - START_RANGE);
+        int endPage = Math.min(searchedMainItems.getTotalPages(), nowPage + END_RANGE);
+
+        model.addAttribute("searchedMainItems", searchedMainItems);
+        model.addAttribute("nowPage", nowPage);
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
+
+        return "guests/searchedItemList";
     }
 
     @ResponseBody
