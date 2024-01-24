@@ -39,6 +39,10 @@ public class Order extends BaseEntity {
     @JoinColumn(name = "users_id")
     private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shippingAddress_id")
+    private ShippingAddress shippingAddress;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderLine> orderLines = new ArrayList<>();
 
@@ -49,8 +53,9 @@ public class Order extends BaseEntity {
     private long totalPrice;
 
     @Builder
-    public Order(User user, OrderLine orderLine) {
+    public Order(User user, ShippingAddress shippingAddress, OrderLine orderLine) {
         this.user = user;
+        this.shippingAddress = shippingAddress;
         addOrderLine(orderLine);
         this.status = OrderStatus.ORDER;
         calculateTotalPrice();
@@ -59,6 +64,10 @@ public class Order extends BaseEntity {
     public void addOrderLine(OrderLine orderLine) {
         orderLines.add(orderLine);
         orderLine.addOrder(this);
+    }
+
+    public void linkForeignEntity(ShippingAddress shippingAddress) {
+        this.shippingAddress = shippingAddress;
     }
 
     public void calculateTotalPrice() {

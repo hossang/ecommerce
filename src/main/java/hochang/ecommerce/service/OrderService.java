@@ -4,11 +4,14 @@ import hochang.ecommerce.domain.Item;
 import hochang.ecommerce.domain.Order;
 import hochang.ecommerce.domain.OrderLine;
 import hochang.ecommerce.domain.OrderStatus;
+import hochang.ecommerce.domain.ShippingAddress;
 import hochang.ecommerce.domain.User;
 import hochang.ecommerce.dto.BoardOrder;
+import hochang.ecommerce.dto.OrderingUser;
 import hochang.ecommerce.dto.OrderItem;
 import hochang.ecommerce.repository.ItemRepository;
 import hochang.ecommerce.repository.OrderRepository;
+import hochang.ecommerce.repository.ShippingAddressRepository;
 import hochang.ecommerce.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +37,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
+    private final ShippingAddressRepository shippingAddressRepository;
 
     @Transactional
     public Order addOrderLineInCart(String username, Long itemId, Integer quantity) {
@@ -58,12 +62,48 @@ public class OrderService {
         order.cancelOrder();
     }
 
+    @Transactional
+    public Order createOrder(String username, Long itemId, int count) {
+        User user = userRepository.findByUsername(username);
+        OrderLine orderLine = createOrderLine(itemId, count);
+        Order order = Order.builder()
+                .user(user)
+                .orderLine(orderLine)
+                .build();
+
+        return orderRepository.save(order);
+    }
+
+    @Transactional
+    public Order createOrder(String username, OrderItem orderItem, OrderingUser orderingUser) {
+        User user = userRepository.findByUsername(username);
+        ShippingAddress shippingAddress = shippingAddressRepository.findById(orderingUser.getShippingAddressId())
+                .orElseThrow(EntityNotFoundException::new);
+        OrderLine orderLine = createOrderLine(orderItem.getItemId(), orderItem.getCount());
+        Order order = Order.builder()
+                .user(user)
+                .shippingAddress(shippingAddress)
+                .orderLine(orderLine)
+                .build();
+
+        return orderRepository.save(order);
+    }
+
+    public Order findOrder(Long id) {
+        return orderRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+    }
+
     public Optional<Order> findByUserAndStatus(String username) {
         User user = userRepository.findByUsername(username);
         return orderRepository.findByUserAndStatus(user, OrderStatus.ORDER);
     }
 
-    public List<OrderItem> findOrderItems(List<OrderLine> orderLines, Long orderId) {
+    public OrderingUser findOrderingUser(Long id) {
+        Order order = findOrder(id);
+        return toOrderingUser(order);
+    }
+
+    public List<OrderItem> findOrderItems(List<OrderLine> orderLines) {
         List<OrderItem> orderItems = new ArrayList<>();
         for (OrderLine orderLine : orderLines) {
             orderItems.add(toOrderItem(orderLine));
@@ -83,25 +123,13 @@ public class OrderService {
     }
 
     public BoardOrder findBoardOrder(Long id) {
-        Order order = orderRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        Order order = findOrder(id);
         return toBoardOrder(order);
     }
 
     public List<OrderLine> findOrderLines(Long id) {
-        Order order = orderRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        Order order = findOrder(id);
         return order.getOrderLines();
-    }
-
-    @Transactional
-    public Order createOrder(String username, Long itemId, int quantity) {
-        User user = userRepository.findByUsername(username);
-        OrderLine orderLine = createOrderLine(itemId, quantity);
-        Order order = Order.builder()
-                .user(user)
-                .orderLine(orderLine)
-                .build();
-
-        return orderRepository.save(order);
     }
 
     private Order addOrderLine(Order order, Long itemId, int quantity) {
@@ -132,9 +160,9 @@ public class OrderService {
         return orderLine.getItem().getId().equals(itemId);
     }
 
-    private String makeOrderLineNames(Order o) {
+    private String makeOrderLineNames(Order order) {
         StringBuilder stringbuilder = new StringBuilder();
-        for (OrderLine orderLine : o.getOrderLines()) {
+        for (OrderLine orderLine : order.getOrderLines()) {
             stringbuilder.append(orderLine.getItem().getName()).append(", "); //N + 1
         }
         if (!stringbuilder.isEmpty()) {
@@ -167,13 +195,21 @@ public class OrderService {
     }
 
 
-    private BoardOrder toBoardOrder(Order o) {
+    private BoardOrder toBoardOrder(Order order) {
         BoardOrder boardOrder = new BoardOrder();
-        boardOrder.setId(o.getId());
-        boardOrder.setOrderLineNames(makeOrderLineNames(o));
-        boardOrder.setStatus(OrderStatusConstants.ORDER_STATUSES.get(o.getStatus()));
-        boardOrder.setTotalPrice(o.getTotalPrice());
-        boardOrder.setCreateDate(o.getCreatedDate());
+        boardOrder.setId(order.getId());
+        boardOrder.setOrderLineNames(makeOrderLineNames(order));
+        boardOrder.setStatus(OrderStatusConstants.ORDER_STATUSES.get(order.getStatus()));
+        boardOrder.setTotalPrice(order.getTotalPrice());
+        boardOrder.setCreateDate(order.getCreatedDate());
         return boardOrder;
+    }
+
+    private OrderingUser toOrderingUser(Order order) {
+        OrderingUser orderingUser = new OrderingUser();
+        ShippingAddress shippingAddress = order.getShippingAddress();
+        orderingUser.setShippingAddressId(shippingAddress.getId());
+        orderingUser.setFullAddress(shippingAddress.getAddress() + " " + shippingAddress.getDetailAddress());
+        return orderingUser;
     }
 }

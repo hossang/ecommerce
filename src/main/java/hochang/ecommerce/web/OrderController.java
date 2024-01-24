@@ -3,10 +3,14 @@ package hochang.ecommerce.web;
 import hochang.ecommerce.domain.Item;
 import hochang.ecommerce.domain.Order;
 import hochang.ecommerce.domain.OrderLine;
+import hochang.ecommerce.domain.ShippingAddress;
+import hochang.ecommerce.dto.OrderingUser;
 import hochang.ecommerce.dto.BoardOrder;
+import hochang.ecommerce.dto.OrderAddress;
 import hochang.ecommerce.dto.OrderItem;
 import hochang.ecommerce.service.ItemService;
 import hochang.ecommerce.service.OrderService;
+import hochang.ecommerce.service.ShippingAddressService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -34,12 +38,13 @@ import static hochang.ecommerce.web.PageConstants.START_RANGE;
 public class OrderController {
     private final OrderService orderService;
     private final ItemService itemService;
+    private final ShippingAddressService shippingAddressService;
 
 
     @GetMapping("/users/{username}/orders/cart")
     public String orderLineList(@PathVariable String username, @RequestParam(required = false) Long itemId,
                                 @RequestParam(required = false) Integer quantity, Model model) {
-        if (isInsufficientQuerystring(itemId, quantity)) {
+        if (isInsufficientPurchase(itemId, quantity)) {
             return "error/400";
         }
         Optional<Order> optionalOrder = orderService.findByUserAndStatus(username);
@@ -47,7 +52,7 @@ public class OrderController {
             return "users/myEmptyCart";
         }
         Order order = optionalOrder.orElseThrow(EntityNotFoundException::new);
-        List<OrderItem> orderItems = orderService.findOrderItems(order.getOrderLines(), order.getId());
+        List<OrderItem> orderItems = orderService.findOrderItems(order.getOrderLines());
         model.addAttribute("username", username);
         model.addAttribute("id", order.getId());
         model.addAttribute("orderItems", orderItems);
@@ -71,15 +76,20 @@ public class OrderController {
             return "users/myEmptyCart";
         }
         Order order = optionalOrder.orElseThrow(EntityNotFoundException::new);
+        List<OrderAddress> availableOrderAddresses = shippingAddressService.findOrderAddresses(username);
+        List<OrderItem> orderItems = orderService.findOrderItems(order.getOrderLines());
         model.addAttribute("totalPrice", order.getTotalPrice());
-        List<OrderItem> orderItems = orderService.findOrderItems(order.getOrderLines(), order.getId());
+        model.addAttribute("availableOrderAddresses", availableOrderAddresses);
         model.addAttribute("orderItems", orderItems);
         return "users/myOrders";
     }
 
     @PostMapping("/users/{username}/orders/{id}/create")
-    public String orderCreate(@PathVariable String username, @PathVariable Long id) {
+    public String orderCreate(@PathVariable String username, @PathVariable Long id, OrderingUser orderingUser) {
         Order order = orderService.findByUserAndStatus(username).orElseThrow(EntityNotFoundException::new);
+        ShippingAddress shippingAddress = shippingAddressService
+                .findShippingAddress(orderingUser.getShippingAddressId());
+        order.linkForeignEntity(shippingAddress);
         orderService.completeOrder(order);
         return "redirect:/users/{username}/orders";
     }
@@ -87,7 +97,7 @@ public class OrderController {
     @GetMapping("/users/{username}/orders/create")
     public String orderDetails(@PathVariable String username, @RequestParam(required = false) Long itemId,
                                @RequestParam(required = false) Integer quantity, Model model) {
-        if (isInsufficientQuerystring(itemId, quantity)) {
+        if (!isItemsToAddInCart(itemId, quantity)) {
             return "error/400";
         }
         Optional<Item> optionalItem = itemService.findById(itemId);
@@ -95,15 +105,17 @@ public class OrderController {
         if (item.getCount() < quantity) {
             throw new IllegalArgumentException(item.createExceptionMessage());
         }
+        List<OrderAddress> availableOrderAddresses = shippingAddressService.findOrderAddresses(username);
         OrderItem orderItem = orderService.findOrderItem(item, quantity);
+        model.addAttribute("availableOrderAddresses", availableOrderAddresses);
         model.addAttribute("totalPrice", orderItem.getOrderPrice());
         model.addAttribute("orderItem", orderItem);
         return "users/myOrder";
     }
 
     @PostMapping("/users/{username}/orders/create")
-    public String orderCreate(@PathVariable String username, OrderItem orderItem) {
-        Order order = orderService.createOrder(username, orderItem.getItemId(), orderItem.getCount());
+    public String orderCreate(@PathVariable String username, OrderItem orderItem, OrderingUser orderingUser) {
+        Order order = orderService.createOrder(username, orderItem, orderingUser);
         orderService.completeOrder(order);
         return "redirect:/users/{username}/orders";
     }
@@ -128,9 +140,11 @@ public class OrderController {
     public String orderDetail(@PathVariable String username, @PathVariable Long id, Model model) {
         BoardOrder boardOrder = orderService.findBoardOrder(id);
         List<OrderLine> orderLines = orderService.findOrderLines(id);
-        List<OrderItem> orderItems = orderService.findOrderItems(orderLines, id);
+        List<OrderItem> orderItems = orderService.findOrderItems(orderLines);
+        OrderingUser orderingUser = orderService.findOrderingUser(boardOrder.getId());
         model.addAttribute("boardOrder", boardOrder);
         model.addAttribute("orderItems", orderItems);
+        model.addAttribute("orderingUser", orderingUser);
         return "users/orderDetail";
     }
 
@@ -140,15 +154,15 @@ public class OrderController {
         return "redirect:/users/{username}/orders";
     }
 
-    private static boolean isEmptyCart(Long itemId, Integer quantity, Optional<Order> optionalOrder) {
+    private boolean isEmptyCart(Long itemId, Integer quantity, Optional<Order> optionalOrder) {
         return !optionalOrder.isPresent() && itemId == null && quantity == null;
     }
 
-    private static boolean isInsufficientQuerystring(Long itemId, Integer quantity) {
+    private boolean isInsufficientPurchase(Long itemId, Integer quantity) {
         return (itemId != null && quantity == null) || (itemId == null && quantity != null);
     }
 
-    private static boolean isItemsToAddInCart(Long itemId, Integer quantity) {
+    private boolean isItemsToAddInCart(Long itemId, Integer quantity) {
         return itemId != null && quantity != null;
     }
 }
