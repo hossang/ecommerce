@@ -43,6 +43,11 @@ public class Order extends BaseEntity {
     @JoinColumn(name = "shippingAddress_id")
     private ShippingAddress shippingAddress;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id")
+    //왜래키관계 고민
+    private Account account;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderLine> orderLines = new ArrayList<>();
 
@@ -53,9 +58,10 @@ public class Order extends BaseEntity {
     private long totalPrice;
 
     @Builder
-    public Order(User user, ShippingAddress shippingAddress, OrderLine orderLine) {
+    public Order(User user, ShippingAddress shippingAddress, Account account, OrderLine orderLine) {
         this.user = user;
         this.shippingAddress = shippingAddress;
+        this.account = account;
         addOrderLine(orderLine);
         this.status = OrderStatus.ORDER;
         calculateTotalPrice();
@@ -66,8 +72,9 @@ public class Order extends BaseEntity {
         orderLine.addOrder(this);
     }
 
-    public void linkForeignEntity(ShippingAddress shippingAddress) {
+    public void linkForeignEntity(ShippingAddress shippingAddress, Account account) {
         this.shippingAddress = shippingAddress;
+        this.account = account;
     }
 
     public void calculateTotalPrice() {
@@ -78,11 +85,13 @@ public class Order extends BaseEntity {
     }
 
     public void completeOrder() {
+        account.pay(totalPrice);
         this.status = OrderStatus.COMPLETE;
     }
 
     public void cancelOrder() {
         this.status = OrderStatus.CANCEL;
+        account.refund(getTotalPrice());
         restoreItem();
     }
 

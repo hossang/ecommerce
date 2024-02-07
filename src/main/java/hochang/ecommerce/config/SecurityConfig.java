@@ -22,6 +22,12 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         HandlerMappingIntrospector handlerMappingIntrospector = new HandlerMappingIntrospector();
         http
+                .csrf(c -> {
+                    MvcRequestMatcher mvcRequestMatcher = new MvcRequestMatcher(handlerMappingIntrospector,
+                            "/actuator/loggers/**");
+                    c.ignoringRequestMatchers(mvcRequestMatcher);
+                });
+        http
                 .formLogin()
                 .loginPage("/sign-in")
                 .successHandler(customAuthenticationSuccessHandler())

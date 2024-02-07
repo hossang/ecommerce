@@ -80,6 +80,7 @@
                 </div>
           </div>
         </div>
+        <!--배송지 추가-->
         <div class="spacing">
             <div class="row">
                 <div class="col col-md-3">
@@ -109,7 +110,47 @@
                 </div>
             </div>
         </div>
+
+        <!--결제 수단 선택-->
+        <div id ="accountSelect" class="row">
+            <div class="col">
+                <div th:if="${availableOrderAccounts.size()==0}">
+                    <select name="accountId" class="form-select">
+                        <option value="">결제 수단이 없습니다</option>
+                    </select>
+                </div>
+                <div th:unless="${availableOrderAccounts.size()==0}">
+                    <select name="accountId" class="form-select">
+                        <option value="">결제 수단을 선택하세요</option>
+                        <th:block th:each="availableOrderAccount : ${availableOrderAccounts}">
+                            <option th:value="${availableOrderAccount.id}"
+                                    th:text="${availableOrderAccount.bank} + ' ' + ${availableOrderAccount.accountNumber}+ '  ' + ${availableOrderAccount.getBalance}+ '원'"></option>
+                        </th:block>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <!--결제 수단 추가 -->
+
+        <div class="row spacing">
+            <div class="col col-md-2">
+                <input type="text" class="form-control" id="newBank" placeholder="은행">
+            </div>
+            <div class="col col-md-3">
+                <input type="text" class="form-control" id="newAccountNumber" placeholder="계좌번호">
+            </div>
+            <div class="col col-md-2">
+                <input type="text" class="form-control" id="newBalance" placeholder="자산">
+            </div>
+            <div class="col col-md-2">
+                <input type="text" class="form-control" id="newAccountHolder" placeholder="예금주">
+            </div>
+            <div class="col">
+                <button type="button" class="btn btn-primary" onclick="addOrderAccount()" >결제수단 추가</button>
+            </div>
+        </div>
     </div>
+
     <h2 class="text-center mb-4">총 주문 가격: <span th:text="${totalPrice}"></span></h2>
     <div class="container">
         <div class="row justify-content-center">
@@ -229,6 +270,61 @@
             availableOrderAddresses.forEach(function (availableOrderAddress) {
                 var optionText = availableOrderAddress.address + ' ' + availableOrderAddress.detailAddress;
                 var optionValue = JSON.stringify(availableOrderAddress); // 주소 객체 전체를 value로 사용 (필요에 따라 변경)
+                selectElement.append('<option value="' + optionValue + '">' + optionText + '</option>');
+            });
+        }
+    }
+
+    function addOrderAccount() {
+        var token = $("meta[name='_csrf']").attr("content");
+        var header = $("meta[name='_csrf_header']").attr("content");
+
+        var bank = $("#newBank").val();
+        var accountNumber = $("#newAccountNumber").val();
+        var balance = $("#newBalance").val();
+        var accountHolder = $("#newAccountHolder").val();
+        var username = $("#username").val();
+
+        var url = "/users/" + username + "/accounts/register";
+
+        var orderAccount = {
+            bank : bank,
+            accountNumber : accountNumber,
+            balance : balance,
+            accountHolder : accountHolder
+        };
+
+        console.log("url : ", url);
+
+        $.ajax({
+            type: "POST",
+            url: url,
+            contentType: "application/json",
+            data: JSON.stringify(orderAccount),
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader(header, token);
+            },
+            cache: false,
+            success: function (response) {
+                updateOrderAccounts(response);
+                alert("결제 수단 추가 성공")
+            }
+        });
+    }
+
+    function updateOrderAccounts(availableOrderAccounts) {
+        var selectElement = $("select[name='accountId']");
+        selectElement.empty(); // 기존 옵션 제거
+        $('#accountSelect').load(location.href+' #accountSelect');
+
+        if (availableOrderAccounts.length === 0) {
+            selectElement.append('<option value="">결제 수단이 없습니다</option>');
+        } else {
+            selectElement.append('<option value="">결제 수단을 선택하세요</option>');
+            availableOrderAccounts.forEach(function (availableOrderAccount) {
+                var optionText = availableOrderAccount.bank + ' ' + availableOrderAccount.accountNumber + '  ' + availableOrderAccount.balance + '원';
+                var optionValue = JSON.stringify(availableOrderAccount); // 주소 객체 전체를 value로 사용 (필요에 따라 변경)
+                console.log(optionText);
                 selectElement.append('<option value="' + optionValue + '">' + optionText + '</option>');
             });
         }

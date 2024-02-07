@@ -10,5 +10,7 @@ public class OrderingUser {
 
     private String fullAddress;
 
-    private Long account_id;
+    private Long accountId;
+
+    private String fullAccount;
 }

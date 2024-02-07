@@ -26,10 +26,11 @@ public class GlobalExceptionHandler {
         return "redirect:" + referer;
     }
 
+    //이 두개 마음에 안들어
     @ExceptionHandler(IllegalStateException.class)
     public String signUpDuplicateUser(IllegalStateException illegalStateException, RedirectAttributes redirectAttributes) {
         String errorMessage = illegalStateException.getMessage();
-        redirectAttributes.addAttribute(ERROR_MESSAGE, "이미 존재하는 회원입니다.");
+        redirectAttributes.addAttribute(ERROR_MESSAGE, errorMessage);
         return "redirect:/sign-up";
     }
 

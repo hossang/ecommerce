@@ -1,5 +1,6 @@
 package hochang.ecommerce.service;
 
+import hochang.ecommerce.domain.Account;
 import hochang.ecommerce.domain.Item;
 import hochang.ecommerce.domain.Order;
 import hochang.ecommerce.domain.OrderLine;
@@ -9,6 +10,7 @@ import hochang.ecommerce.domain.User;
 import hochang.ecommerce.dto.BoardOrder;
 import hochang.ecommerce.dto.OrderingUser;
 import hochang.ecommerce.dto.OrderItem;
+import hochang.ecommerce.repository.AccountRepository;
 import hochang.ecommerce.repository.ItemRepository;
 import hochang.ecommerce.repository.OrderRepository;
 import hochang.ecommerce.repository.ShippingAddressRepository;
@@ -38,6 +40,7 @@ public class OrderService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
     private final ShippingAddressRepository shippingAddressRepository;
+    private final AccountRepository accountRepository;
 
     @Transactional
     public Order addOrderLineInCart(String username, Long itemId, Integer quantity) {
@@ -79,10 +82,13 @@ public class OrderService {
         User user = userRepository.findByUsername(username);
         ShippingAddress shippingAddress = shippingAddressRepository.findById(orderingUser.getShippingAddressId())
                 .orElseThrow(EntityNotFoundException::new);
+        Account account = accountRepository.findById(orderingUser.getAccountId())
+                .orElseThrow(EntityNotFoundException::new);
         OrderLine orderLine = createOrderLine(orderItem.getItemId(), orderItem.getCount());
         Order order = Order.builder()
                 .user(user)
                 .shippingAddress(shippingAddress)
+                .account(account)
                 .orderLine(orderLine)
                 .build();
 
@@ -93,9 +99,9 @@ public class OrderService {
         return orderRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     }
 
-    public Optional<Order> findByUserAndStatus(String username) {
+    public Optional<Order> findOrderByUserAndStatus(String username, OrderStatus status) {
         User user = userRepository.findByUsername(username);
-        return orderRepository.findByUserAndStatus(user, OrderStatus.ORDER);
+        return orderRepository.findByUserAndStatus(user, status);
     }
 
     public OrderingUser findOrderingUser(Long id) {
@@ -115,10 +121,10 @@ public class OrderService {
         return toOrderItem(item,quantity);
     }
 
-    public Page<BoardOrder> findBoardOrders(Pageable pageable, String username) {
+    public Page<BoardOrder> findBoardOrders(Pageable pageable, String username, List<OrderStatus> orderStatuses) {
         User user = userRepository.findByUsername(username);
         Page<Order> orderPage = orderRepository.findOrdersWithCoveringIndex(user.getId()
-                , List.of(OrderStatus.COMPLETE, OrderStatus.CANCEL), pageable);
+                , orderStatuses, pageable);
         return orderPage.map(this::toBoardOrder);
     }
 
@@ -208,8 +214,10 @@ public class OrderService {
     private OrderingUser toOrderingUser(Order order) {
         OrderingUser orderingUser = new OrderingUser();
         ShippingAddress shippingAddress = order.getShippingAddress();
+        Account account = order.getAccount();
         orderingUser.setShippingAddressId(shippingAddress.getId());
         orderingUser.setFullAddress(shippingAddress.getAddress() + " " + shippingAddress.getDetailAddress());
+        orderingUser.setFullAccount(account.getBank() + " " + account.getAccountNumber());
         return orderingUser;
     }
 }

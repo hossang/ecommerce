@@ -1,13 +1,17 @@
 package hochang.ecommerce.web;
 
+import hochang.ecommerce.domain.Account;
 import hochang.ecommerce.domain.Item;
 import hochang.ecommerce.domain.Order;
 import hochang.ecommerce.domain.OrderLine;
+import hochang.ecommerce.domain.OrderStatus;
 import hochang.ecommerce.domain.ShippingAddress;
+import hochang.ecommerce.dto.OrderAccount;
 import hochang.ecommerce.dto.OrderingUser;
 import hochang.ecommerce.dto.BoardOrder;
 import hochang.ecommerce.dto.OrderAddress;
 import hochang.ecommerce.dto.OrderItem;
+import hochang.ecommerce.service.AccountService;
 import hochang.ecommerce.service.ItemService;
 import hochang.ecommerce.service.OrderService;
 import hochang.ecommerce.service.ShippingAddressService;
@@ -39,7 +43,7 @@ public class OrderController {
     private final OrderService orderService;
     private final ItemService itemService;
     private final ShippingAddressService shippingAddressService;
-
+    private final AccountService accountService;
 
     @GetMapping("/users/{username}/orders/cart")
     public String orderLineList(@PathVariable String username, @RequestParam(required = false) Long itemId,
@@ -47,7 +51,7 @@ public class OrderController {
         if (isInsufficientPurchase(itemId, quantity)) {
             return "error/400";
         }
-        Optional<Order> optionalOrder = orderService.findByUserAndStatus(username);
+        Optional<Order> optionalOrder = orderService.findOrderByUserAndStatus(username, OrderStatus.ORDER);
         if (isEmptyCart(itemId, quantity, optionalOrder)) {
             return "users/myEmptyCart";
         }
@@ -71,25 +75,28 @@ public class OrderController {
 
     @GetMapping("/users/{username}/orders/{id}/create")
     public String orderDetails(@PathVariable String username, @PathVariable Long id, Model model) {
-        Optional<Order> optionalOrder = orderService.findByUserAndStatus(username);
+        Optional<Order> optionalOrder = orderService.findOrderByUserAndStatus(username, OrderStatus.ORDER);
         if (!optionalOrder.isPresent()) {
             return "users/myEmptyCart";
         }
         Order order = optionalOrder.orElseThrow(EntityNotFoundException::new);
         List<OrderAddress> availableOrderAddresses = shippingAddressService.findOrderAddresses(username);
+        List<OrderAccount> availableOrderAccounts = accountService.findOrderAccounts(username);
         List<OrderItem> orderItems = orderService.findOrderItems(order.getOrderLines());
         model.addAttribute("totalPrice", order.getTotalPrice());
         model.addAttribute("availableOrderAddresses", availableOrderAddresses);
+        model.addAttribute("availableOrderAccounts", availableOrderAccounts);
         model.addAttribute("orderItems", orderItems);
         return "users/myOrders";
     }
 
     @PostMapping("/users/{username}/orders/{id}/create")
     public String orderCreate(@PathVariable String username, @PathVariable Long id, OrderingUser orderingUser) {
-        Order order = orderService.findByUserAndStatus(username).orElseThrow(EntityNotFoundException::new);
+        Order order = orderService.findOrderByUserAndStatus(username, OrderStatus.ORDER).orElseThrow(EntityNotFoundException::new);
         ShippingAddress shippingAddress = shippingAddressService
                 .findShippingAddress(orderingUser.getShippingAddressId());
-        order.linkForeignEntity(shippingAddress);
+        Account account = accountService.findAccount(orderingUser.getAccountId());
+        order.linkForeignEntity(shippingAddress, account);
         orderService.completeOrder(order);
         return "redirect:/users/{username}/orders";
     }
@@ -106,8 +113,10 @@ public class OrderController {
             throw new IllegalArgumentException(item.createExceptionMessage());
         }
         List<OrderAddress> availableOrderAddresses = shippingAddressService.findOrderAddresses(username);
+        List<OrderAccount> availableOrderAccounts = accountService.findOrderAccounts(username);
         OrderItem orderItem = orderService.findOrderItem(item, quantity);
         model.addAttribute("availableOrderAddresses", availableOrderAddresses);
+        model.addAttribute("availableOrderAccounts", availableOrderAccounts);
         model.addAttribute("totalPrice", orderItem.getOrderPrice());
         model.addAttribute("orderItem", orderItem);
         return "users/myOrder";
@@ -123,7 +132,8 @@ public class OrderController {
 
     @GetMapping("/users/{username}/orders")
     public String orderList(@PathVariable String username, @PageableDefault Pageable pageable, Model model) {
-        Page<BoardOrder> boardOrders = orderService.findBoardOrders(pageable, username);
+        Page<BoardOrder> boardOrders = orderService.findBoardOrders(pageable, username,
+                List.of(OrderStatus.COMPLETE, OrderStatus.CANCEL));
         int nowPage = boardOrders.getPageable().getPageNumber() + PREVENTION_ZERO;
         int startPage = Math.max(PREVENTION_NEGATIVE_NUMBERS, nowPage - START_RANGE);
         int endPage = Math.min(boardOrders.getTotalPages(), nowPage + END_RANGE);

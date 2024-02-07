@@ -41,8 +41,8 @@
                         <!-- 장바구니에 추가 폼 -->
                         <form th:if="${username}" method="get" class="mb-3">
                             <div class="input-group">
-                                <label for="quantity" class="input-group-text">수량:</label>
-                                <input type="number" id="quantity" name="quantity" min="1" value="1" class="form-control">
+                                <label class="input-group-text">수량</label>
+                                <input type="number" name="quantity" min="1" value="1" class="form-control">
                             </div>
                             <input type="hidden" th:name="itemId" th:value="${bulletinItem.id}">
                             <div class="row mt-3">
@@ -57,8 +57,8 @@
                         </form>
                         <form th:if="${username == null}" method="get" action="/sign-in" class="mb-3">
                             <div class="input-group">
-                                <label for="quantity" class="input-group-text">수량:</label>
-                                <input type="number" id="quantity" name="quantity" min="1" value="1" class="form-control">
+                                <label class="input-group-text">수량</label>
+                                <input type="number" name="quantity" min="1" value="1" class="form-control">
                             </div>
 <!--                            <input type="hidden" th:name="redirectURL" th:value="'/items/' + ${bulletinItem.id}" />-->
                             <div class="row mt-3">

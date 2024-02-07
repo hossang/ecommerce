@@ -107,7 +107,7 @@ public class UserService implements UserDetailsService {
     private void validateDuplicateUser(User user) {
         User findUser = userRepository.findByUsername(user.getUsername());
         if (findUser != null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("이미 존재하는 회원입니다.");
         }
     }
 
