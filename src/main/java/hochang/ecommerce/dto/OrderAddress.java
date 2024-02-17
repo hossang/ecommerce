@@ -16,6 +16,5 @@ public class OrderAddress {
     @NotBlank
     private String address;
 
-    @NotBlank
     private String detailAddress;
 }

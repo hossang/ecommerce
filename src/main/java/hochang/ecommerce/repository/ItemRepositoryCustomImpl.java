@@ -50,7 +50,7 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
                         item.id,
                         item.name,
                         item.price,
-                        item.storeFileName))
+                        item.thumbnailStoreFileName))
                 .from(item)
                 .where(item.id.in(ids))
                 .orderBy(item.id.desc())
@@ -84,7 +84,7 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
                         item.id,
                         item.name,
                         item.price,
-                        item.storeFileName))
+                        item.thumbnailStoreFileName))
                 .from(item)
                 .where(getSearchCriteria(itemSearch.getCriteria(), itemSearch.getSearchQuery(), item))
                 .orderBy(item.views.desc())

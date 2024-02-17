@@ -33,15 +33,15 @@ public class OrderLine extends BaseEntity {
     @JoinColumn(name = "item_id")
     private Item item;
 
-    private int count;
+    private int quantity;
 
     private long orderPrice;
 
     @Builder
-    public OrderLine(Item item, int count) {
+    public OrderLine(Item item, int quantity) {
         this.item = item;
-        this.item.reduceCount(count);
-        this.count = count;
+        this.item.reduceQuantity(quantity);
+        this.quantity = quantity;
         calculateOrderPrice();
     }
 
@@ -49,13 +49,13 @@ public class OrderLine extends BaseEntity {
         this.order = order;
     }
 
-    public void modifyCount(int count) {
-        this.item.reduceCount(count);
-        this.count += count;
+    public void modifyCount(int quantity) {
+        this.item.reduceQuantity(quantity);
+        this.quantity += quantity;
         calculateOrderPrice();
     }
 
     private void calculateOrderPrice() {
-        this.orderPrice = item.getPrice() * count;
+        this.orderPrice = item.getPrice() * quantity;
     }
 }

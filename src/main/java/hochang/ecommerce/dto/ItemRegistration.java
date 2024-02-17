@@ -5,9 +5,11 @@ import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static hochang.ecommerce.constants.NumberConstants.*;
 
@@ -20,13 +22,15 @@ public class ItemRegistration {
     private String name;
 
     @Min(value = INT_1, message = "수량은 1개이상이어야 합니다.")
-    private int count;
+    private int quantity;
 
     @NotNull(message = "가격은 필수 입력해야합니다.")
     private long price;
 
-    @NotBlank(message = "상품 내용은 필수 입력해야합니다.")
-    private String contents;
+    private MultipartFile thumbnailImage;
 
-    private MultipartFile imageFile;
+    private List<MultipartFile> contentImages = new ArrayList<>();
+
+    @NotNull
+    private Long accountId;
 }

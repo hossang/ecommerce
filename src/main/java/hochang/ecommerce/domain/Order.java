@@ -45,7 +45,6 @@ public class Order extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
-    //왜래키관계 고민
     private Account account;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -86,18 +85,27 @@ public class Order extends BaseEntity {
 
     public void completeOrder() {
         account.pay(totalPrice);
+        for (OrderLine orderLine : orderLines) {
+            Item item = orderLine.getItem();
+            item.reduceQuantity(orderLine.getQuantity());
+            Account account = item.getAccount();
+            account.receive(orderLine.getOrderPrice());
+        }
         this.status = OrderStatus.COMPLETE;
     }
 
     public void cancelOrder() {
         this.status = OrderStatus.CANCEL;
-        account.refund(getTotalPrice());
-        restoreItem();
+        account.receive(getTotalPrice());
+        cancelItem();
     }
 
-    public void restoreItem() {
+    public void cancelItem() {
         for (OrderLine orderLine : orderLines) {
-            orderLine.getItem().addCount(orderLine.getCount());
+            Item item = orderLine.getItem();
+            item.addQuantity(orderLine.getQuantity());
+            Account account = item.getAccount();
+            account.pay(orderLine.getOrderPrice());
         }
     }
 }

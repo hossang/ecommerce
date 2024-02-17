@@ -1,5 +1,6 @@
 package hochang.ecommerce.repository;
 
+import hochang.ecommerce.domain.Account;
 import hochang.ecommerce.domain.Item;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,10 +15,11 @@ public interface ItemRepository extends JpaRepository<Item, Long>, ItemRepositor
     void incrementViewsById(@Param("itemId") Long itemId, @Param("increment") Long increment);
 
     @Modifying
-    @Query("update Item i set i.count = :count, i.uploadFileName = :uploadFileName," +
-            " i.storeFileName = :storeFileName where i.id = :itemId")
-    void modifyItem(@Param("itemId") Long itemId, @Param("count") int count,
-                    @Param("uploadFileName") String uploadFileName, @Param("storeFileName") String storeFileName);
+    @Query("update Item i set i.quantity = :quantity, i.thumbnailUploadFileName = :thumbnailUploadFileName," +
+            " i.thumbnailStoreFileName = :thumbnailStoreFileName, i.account = :account where i.id = :itemId")
+    void modifyItem(@Param("itemId") Long itemId, @Param("quantity") int quantity,
+                    @Param("thumbnailUploadFileName") String thumbnailUploadFileName,
+                    @Param("thumbnailStoreFileName") String thumbnailStoreFileName, @Param("account") Account account);
 
     Page<Item> findAll(Pageable pageable);
 }

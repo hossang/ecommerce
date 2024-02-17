@@ -1,5 +1,8 @@
 package hochang.ecommerce.exception;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MultipartException;
@@ -26,23 +29,39 @@ public class GlobalExceptionHandler {
         return "redirect:" + referer;
     }
 
-    //이 두개 마음에 안들어
-    @ExceptionHandler(IllegalStateException.class)
-    public String signUpDuplicateUser(IllegalStateException illegalStateException, RedirectAttributes redirectAttributes) {
-        String errorMessage = illegalStateException.getMessage();
+    @ExceptionHandler(UserIllegalStateException.class)
+    public String signUpDuplicateUser(UserIllegalStateException userIllegalStateException,
+                                      RedirectAttributes redirectAttributes) {
+        String errorMessage = userIllegalStateException.getMessage();
         redirectAttributes.addAttribute(ERROR_MESSAGE, errorMessage);
         return "redirect:/sign-up";
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public String outOfStock(IllegalArgumentException illegalArgumentException, HttpServletRequest request
+    @ExceptionHandler(AccountIllegalStateException.class)
+    public ResponseEntity<String> saveDuplicateAccountNumber(AccountIllegalStateException accountIllegalStateException) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(accountIllegalStateException.getMessage());
+    }
+
+    @ExceptionHandler(AccountIllegalArgumentException.class)
+    public String shortOfBalance(AccountIllegalArgumentException accountIllegalArgumentException,
+                                 RedirectAttributes redirectAttributes, HttpServletRequest request) {
+        String referer = request.getHeader(REFERER);
+        if (referer == null) {
+            referer = "/";
+        }
+        redirectAttributes.addAttribute(ERROR_MESSAGE, accountIllegalArgumentException.getMessage());
+        return "redirect:" + referer;
+    }
+
+
+    @ExceptionHandler(ItemIllegalArgumentException.class)
+    public String outOfStock(ItemIllegalArgumentException itemIllegalArgumentException, HttpServletRequest request
             , RedirectAttributes redirectAttributes) {
         String referer = request.getHeader(REFERER);
         if (referer == null) {
             referer = "/";
         }
-        //Item.reduceCount()에서 발새한 에러
-        redirectAttributes.addAttribute(ERROR_MESSAGE, illegalArgumentException.getMessage());
+        redirectAttributes.addAttribute(ERROR_MESSAGE, itemIllegalArgumentException.getMessage());
         return "redirect:" + referer;
     }
 }

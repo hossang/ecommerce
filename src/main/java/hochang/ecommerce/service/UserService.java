@@ -6,6 +6,7 @@ import hochang.ecommerce.domain.Role;
 import hochang.ecommerce.domain.User;
 import hochang.ecommerce.dto.BoardUser;
 import hochang.ecommerce.dto.UserRegistration;
+import hochang.ecommerce.exception.UserIllegalStateException;
 import hochang.ecommerce.repository.OrderRepository;
 import hochang.ecommerce.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -71,21 +72,22 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public void removeUser(String username) { //유저 삭제할 때 참조무결성 위반 조심하기
+    public void removeUser(String username) {
         User user = userRepository.findByUsername(username);
         removeItemsInCart(user);
 
-        List<Order> byUsersIdOrders = orderRepository.findByUserId(user.getId());
-        if (!byUsersIdOrders.isEmpty()) {
-            orderRepository.deleteAll(byUsersIdOrders);
+        List<Order> orders = orderRepository.findByUserId(user.getId());
+        if (!orders.isEmpty()) {
+            orderRepository.deleteAll(orders);
         }
+        //soft delete ?
         userRepository.delete(user);
     }
 
     private void removeItemsInCart(User user) {
         Optional<Order> orderInCart = orderRepository.findByUserAndStatusForUpdate(user, OrderStatus.ORDER);
         if (orderInCart.isPresent()) {
-            orderInCart.get().restoreItem(); //동시성 제어가 필요하다
+            orderInCart.get().cancelItem(); //동시성 제어가 필요하다
         }
     }
 
@@ -107,7 +109,7 @@ public class UserService implements UserDetailsService {
     private void validateDuplicateUser(User user) {
         User findUser = userRepository.findByUsername(user.getUsername());
         if (findUser != null) {
-            throw new IllegalStateException("이미 존재하는 회원입니다.");
+            throw new UserIllegalStateException("이미 존재하는 회원입니다.");
         }
     }
 

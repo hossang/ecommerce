@@ -48,7 +48,7 @@
                         </td>
                         <td th:text="${orderItem.name}"></td>
                         <td th:text="${orderItem.price}"></td>
-                        <td th:text="${orderItem.count}"></td>
+                        <td th:text="${orderItem.getQuantity}"></td>
                         <td th:text="${orderItem.orderPrice}"></td>
                     </tr>
                     </tbody>
@@ -59,94 +59,141 @@
 
     <div class="container col-md-8">
         <!--배송지 선택-->
-        <div id ="addressSelect" class="row">
-            <div class="col">
-                <div th:if="${availableOrderAddresses.size()==0}">
-                    <select name="shippingAddressId" class="form-select">
-                        <option value="">배송지가 없습니다</option>
-                    </select>
-                </div>
-                <div th:unless="${availableOrderAddresses.size()==0}">
-                    <select name="shippingAddressId" class="form-select">
-                        <option value="">배송지를 선택하세요</option>
-                        <th:block th:each="availableOrderAddress : ${availableOrderAddresses}">
-                            <option th:value="${availableOrderAddress.id}"
-                                    th:text="${availableOrderAddress.address} + ' ' + ${availableOrderAddress.detailAddress}"></option>
-                        </th:block>
-                    </select>
+        <div class="row spacing">
+            <div id ="addressSelect">
+                <div class="col">
+                    <div th:if="${availableOrderAddresses.size()==0}">
+                        <select name="shippingAddressId" class="form-select" required>
+                            <option value="">배송지가 없습니다</option>
+                        </select>
+                    </div>
+                    <div th:unless="${availableOrderAddresses.size()==0}">
+                        <select name="shippingAddressId" class="form-select" required>
+                            <option value="">배송지를 선택하세요</option>
+                            <th:block th:each="availableOrderAddress : ${availableOrderAddresses}">
+                                <option th:value="${availableOrderAddress.id}"
+                                        th:text="${availableOrderAddress.address} + ' ' + ${availableOrderAddress.detailAddress}"></option>
+                            </th:block>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
-        <!--배송지 추가-->
+        <!--결제 계좌 선택-->
         <div class="spacing">
             <div class="row">
-                <div class="col col-md-3">
-                    <input type="text" class="form-control" id="sample4_postcode" placeholder="우편번호">
-                </div>
-                <div class="col col-md-3">
-                    <input type="text" class="form-control" id="sample4_roadAddress" placeholder="도로명주소">
-                </div>
-                <div class="col">
-                    <input type="button" class="btn btn-primary" onclick="sample4_execDaumPostcode()" value="우편번호 찾기">
-                </div>
-            </div>
-            <div class="row spacing">
-                <div class="col col-md-3">
-                    <input type="text" class="form-control" id="sample4_jibunAddress" placeholder="지번주소">
-                    <span id="guide" style="color:#999;display:none"></span>
-                </div>
-                <div class="col col-md-3">
-                    <input type="text" class="form-control" id="sample4_detailAddress" placeholder="상세주소">
-                </div>
-                <div class="col col-md-2">
-                    <input type="text" class="form-control" id="sample4_extraAddress" placeholder="참고항목">
-                    <input type="hidden" class="form-control" id="username" th:value="${username}">
-                </div>
-                <div class="col">
-                    <button type="button" class="btn btn-primary" onclick="addOrderAddress()" >배송지 추가</button>
+                <div id ="accountSelect">
+                    <div class="col">
+                        <div th:if="${availableOrderAccounts.size()==0}">
+                            <select name="accountId" class="form-select" required>
+                                <option value="">결제 계좌가 없습니다</option>
+                            </select>
+                        </div>
+                        <div th:unless="${availableOrderAccounts.size()==0}">
+                            <select name="accountId" class="form-select" required>
+                                <option value="">결제 계좌를 선택하세요</option>
+                                <th:block th:each="availableOrderAccount : ${availableOrderAccounts}">
+                                    <option th:value="${availableOrderAccount.id}"
+                                            th:text="${availableOrderAccount.bank} + ' ' + ${availableOrderAccount.accountNumber}+ '  ' + ${availableOrderAccount.getBalance}+ '원'"></option>
+                                </th:block>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <!--결제 수단 선택-->
-        <div id ="accountSelect" class="row">
-            <div class="col">
-                <div th:if="${availableOrderAccounts.size()==0}">
-                    <select name="accountId" class="form-select">
-                        <option value="">결제 수단이 없습니다</option>
-                    </select>
+    </div>
+    <!-- 배송지 추가 모달 -->
+    <div class="modal fade" id="addAddressModal" tabindex="-1" role="dialog" aria-labelledby="addAddressModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addAddressModalLabel">배송지 추가</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div th:unless="${availableOrderAccounts.size()==0}">
-                    <select name="accountId" class="form-select">
-                        <option value="">결제 수단을 선택하세요</option>
-                        <th:block th:each="availableOrderAccount : ${availableOrderAccounts}">
-                            <option th:value="${availableOrderAccount.id}"
-                                    th:text="${availableOrderAccount.bank} + ' ' + ${availableOrderAccount.accountNumber}+ '  ' + ${availableOrderAccount.getBalance}+ '원'"></option>
-                        </th:block>
-                    </select>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="sample4_postcode" placeholder="우편번호">
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="sample4_roadAddress" placeholder="도로명주소">
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-primary" onclick="sample4_execDaumPostcode()">우편번호 찾기</button>
+                        </div>
+                    </div>
+                    <div class="row spacing">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="sample4_jibunAddress" placeholder="지번주소">
+                            <span id="guide" style="color:#999;display:none"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="sample4_detailAddress" placeholder="상세주소">
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="sample4_extraAddress" placeholder="참고항목">
+                            <input type="hidden" class="form-control" id="username" th:value="${username}">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" onclick="addOrderAddress()">추가</button>
                 </div>
             </div>
         </div>
-        <!--결제 수단 추가 -->
-
-        <div class="row spacing">
-            <div class="col col-md-2">
-                <input type="text" class="form-control" id="newBank" placeholder="은행">
-            </div>
-            <div class="col col-md-3">
-                <input type="text" class="form-control" id="newAccountNumber" placeholder="계좌번호">
-            </div>
-            <div class="col col-md-2">
-                <input type="text" class="form-control" id="newBalance" placeholder="자산">
-            </div>
-            <div class="col col-md-2">
-                <input type="text" class="form-control" id="newAccountHolder" placeholder="예금주">
-            </div>
-            <div class="col">
-                <button type="button" class="btn btn-primary" onclick="addOrderAccount()" >결제수단 추가</button>
+    </div>
+    <!-- 결제 추가 모달 -->
+    <div class="modal fade" id="addAccountModal" tabindex="-1" role="dialog" aria-labelledby="addAccountModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addAccountModalLabel">결제계좌 추가</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col">
+                            <input type="text" class="form-control" id="newBank" placeholder="은행">
+                        </div>
+                        <div class="col">
+                            <input type="text" class="form-control" id="newAccountNumber" placeholder="계좌번호">
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col">
+                            <input type="text" class="form-control" id="newBalance" placeholder="자산">
+                        </div>
+                        <div class="col">
+                            <input type="text" class="form-control" id="newAccountHolder" placeholder="예금주">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                    <button type="button" class="btn btn-primary" onclick="addOrderAccount()">저장</button>
+                </div>
             </div>
         </div>
     </div>
 
+    <div class="row justify-content-center spacing">
+        <div class="col-auto">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAddressModal">배송지 추가</button>
+        </div>
+        <div class="col-auto">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAccountModal">
+                결제계좌 추가
+            </button>
+        </div>
+    </div>
+    <!--자금부족 에러메시지-->
+    <div th:if="${errorMessage}">
+        <h4 class="text-center mb-4">
+            <p th:text="${errorMessage}" class="error-message text-danger"></p>
+        </h4>
+    </div>
     <h2 class="text-center mb-4">총 주문 가격: <span th:text="${totalPrice}"></span></h2>
     <div class="container">
         <div class="row justify-content-center">
@@ -246,6 +293,7 @@
             cache: false,
             success: function (response) {
                 updateOrderAddresses(response);
+                $('#addAddressModal').modal('hide'); //모달 이벤트 : 닫기
                 alert("배송지 추가 성공")
             }
         });
@@ -303,7 +351,11 @@
             cache: false,
             success: function (response) {
                 updateOrderAccounts(response);
-                alert("결제 수단 추가 성공")
+                $('#addAccountModal').modal('hide'); //모달 이벤트 : 닫기
+                alert("결제 계좌 추가 성공")
+            },
+            error: function (xhr) {
+                alert(xhr.responseText); // 서버에서 보낸 메시지를 alert로 표시
             }
         });
     }
@@ -314,9 +366,9 @@
         $('#accountSelect').load(location.href+' #accountSelect');
 
         if (availableOrderAccounts.length === 0) {
-            selectElement.append('<option value="">결제 수단이 없습니다</option>');
+            selectElement.append('<option value="">결제 계좌가 없습니다</option>');
         } else {
-            selectElement.append('<option value="">결제 수단을 선택하세요</option>');
+            selectElement.append('<option value="">결제 계좌룰 선택하세요</option>');
 
             availableOrderAccounts.forEach(function (availableOrderAccount) {
                 var optionText = availableOrderAccount.bank + ' ' + availableOrderAccount.accountNumber + '  ' + availableOrderAccount.balance + '원';

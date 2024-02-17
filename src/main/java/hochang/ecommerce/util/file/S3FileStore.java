@@ -33,8 +33,8 @@ public class S3FileStore {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    public String getS3FullPath(String filename) {
-        return S3_PATH + filename;
+    public String getS3FullPath(String fileName) {
+        return S3_PATH + fileName;
     }
 
     public UploadFile storeFile(MultipartFile multipartFile) throws IOException {

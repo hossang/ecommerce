@@ -10,7 +10,7 @@ public class OrderItem {
 
     private String name;
 
-    private int count;
+    private int quantity;
 
     private long price;
 

@@ -3,6 +3,9 @@ package hochang.ecommerce.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 public class BulletinItem {
@@ -12,7 +15,7 @@ public class BulletinItem {
 
     private long price;
 
-    private String contents;
+    private String thumbnailStoreFileName;
 
-    private String storeFileName;
+    private List<String> imageStoreFileNames = new ArrayList<>();
 }

@@ -1,5 +1,8 @@
 package hochang.ecommerce.domain;
 
+import hochang.ecommerce.dto.ItemRegistration;
+import hochang.ecommerce.exception.ItemIllegalArgumentException;
+import hochang.ecommerce.util.file.UploadFile;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,10 +19,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.util.ArrayList;
 import java.util.List;
 
 import static hochang.ecommerce.constants.NumberConstants.*;
@@ -30,7 +33,6 @@ import static hochang.ecommerce.constants.NumberConstants.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(indexes = @Index(name = "idx_views", columnList = "views"))
 public class Item extends BaseEntity {
-    private static final int EMPTY = 0;
     private static final List<String> INSUFFICIENT_STOCK_MESSAGES = List.of("재고가 부족합니다. ",
             " 의 현재 보유 수량은 ", "개 입니다.");
 
@@ -39,49 +41,58 @@ public class Item extends BaseEntity {
     @Column(name = "item_id")
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "item_content_id")
-    private ItemContent itemContent;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id")
+    private Account account;
+
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Content> contents = new ArrayList<>();
 
     @Column(length = INT_40)
     private String name;
 
-    private int count;
+    private int quantity;
 
     private long price;
 
     @ColumnDefault("0")
     private long views;
 
-    private String uploadFileName;
+    private String thumbnailUploadFileName;
 
-    private String storeFileName;
+    private String thumbnailStoreFileName;
 
     @Builder
-    public Item(String name, int count, long price, ItemContent itemContent, String uploadFileName, String storeFileName) {
+    public Item(Account account, String name, int quantity, long price, String thumbnailUploadFileName,
+                String thumbnailStoreFileName) {
+        this.account = account;
         this.name = name;
-        this.count = count;
+        this.quantity = quantity;
         this.price = price;
-        this.itemContent = itemContent;
-        this.uploadFileName = uploadFileName;
-        this.storeFileName = storeFileName;
+        this.thumbnailUploadFileName = thumbnailUploadFileName;
+        this.thumbnailStoreFileName = thumbnailStoreFileName;
     }
 
-    public void reduceCount(int count) {
-        int reducedCount = this.count - count;
-        if (reducedCount < EMPTY) {
-            throw new IllegalArgumentException(createExceptionMessage());
+    public void addContent(Content content) {
+        contents.add(content);
+        content.addItem(this);
+    }
+
+    public void reduceQuantity(int quantity) {
+        int reducedQuantity = this.quantity - quantity;
+        if (reducedQuantity < LONG_0) {
+            throw new ItemIllegalArgumentException(createExceptionMessage());
         }
-        this.count = reducedCount;
+        this.quantity = reducedQuantity;
     }
 
-    public void addCount(int count) {
-        this.count += count;
+    public void addQuantity(int quantity) {
+        this.quantity += quantity;
     }
 
     public String createExceptionMessage() {
         return INSUFFICIENT_STOCK_MESSAGES.get(INT_0) + this.name + INSUFFICIENT_STOCK_MESSAGES.get(INT_1)
-                + this.count + INSUFFICIENT_STOCK_MESSAGES.get(INT_2);
+                + this.quantity + INSUFFICIENT_STOCK_MESSAGES.get(INT_2);
     }
 }
 

@@ -11,6 +11,7 @@ import hochang.ecommerce.dto.OrderingUser;
 import hochang.ecommerce.dto.BoardOrder;
 import hochang.ecommerce.dto.OrderAddress;
 import hochang.ecommerce.dto.OrderItem;
+import hochang.ecommerce.exception.ItemIllegalArgumentException;
 import hochang.ecommerce.service.AccountService;
 import hochang.ecommerce.service.ItemService;
 import hochang.ecommerce.service.OrderService;
@@ -22,12 +23,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -74,7 +77,8 @@ public class OrderController {
     }
 
     @GetMapping("/users/{username}/orders/{id}/create")
-    public String orderDetails(@PathVariable String username, @PathVariable Long id, Model model) {
+    public String orderDetails(@PathVariable String username, @PathVariable Long id,
+                               @RequestParam(required = false) String errorMessage, Model model) {
         Optional<Order> optionalOrder = orderService.findOrderByUserAndStatus(username, OrderStatus.ORDER);
         if (!optionalOrder.isPresent()) {
             return "users/myEmptyCart";
@@ -84,6 +88,7 @@ public class OrderController {
         List<OrderAccount> availableOrderAccounts = accountService.findOrderAccounts(username);
         List<OrderItem> orderItems = orderService.findOrderItems(order.getOrderLines());
         model.addAttribute("totalPrice", order.getTotalPrice());
+        model.addAttribute("errorMessage", errorMessage);
         model.addAttribute("availableOrderAddresses", availableOrderAddresses);
         model.addAttribute("availableOrderAccounts", availableOrderAccounts);
         model.addAttribute("orderItems", orderItems);
@@ -92,7 +97,8 @@ public class OrderController {
 
     @PostMapping("/users/{username}/orders/{id}/create")
     public String orderCreate(@PathVariable String username, @PathVariable Long id, OrderingUser orderingUser) {
-        Order order = orderService.findOrderByUserAndStatus(username, OrderStatus.ORDER).orElseThrow(EntityNotFoundException::new);
+        Order order = orderService.findOrderByUserAndStatus(username, OrderStatus.ORDER)
+                .orElseThrow(EntityNotFoundException::new);
         ShippingAddress shippingAddress = shippingAddressService
                 .findShippingAddress(orderingUser.getShippingAddressId());
         Account account = accountService.findAccount(orderingUser.getAccountId());
@@ -103,18 +109,16 @@ public class OrderController {
 
     @GetMapping("/users/{username}/orders/create")
     public String orderDetails(@PathVariable String username, @RequestParam(required = false) Long itemId,
-                               @RequestParam(required = false) Integer quantity, Model model) {
+                               @RequestParam(required = false) Integer quantity,
+                               @RequestParam(required = false) String errorMessage, Model model) {
         if (!isItemsToAddInCart(itemId, quantity)) {
             return "error/400";
         }
-        Optional<Item> optionalItem = itemService.findById(itemId);
-        Item item = optionalItem.orElseThrow(EntityNotFoundException::new);
-        if (item.getCount() < quantity) {
-            throw new IllegalArgumentException(item.createExceptionMessage());
-        }
+        Item item = itemService.findById(itemId);
         List<OrderAddress> availableOrderAddresses = shippingAddressService.findOrderAddresses(username);
         List<OrderAccount> availableOrderAccounts = accountService.findOrderAccounts(username);
         OrderItem orderItem = orderService.findOrderItem(item, quantity);
+        model.addAttribute("errorMessage", errorMessage);
         model.addAttribute("availableOrderAddresses", availableOrderAddresses);
         model.addAttribute("availableOrderAccounts", availableOrderAccounts);
         model.addAttribute("totalPrice", orderItem.getOrderPrice());
@@ -125,7 +129,7 @@ public class OrderController {
     @PostMapping("/users/{username}/orders/create")
     public String orderCreate(@PathVariable String username, OrderItem orderItem, OrderingUser orderingUser) {
         Order order = orderService.createOrder(username, orderItem, orderingUser);
-        orderService.completeOrder(order);
+        //동시성 테스트 해보기
         return "redirect:/users/{username}/orders";
     }
 

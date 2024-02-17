@@ -3,6 +3,7 @@ package hochang.ecommerce.service;
 import hochang.ecommerce.domain.Account;
 import hochang.ecommerce.domain.User;
 import hochang.ecommerce.dto.OrderAccount;
+import hochang.ecommerce.exception.AccountIllegalStateException;
 import hochang.ecommerce.repository.AccountRepository;
 import hochang.ecommerce.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -24,10 +26,19 @@ public class AccountService {
 
     @Transactional
     public OrderAccount save(String username, OrderAccount orderAccount) {
+        validateDuplicateAccountNumber(orderAccount);
         User user = userRepository.findByUsername(username);
         Account account = createAccount(user, orderAccount);
         accountRepository.save(account);
         return toOrderAccount(account);
+    }
+
+    private void validateDuplicateAccountNumber(OrderAccount orderAccount) {
+        String accountNumber = orderAccount.getAccountNumber();
+        Account account = accountRepository.findByAccountNumber(accountNumber);
+        if (account != null) {
+            throw new AccountIllegalStateException("이미 존재하는 계좌번호입니다.");
+        }
     }
 
     private Account createAccount(User user, OrderAccount orderAccount) {

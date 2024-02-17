@@ -66,9 +66,9 @@ public class OrderService {
     }
 
     @Transactional
-    public Order createOrder(String username, Long itemId, int count) {
+    public Order createOrder(String username, Long itemId, int quantity) {
         User user = userRepository.findByUsername(username);
-        OrderLine orderLine = createOrderLine(itemId, count);
+        OrderLine orderLine = createOrderLine(itemId, quantity);
         Order order = Order.builder()
                 .user(user)
                 .orderLine(orderLine)
@@ -84,13 +84,15 @@ public class OrderService {
                 .orElseThrow(EntityNotFoundException::new);
         Account account = accountRepository.findById(orderingUser.getAccountId())
                 .orElseThrow(EntityNotFoundException::new);
-        OrderLine orderLine = createOrderLine(orderItem.getItemId(), orderItem.getCount());
+        OrderLine orderLine = createOrderLine(orderItem.getItemId(), orderItem.getQuantity());
         Order order = Order.builder()
                 .user(user)
                 .shippingAddress(shippingAddress)
                 .account(account)
                 .orderLine(orderLine)
                 .build();
+
+        completeOrder(order);
 
         return orderRepository.save(order);
     }
@@ -157,7 +159,7 @@ public class OrderService {
         Item item = itemRepository.findById(itemId).orElseThrow(EntityNotFoundException::new);
         OrderLine orderLine = OrderLine.builder()
                 .item(item)
-                .count(quantity) //동시성 제어가 필요하다
+                .quantity(quantity) //동시성 제어가 필요하다
                 .build();
         return orderLine;
     }
@@ -182,9 +184,9 @@ public class OrderService {
         orderItem.setItemId(orderLine.getItem().getId());
         orderItem.setName(orderLine.getItem().getName()); //N + 1
         orderItem.setPrice(orderLine.getItem().getPrice());
-        orderItem.setCount(orderLine.getCount());
+        orderItem.setQuantity(orderLine.getQuantity());
         orderItem.setOrderPrice(orderLine.getOrderPrice());
-        orderItem.setStoreFileName(orderLine.getItem().getStoreFileName());
+        orderItem.setStoreFileName(orderLine.getItem().getThumbnailStoreFileName());
         return orderItem;
     }
 
@@ -194,9 +196,9 @@ public class OrderService {
         orderItem.setItemId(item.getId());
         orderItem.setName(item.getName());
         orderItem.setPrice(item.getPrice());
-        orderItem.setCount(quantity);
+        orderItem.setQuantity(quantity);
         orderItem.setOrderPrice(item.getPrice() * quantity);
-        orderItem.setStoreFileName(item.getStoreFileName());
+        orderItem.setStoreFileName(item.getThumbnailStoreFileName());
         return orderItem;
     }
 

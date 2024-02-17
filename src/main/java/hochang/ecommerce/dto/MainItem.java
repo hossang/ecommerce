@@ -12,5 +12,5 @@ public class MainItem {
 
     private long price;
 
-    private String storeFileName;
+    private String thumbnailStoreFileName;
 }

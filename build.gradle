@@ -46,6 +46,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
 	implementation 'org.imgscalr:imgscalr-lib:4.2'
 	implementation 'org.springframework.session:spring-session-data-redis'
@@ -62,6 +64,7 @@ dependencies {
 	implementation 'software.amazon.awssdk:s3'
 	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
 	annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}"
+	compileOnly("org.springframework.boot:spring-boot-devtools")
 }
 
 tasks.named('test') {
@@ -82,4 +85,8 @@ configurations {
 }
 compileQuerydsl {
 	options.annotationProcessorPath = configurations.querydsl
+}
+
+springBoot {
+	buildInfo()
 }

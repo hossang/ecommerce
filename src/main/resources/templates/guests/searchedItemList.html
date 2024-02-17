@@ -29,7 +29,7 @@
             <th:block th:each="searchedMainItem : ${searchedMainItems}">
                 <div class="col-lg-3">
                     <div class="card">
-                        <img th:src="|/images/${searchedMainItem.storeFileName}|" class="img-fluid">
+                        <img th:src="|/images/${searchedMainItem.getThumbnailStoreFileName}|" class="img-fluid">
                         <div class="card-body">
                             <h5 class="card-title" th:text="${searchedMainItem.name}"></h5>
                             <p class="card-text" th:text="${searchedMainItem.price + '원'}"></p>

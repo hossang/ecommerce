@@ -1,6 +1,7 @@
 package hochang.ecommerce.domain;
 
 
+import hochang.ecommerce.exception.AccountIllegalArgumentException;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,8 +13,10 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 import static hochang.ecommerce.constants.NumberConstants.INT_10;
 import static hochang.ecommerce.constants.NumberConstants.INT_40;
@@ -22,6 +25,7 @@ import static hochang.ecommerce.constants.NumberConstants.LONG_0;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(indexes = @Index(name = "idx_accountNumber", columnList = "accountNumber"))
 public class Account extends BaseTimeEntity {
     private static final String EXCEPTION_MESSAGE = "잔고가 부족합니다.";
 
@@ -57,13 +61,13 @@ public class Account extends BaseTimeEntity {
     public void pay(long amount) {
         long reducedBalance = this.balance - amount;
         if (reducedBalance < LONG_0) {
-            throw new IllegalArgumentException(EXCEPTION_MESSAGE);
+            throw new AccountIllegalArgumentException(EXCEPTION_MESSAGE);
         }
         this.balance = reducedBalance;
 
     }
 
-    public void refund(long amount) {
+    public void receive(long amount) {
         this.balance += amount;
 
     }

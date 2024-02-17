@@ -1,10 +1,15 @@
 package hochang.ecommerce.web;
 
+import hochang.ecommerce.domain.Account;
 import hochang.ecommerce.dto.BoardItem;
 import hochang.ecommerce.dto.BulletinItem;
 import hochang.ecommerce.dto.ItemRegistration;
 import hochang.ecommerce.dto.ItemSearch;
 import hochang.ecommerce.dto.MainItem;
+import hochang.ecommerce.dto.OrderAccount;
+import hochang.ecommerce.dto.OrderingUser;
+import hochang.ecommerce.dto.UploadedItemFile;
+import hochang.ecommerce.service.AccountService;
 import hochang.ecommerce.service.ItemService;
 import hochang.ecommerce.web.annotation.SignIn;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +31,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.List;
 
 import static hochang.ecommerce.web.PageConstants.END_RANGE;
 import static hochang.ecommerce.web.PageConstants.PAGE_SIZE_MAIN_ITEM;
@@ -38,6 +44,7 @@ import static hochang.ecommerce.web.PageConstants.START_RANGE;
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
+    private final AccountService accountService;
 
     @GetMapping("/admins/{username}/items")
     public String itemList(@PathVariable String username,
@@ -61,6 +68,8 @@ public class ItemController {
     @GetMapping("/admins/{username}/items/register")
     public String itemRegistrationFormCreate(@PathVariable String username, ItemRegistration itemRegistration,
                                              Model model) {
+        List<OrderAccount> availableOrderAccounts = accountService.findOrderAccounts(username);
+        model.addAttribute("availableOrderAccounts", availableOrderAccounts);
         model.addAttribute("username", username);
         model.addAttribute("itemRegistration", itemRegistration);
         return "admins/itemRegistration";
@@ -72,7 +81,7 @@ public class ItemController {
         if (bindingResult.hasErrors()) {
             return "admins/itemRegistration";
         }
-        itemService.save(itemRegistration);
+        itemService.save(itemRegistration, username);
         return "redirect:/admins/{username}/items";
     }
 
@@ -90,6 +99,10 @@ public class ItemController {
     @GetMapping("/admins/{username}/items/{id}/modify")
     public String itemRegistrationFormModify(@PathVariable String username, @PathVariable Long id, Model model) {
         ItemRegistration itemRegistration = itemService.findItemRegistration(id);
+        UploadedItemFile uploadedItemFile = itemService.findUploadedItemFile(id);
+        List<OrderAccount> availableOrderAccounts = accountService.findOrderAccounts(username);
+        model.addAttribute("availableOrderAccounts", availableOrderAccounts);
+        model.addAttribute("uploadedItemFile", uploadedItemFile);
         model.addAttribute("username", username);
         model.addAttribute("itemRegistration", itemRegistration);
         return "admins/itemModification";
