@@ -14,6 +14,8 @@ public abstract class NumberConstants {
     public static final int INT_20 = 20;
     public static final int INT_40 = 40;
 
+    public static final int INT_100 = 100;
+
     public static final long LONG_0 = 0L;
     public static final long LONG_1 = 1L;
 

@@ -31,7 +31,7 @@ public class HomeController {
     public String homePage(@SignIn String username,
                            @PageableDefault(sort = "views", direction = Sort.Direction.DESC, size = PAGE_SIZE_MAIN_ITEM) Pageable pageable,
                            Model model) {
-        Page<MainItem> mainItems = itemService.findMainItemsWithCoveringIndex(pageable);
+        Page<MainItem> mainItems = itemService.findMainItems(pageable);
         int nowPage = mainItems.getPageable().getPageNumber() + PREVENTION_ZERO;
         int startPage = Math.max(PREVENTION_NEGATIVE_NUMBERS, nowPage - START_RANGE);
         int endPage = Math.min(mainItems.getTotalPages(), nowPage + END_RANGE);
