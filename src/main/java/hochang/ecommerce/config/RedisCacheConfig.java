@@ -2,6 +2,7 @@ package hochang.ecommerce.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hochang.ecommerce.dto.BulletinItem;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +16,7 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -44,14 +46,10 @@ public class RedisCacheConfig {
     }
 
     @Bean
-    public CacheManager cacheManager() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        objectMapper.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.NON_FINAL);
-
+    public CacheManager cacheManager(ObjectMapper redisObjectMapper) {
         RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer(objectMapper)))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer(redisObjectMapper)))
                 .entryTtl(Duration.ofMinutes(LONG_30))
                 .disableCachingNullValues()
                 .computePrefixWith(CacheKeyPrefix.simple());
@@ -68,10 +66,19 @@ public class RedisCacheConfig {
     }
 
     @Bean("cacheRedisTemplate")
-    public RedisTemplate<String, Object> cacheRedisTemplate() {
+    public RedisTemplate<String, Object> cacheRedisTemplate(ObjectMapper redisObjectMapper) {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(cacheRedisConnectionFactory());
-        redisTemplate.setDefaultSerializer(new StringRedisSerializer());
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer(redisObjectMapper));
         return redisTemplate;
+    }
+
+    @Bean
+    public ObjectMapper redisObjectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        objectMapper.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.NON_FINAL);
+        return objectMapper;
     }
 }

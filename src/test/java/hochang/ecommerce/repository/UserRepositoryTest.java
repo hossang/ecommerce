@@ -1,29 +1,37 @@
 package hochang.ecommerce.repository;
 
+import hochang.ecommerce.config.TestConfig;
 import hochang.ecommerce.domain.Role;
 import hochang.ecommerce.domain.User;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
 
-@ExtendWith(SpringExtension.class)
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import(TestConfig.class)
 class UserRepositoryTest {
     @Autowired
     UserRepository userRepository;
 
+    private Long userId;
+
     @BeforeEach
-    public void 회원가입() {
+    public void init() {
         User user = User.builder()
                 .username("asdf1234")
                 .password("asdf123!@@")
@@ -34,11 +42,12 @@ class UserRepositoryTest {
                 .role(Role.USER)
                 .build();
 
-        userRepository.save(user);
+        userId = userRepository.save(user).getId();
     }
     
     @Test
-    public void 단일회원조회() {
+    @DisplayName("단일 회원 조회")
+    public void findUser() {
         //Given
         //When
         User user = userRepository.findByUsername("asdf1234");
@@ -48,7 +57,8 @@ class UserRepositoryTest {
     } 
     
     @Test
-    public void 모든회원조회() {
+    @DisplayName("모든 회원 조회")
+    public void findUsers() {
         //Given
         User secondUser = User.builder()
                 .username("qwer")
@@ -71,7 +81,8 @@ class UserRepositoryTest {
     } 
 
     @Test
-    public void 회원삭제() {
+    @DisplayName("회원 삭제")
+    public void delete() {
         //Given
         User user = userRepository.findByUsername("asdf1234");
         System.out.println("user.getId() = " + user.getId());
@@ -82,11 +93,22 @@ class UserRepositoryTest {
     }
 
     @Test
-    public void 아이디로_회원_찾기() {
+    @DisplayName("아이디로 회원 찾기")
+    public void findByUsername() {
         //Given
         //When
         User user = userRepository.findByUsername("asdf1234");
         //Then
         assertThat(user.getUsername()).isEqualTo("asdf1234");
+    }
+
+    @Test
+    @DisplayName("회원 정보 수정")
+    void modifyUser() {
+        //Given
+        User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+        user.modifyProfile("dlghckd1@dlghckd.com","01022223333");
+        //Then
+        assertThat(user.getEmail()).isEqualTo("dlghckd1@dlghckd.com");
     }
 }

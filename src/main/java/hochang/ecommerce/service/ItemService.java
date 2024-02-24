@@ -47,9 +47,10 @@ import static hochang.ecommerce.constants.NumberConstants.*;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ItemService {
-    private static final int HALF_AN_HOUR = 1_800_000;
+    private static final int AN_HOUR = 3_600_000;
     private static final String CLOUDFRONT_DOMAIN = "https://d14cet1pxkvpbm.cloudfront.net/";
-    private ConcurrentMap<Long, Long> viewCounter = new ConcurrentHashMap<>(INT_100); //Long,Long이 아니라 BulletinItem, Long은 어떤가...
+    private static final String VIEW_COUNTER = "viewCounter";
+    private ConcurrentMap<Long, Long> viewCounter = new ConcurrentHashMap<>(INT_100);
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
@@ -78,11 +79,24 @@ public class ItemService {
         return itemPage.map(this::toBoardItem);
     }
 
-    //@Cacheable(cacheNames = FIND_MAIN_ITEMS_WITH_COVERING_INDEX, key = "#pageable.pageSize.toString().concat('-').concat(#pageable.pageNumber)")
+    public Page<MainItem> findRealtimePopularMainItems(Pageable pageable) {
+        long startIndex = pageable.getOffset();
+        long endIndex = startIndex + pageable.getPageSize();
+
+        Set<Object> ids = cacheRedisTemplate.opsForZSet().reverseRange(VIEW_COUNTER, startIndex, endIndex);
+        List<String> keys = ids.stream()
+                .map(o -> FIND_BULLETIN_ITEM + "::" + o)
+                .collect(Collectors.toList());
+        List<BulletinItem> bulletinItems = (List<BulletinItem>) (Object) cacheRedisTemplate.opsForValue().multiGet(keys);
+
+        List<MainItem> mainItems = bulletinItems.stream()
+                .map(o -> toMainItemFromBulletinItem(o))
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(mainItems, pageable, mainItems.size());
+    }
+
     public Page<MainItem> findMainItems(Pageable pageable) {
-        /* cacheRedisTemplate 을 고려해봤는데 이것도 구린내가 남
-        * 1. redis에 id만 저장하고, id의 순서를 찾을 수 있다. But! id를 통해 DB에서 Item들을 찾아와야 한다.
-        * */
         return itemRepository.findMainItemsWithCoveringIndex(pageable);
     }
 
@@ -137,11 +151,11 @@ public class ItemService {
     }
 
     @Transactional
-    @Scheduled(fixedRate = HALF_AN_HOUR)
+    @Scheduled(fixedRate = 10000) // AN_HOUR
     public void modifyViews() {
         for (Long id : viewCounter.keySet()) {
             itemRepository.incrementViewsById(id, viewCounter.get(id));
-            cacheRedisTemplate.opsForHash().increment("item_views", id, viewCounter.get(id));
+            cacheRedisTemplate.opsForZSet().add(VIEW_COUNTER, id.toString(), viewCounter.get(id));
         }
         viewCounter = new ConcurrentHashMap<>(INT_100);
     }
@@ -227,5 +241,14 @@ public class ItemService {
             imageUploadFileNames.add(content.getImageUploadFileName());
         }
         return uploadedItemFile;
+    }
+
+    private MainItem toMainItemFromBulletinItem(BulletinItem bulletinItem) {
+        MainItem mainItem = new MainItem();
+        mainItem.setId(bulletinItem.getId());
+        mainItem.setName(bulletinItem.getName());
+        mainItem.setPrice(bulletinItem.getPrice());
+        mainItem.setThumbnailStoreFileName(bulletinItem.getThumbnailStoreFileName());
+        return mainItem;
     }
 }

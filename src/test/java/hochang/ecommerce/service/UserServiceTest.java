@@ -4,12 +4,14 @@ import hochang.ecommerce.domain.Role;
 import hochang.ecommerce.domain.User;
 import hochang.ecommerce.dto.UserRegistration;
 import hochang.ecommerce.repository.UserRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +31,8 @@ class UserServiceTest {
     private BCryptPasswordEncoder encoder;
 
     @Test
-    public void 회원가입() {
+    @DisplayName("회원가입 성공")
+    public void save1() {
         //Given
         UserRegistration userRegistration = new UserRegistration();
         given(userRepository.save(any(User.class))).willReturn(any(User.class));
@@ -40,7 +43,8 @@ class UserServiceTest {
     }
 
     @Test
-    public void 중복_회원가입() {
+    @DisplayName("회원가입 실패 - 중복 아이디")
+    public void save2() {
         //Given
         UserRegistration userRegistration1 = new UserRegistration();
         UserRegistration userRegistration2 = new UserRegistration();
@@ -56,7 +60,8 @@ class UserServiceTest {
     }
 
     @Test
-    public void 모든_회원_찾기() {
+    @DisplayName("모든 회원 찾기")
+    public void findUsers() {
         //Given
         List<User> users = new ArrayList<>();
         users.add(User.builder().username("user1").build());
