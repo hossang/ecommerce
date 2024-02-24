@@ -1,13 +1,11 @@
 package hochang.ecommerce.web;
 
-import hochang.ecommerce.domain.Account;
 import hochang.ecommerce.dto.BoardItem;
 import hochang.ecommerce.dto.BulletinItem;
 import hochang.ecommerce.dto.ItemRegistration;
 import hochang.ecommerce.dto.ItemSearch;
 import hochang.ecommerce.dto.MainItem;
 import hochang.ecommerce.dto.OrderAccount;
-import hochang.ecommerce.dto.OrderingUser;
 import hochang.ecommerce.dto.UploadedItemFile;
 import hochang.ecommerce.service.AccountService;
 import hochang.ecommerce.service.ItemService;
@@ -34,7 +32,6 @@ import java.net.MalformedURLException;
 import java.util.List;
 
 import static hochang.ecommerce.web.PageConstants.END_RANGE;
-import static hochang.ecommerce.web.PageConstants.PAGE_SIZE_MAIN_ITEM;
 import static hochang.ecommerce.web.PageConstants.PREVENTION_NEGATIVE_NUMBERS;
 import static hochang.ecommerce.web.PageConstants.PREVENTION_ZERO;
 import static hochang.ecommerce.web.PageConstants.START_RANGE;
@@ -47,9 +44,9 @@ public class ItemController {
     private final AccountService accountService;
 
     @GetMapping("/admins/{username}/items")
-    public String itemList(@PathVariable String username,
-                           @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
-                           Model model) {
+    public String itemListForAdmin(@PathVariable String username,
+                                  @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+                                  Model model) {
         Page<BoardItem> boardItems = itemService.findBoardItems(pageable);
         int nowPage = boardItems.getPageable().getPageNumber() + PREVENTION_ZERO;
         int startPage = Math.max(PREVENTION_NEGATIVE_NUMBERS, nowPage - START_RANGE);
@@ -62,7 +59,24 @@ public class ItemController {
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
 
-        return "admins/itemList";
+        return "admins/itemListForAdmin";
+    }
+
+    @GetMapping("/items")
+    public String itemList(@SignIn String username,
+                           @PageableDefault(sort = "views", direction = Sort.Direction.DESC) Pageable pageable,
+                           Model model) {
+        Page<MainItem> mainItems = itemService.findMainItems(pageable);
+        int nowPage = mainItems.getPageable().getPageNumber() + PREVENTION_ZERO;
+        int startPage = Math.max(PREVENTION_NEGATIVE_NUMBERS, nowPage - START_RANGE);
+        int endPage = Math.min(mainItems.getTotalPages(), nowPage + END_RANGE);
+
+        model.addAttribute("username", username);
+        model.addAttribute("mainItems", mainItems);
+        model.addAttribute("nowPage", nowPage);
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
+        return "guests/itemList";
     }
 
     @GetMapping("/admins/{username}/items/register")
@@ -112,6 +126,7 @@ public class ItemController {
     public String itemRegistrationModify(@PathVariable String username, @PathVariable Long id,
                                          @Valid ItemRegistration itemRegistration,
                                          BindingResult bindingResult) throws IOException {
+        /*ㄷㅅㅅ*/
         if (bindingResult.hasErrors()) {
             return "admins/itemModification";
         }
@@ -121,8 +136,8 @@ public class ItemController {
     }
 
     @GetMapping("/items/search")
-    public String searchedItemList(@PageableDefault(sort = "views", direction = Sort.Direction.DESC,
-            size = PAGE_SIZE_MAIN_ITEM) Pageable pageable, ItemSearch itemSearch, Model model) {
+    public String searchedItemList(@PageableDefault(sort = "views", direction = Sort.Direction.DESC) Pageable pageable,
+                                   ItemSearch itemSearch, Model model) {
         Page<MainItem> searchedMainItems = itemService.findSearchedMainItems(pageable, itemSearch);
 
         int nowPage = searchedMainItems.getPageable().getPageNumber() + PREVENTION_ZERO;

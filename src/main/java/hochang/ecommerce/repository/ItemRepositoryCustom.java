@@ -4,6 +4,7 @@ import hochang.ecommerce.dto.ItemSearch;
 import hochang.ecommerce.dto.MainItem;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Repository;
 
 public interface ItemRepositoryCustom {
 

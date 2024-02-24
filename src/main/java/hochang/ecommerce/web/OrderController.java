@@ -97,13 +97,7 @@ public class OrderController {
 
     @PostMapping("/users/{username}/orders/{id}/create")
     public String orderCreate(@PathVariable String username, @PathVariable Long id, OrderingUser orderingUser) {
-        Order order = orderService.findOrderByUserAndStatus(username, OrderStatus.ORDER)
-                .orElseThrow(EntityNotFoundException::new);
-        ShippingAddress shippingAddress = shippingAddressService
-                .findShippingAddress(orderingUser.getShippingAddressId());
-        Account account = accountService.findAccount(orderingUser.getAccountId());
-        order.linkForeignEntity(shippingAddress, account);
-        orderService.completeOrder(order);
+        orderService.completeOrder(username, orderingUser);
         return "redirect:/users/{username}/orders";
     }
 
@@ -129,7 +123,7 @@ public class OrderController {
     @PostMapping("/users/{username}/orders/create")
     public String orderCreate(@PathVariable String username, OrderItem orderItem, OrderingUser orderingUser) {
         Order order = orderService.createOrder(username, orderItem, orderingUser);
-        //동시성 테스트 해보기
+        /*동시성 테스트 해보기*/
         return "redirect:/users/{username}/orders";
     }
 

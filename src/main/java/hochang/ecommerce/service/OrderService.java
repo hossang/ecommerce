@@ -20,6 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
@@ -42,7 +44,7 @@ public class OrderService {
     private final ShippingAddressRepository shippingAddressRepository;
     private final AccountRepository accountRepository;
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Order addOrderLineInCart(String username, Long itemId, Integer quantity) {
         User user = userRepository.findByUsername(username);
         Optional<Order> optionalOrder = orderRepository.findByUserAndStatusForUpdate(user, OrderStatus.ORDER);
@@ -53,14 +55,26 @@ public class OrderService {
         return addOrderLine(optionalOrder.orElseThrow(EntityNotFoundException::new), itemId, quantity);
     }
 
-    @Transactional
-    public void completeOrder(Order order) {
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void completeOrder(String username, OrderingUser orderingUser) {
+        User user = userRepository.findByUsername(username);
+        Order order = orderRepository.findByUserAndStatusForUpdate(user, OrderStatus.ORDER)
+                .orElseThrow(EntityNotFoundException::new);
+        ShippingAddress shippingAddress = shippingAddressRepository.findById(orderingUser.getShippingAddressId())
+                .orElseThrow(EntityNotFoundException::new);
+        Account account = accountRepository.findById(orderingUser.getAccountId())
+                .orElseThrow(EntityNotFoundException::new);
+        order.linkForeignEntity(shippingAddress, account);
         order.completeOrder();
     }
 
-    @Transactional
+    public void completeOrder(Long orderId) {
+        Order order = orderRepository.findByIdForUpdate(orderId).orElseThrow(EntityNotFoundException::new);
+        order.completeOrder();
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void cancelOrder(Long id) {
-        //동시성 재어 필요하다
         Order order = orderRepository.findByIdForUpdate(id).orElseThrow(EntityNotFoundException::new);
         order.cancelOrder();
     }
@@ -77,7 +91,7 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Order createOrder(String username, OrderItem orderItem, OrderingUser orderingUser) {
         User user = userRepository.findByUsername(username);
         ShippingAddress shippingAddress = shippingAddressRepository.findById(orderingUser.getShippingAddressId())
@@ -91,10 +105,10 @@ public class OrderService {
                 .account(account)
                 .orderLine(orderLine)
                 .build();
+        Long orderId = orderRepository.save(order).getId();
+        completeOrder(orderId);
 
-        completeOrder(order);
-
-        return orderRepository.save(order);
+        return order;
     }
 
     public Order findOrder(Long id) {

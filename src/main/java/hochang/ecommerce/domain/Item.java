@@ -78,6 +78,14 @@ public class Item extends BaseEntity {
         content.addItem(this);
     }
 
+    public void modifyItem(int quantity, String thumbnailUploadFileName,
+                           String thumbnailStoreFileName, Account account) {
+        this.quantity = quantity;
+        this.thumbnailUploadFileName = thumbnailUploadFileName;
+        this.thumbnailStoreFileName = thumbnailStoreFileName;
+        this.account = account;
+    }
+
     public void reduceQuantity(int quantity) {
         int reducedQuantity = this.quantity - quantity;
         if (reducedQuantity < LONG_0) {

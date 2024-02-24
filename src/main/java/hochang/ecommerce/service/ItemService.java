@@ -22,10 +22,12 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.thymeleaf.util.StringUtils;
@@ -36,8 +38,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 import static hochang.ecommerce.constants.CacheConstants.*;
 import static hochang.ecommerce.constants.NumberConstants.*;
@@ -69,7 +73,6 @@ public class ItemService {
         Account account = accountRepository.findById(itemRegistration.getAccountId())
                 .orElseThrow(EntityNotFoundException::new);
         Item item = createItem(account, itemRegistration, thumbnailUploadFile);
-
         createContents(contentUploadFiles, item);
         return itemRepository.save(item).getId();
     }
@@ -120,20 +123,19 @@ public class ItemService {
         return toItemRegistration(item);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @CacheEvict(cacheNames = FIND_BULLETIN_ITEM, key = "#itemRegistration.id")
     public void modifyItem(ItemRegistration itemRegistration) throws IOException {
+        Item item = itemRepository.findByIdForUpdate(itemRegistration.getId()).orElseThrow(EntityNotFoundException::new);
+        Account account = accountRepository.findById(itemRegistration.getAccountId())
+                .orElseThrow(EntityNotFoundException::new);
         UploadFile thumbnailUploadFile = fileStore.storeFile(itemRegistration.getThumbnailImage());
         List<UploadFile> contentUploadFiles = convertMultipartFileToContentUploadFiles(itemRegistration);
 
-        Account account = accountRepository.findById(itemRegistration.getAccountId())
-                .orElseThrow(EntityNotFoundException::new);
-        Item item = itemRepository.findById(itemRegistration.getId()).orElseThrow(EntityNotFoundException::new);
-
-        //일단 다 삭제후 새로저장
         fileStore.deleteS3File(item.getThumbnailStoreFileName());
-        itemRepository.modifyItem(item.getId(), itemRegistration.getQuantity(), thumbnailUploadFile.getUploadFileName(),
-                thumbnailUploadFile.getStoreFileName(),account);
+        item.modifyItem(itemRegistration.getQuantity(), thumbnailUploadFile.getUploadFileName(),
+                thumbnailUploadFile.getStoreFileName(), account);
+
         List<Content> contents = item.getContents();
         contents.clear();
 
