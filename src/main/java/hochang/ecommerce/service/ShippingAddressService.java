@@ -23,15 +23,13 @@ public class ShippingAddressService {
     private final UserRepository userRepository;
 
     @Transactional
-    public OrderAddress save(String username, OrderAddress orderAddress) {
-        User user = userRepository.findByUsername(username);
+    public OrderAddress save(User user, OrderAddress orderAddress) {
         ShippingAddress shippingAddress = createShippingAddress(orderAddress, user);
         shippingAddressRepository.save(shippingAddress);
         return toOrderAddress(shippingAddress);
     }
 
-    public List<OrderAddress> findOrderAddresses(String username) {
-        User user = userRepository.findByUsername(username);
+    public List<OrderAddress> findOrderAddresses(User user) {
         List<ShippingAddress> shippingAddresses = shippingAddressRepository.findByUserId(user.getId());
         return shippingAddresses.stream()
                 .map(this::toOrderAddress)
@@ -42,14 +40,6 @@ public class ShippingAddressService {
         return shippingAddressRepository.findById(shippingAddressId).orElseThrow(EntityNotFoundException::new);
     }
 
-    private OrderAddress toOrderAddress(ShippingAddress shippingAddress) {
-        OrderAddress orderAddress = new OrderAddress();
-        orderAddress.setId(shippingAddress.getId());
-        orderAddress.setAddress(shippingAddress.getAddress());
-        orderAddress.setDetailAddress(shippingAddress.getDetailAddress());
-        return orderAddress;
-    }
-
     private ShippingAddress createShippingAddress(OrderAddress orderAddress, User user) {
         return ShippingAddress.builder()
                 .user(user)
@@ -57,5 +47,13 @@ public class ShippingAddressService {
                 .address(orderAddress.getAddress())
                 .detailAddress(orderAddress.getDetailAddress())
                 .build();
+    }
+
+    private OrderAddress toOrderAddress(ShippingAddress shippingAddress) {
+        OrderAddress orderAddress = new OrderAddress();
+        orderAddress.setId(shippingAddress.getId());
+        orderAddress.setAddress(shippingAddress.getAddress());
+        orderAddress.setDetailAddress(shippingAddress.getDetailAddress());
+        return orderAddress;
     }
 }

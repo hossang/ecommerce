@@ -1,7 +1,9 @@
 package hochang.ecommerce.web;
 
+import hochang.ecommerce.domain.User;
 import hochang.ecommerce.dto.OrderAddress;
 import hochang.ecommerce.service.ShippingAddressService;
+import hochang.ecommerce.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -19,17 +21,19 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ShippingAddressController {
     private final ShippingAddressService shippingAddressService;
+    private final UserService userService;
 
     @PostMapping("/users/{username}/shippingAddresses/register")
     @ResponseBody
     public List<OrderAddress> shippingAddressCreate(@PathVariable String username,
                                                     @RequestBody @Valid OrderAddress orderAddress,
                                                     BindingResult bindingResult) {
-        List<OrderAddress> availableOrderAddresses = shippingAddressService.findOrderAddresses(username);
+        User user = userService.findByUsername(username);
+        List<OrderAddress> availableOrderAddresses = shippingAddressService.findOrderAddresses(user);
         if (bindingResult.hasErrors()) {
             return availableOrderAddresses;
         }
-        OrderAddress savedOrderAddress = shippingAddressService.save(username, orderAddress);
+        OrderAddress savedOrderAddress = shippingAddressService.save(user, orderAddress);
         availableOrderAddresses.add(savedOrderAddress);
         return availableOrderAddresses;
     }

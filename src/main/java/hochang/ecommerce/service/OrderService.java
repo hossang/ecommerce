@@ -41,63 +41,19 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
-    private final ShippingAddressRepository shippingAddressRepository;
-    private final AccountRepository accountRepository;
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Order addOrderLineInCart(String username, Long itemId, Integer quantity) {
-        User user = userRepository.findByUsername(username);
+    public Order addOrderLineInCart(User user, Long itemId, Integer quantity) {
         Optional<Order> optionalOrder = orderRepository.findByUserAndStatusForUpdate(user, OrderStatus.ORDER);
         if (!optionalOrder.isPresent()) {
-            return createOrder(username, itemId, quantity);
+            return createOrder(user, itemId, quantity);
 
         }
         return addOrderLine(optionalOrder.orElseThrow(EntityNotFoundException::new), itemId, quantity);
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public void completeOrder(String username, OrderingUser orderingUser) {
-        User user = userRepository.findByUsername(username);
-        Order order = orderRepository.findByUserAndStatusForUpdate(user, OrderStatus.ORDER)
-                .orElseThrow(EntityNotFoundException::new);
-        ShippingAddress shippingAddress = shippingAddressRepository.findById(orderingUser.getShippingAddressId())
-                .orElseThrow(EntityNotFoundException::new);
-        Account account = accountRepository.findById(orderingUser.getAccountId())
-                .orElseThrow(EntityNotFoundException::new);
-        order.linkForeignEntity(shippingAddress, account);
-        order.completeOrder();
-    }
-
-    public void completeOrder(Long orderId) {
-        Order order = orderRepository.findByIdForUpdate(orderId).orElseThrow(EntityNotFoundException::new);
-        order.completeOrder();
-    }
-
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public void cancelOrder(Long id) {
-        Order order = orderRepository.findByIdForUpdate(id).orElseThrow(EntityNotFoundException::new);
-        order.cancelOrder();
-    }
-
-    @Transactional
-    public Order createOrder(String username, Long itemId, int quantity) {
-        User user = userRepository.findByUsername(username);
-        OrderLine orderLine = createOrderLine(itemId, quantity);
-        Order order = Order.builder()
-                .user(user)
-                .orderLine(orderLine)
-                .build();
-
-        return orderRepository.save(order);
-    }
-
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Order createOrder(String username, OrderItem orderItem, OrderingUser orderingUser) {
-        User user = userRepository.findByUsername(username);
-        ShippingAddress shippingAddress = shippingAddressRepository.findById(orderingUser.getShippingAddressId())
-                .orElseThrow(EntityNotFoundException::new);
-        Account account = accountRepository.findById(orderingUser.getAccountId())
-                .orElseThrow(EntityNotFoundException::new);
+    public Order createOrder(User user, OrderItem orderItem, ShippingAddress shippingAddress, Account account) {
         OrderLine orderLine = createOrderLine(orderItem.getItemId(), orderItem.getQuantity());
         Order order = Order.builder()
                 .user(user)
@@ -111,12 +67,25 @@ public class OrderService {
         return order;
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void completeOrder(User user, ShippingAddress shippingAddress, Account account) {
+        Order order = orderRepository.findByUserAndStatusForUpdate(user, OrderStatus.ORDER)
+                .orElseThrow(EntityNotFoundException::new);
+        order.linkForeignEntity(shippingAddress, account);
+        order.completeOrder();
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void cancelOrder(Long id) {
+        Order order = orderRepository.findByIdForUpdate(id).orElseThrow(EntityNotFoundException::new);
+        order.cancelOrder();
+    }
+
     public Order findOrder(Long id) {
         return orderRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     }
 
-    public Optional<Order> findOrderByUserAndStatus(String username, OrderStatus status) {
-        User user = userRepository.findByUsername(username);
+    public Optional<Order> findOrderByUserAndStatus(User user, OrderStatus status) {
         return orderRepository.findByUserAndStatus(user, status);
     }
 
@@ -137,8 +106,7 @@ public class OrderService {
         return toOrderItem(item,quantity);
     }
 
-    public Page<BoardOrder> findBoardOrders(Pageable pageable, String username, List<OrderStatus> orderStatuses) {
-        User user = userRepository.findByUsername(username);
+    public Page<BoardOrder> findBoardOrders(Pageable pageable, User user, List<OrderStatus> orderStatuses) {
         Page<Order> orderPage = orderRepository.findOrdersWithCoveringIndex(user.getId()
                 , orderStatuses, pageable);
         return orderPage.map(this::toBoardOrder);
@@ -154,28 +122,9 @@ public class OrderService {
         return order.getOrderLines();
     }
 
-    private Order addOrderLine(Order order, Long itemId, int quantity) {
-        for (OrderLine orderLine : order.getOrderLines()) {
-            if (isItemInOrderLine(itemId, orderLine)) {
-                orderLine.modifyCount(quantity); //동시성 제어가 필요하다
-                order.calculateTotalPrice();
-                return order;
-            }
-        }
-
-        OrderLine orderLine = createOrderLine(itemId, quantity);
-        order.addOrderLine(orderLine);
-        order.calculateTotalPrice();
-        return order;
-    }
-
-    private OrderLine createOrderLine(Long itemId, int quantity) {
-        Item item = itemRepository.findById(itemId).orElseThrow(EntityNotFoundException::new);
-        OrderLine orderLine = OrderLine.builder()
-                .item(item)
-                .quantity(quantity) //동시성 제어가 필요하다
-                .build();
-        return orderLine;
+    public void completeOrder(Long orderId) {
+        Order order = orderRepository.findByIdForUpdate(orderId).orElseThrow(EntityNotFoundException::new);
+        order.completeOrder();
     }
 
     private boolean isItemInOrderLine(Long itemId, OrderLine orderLine) {
@@ -191,6 +140,40 @@ public class OrderService {
             stringbuilder.delete(stringbuilder.length() - COMMA, stringbuilder.length() - BLANK);
         }
         return stringbuilder.toString();
+    }
+
+    private Order createOrder(User user, Long itemId, int quantity) {
+        OrderLine orderLine = createOrderLine(itemId, quantity);
+        Order order = Order.builder()
+                .user(user)
+                .orderLine(orderLine)
+                .build();
+
+        return orderRepository.save(order);
+    }
+
+    private Order addOrderLine(Order order, Long itemId, int quantity) {
+        for (OrderLine orderLine : order.getOrderLines()) {
+            if (isItemInOrderLine(itemId, orderLine)) {
+                orderLine.modifyCount(quantity);
+                order.calculateTotalPrice();
+                return order;
+            }
+        }
+
+        OrderLine orderLine = createOrderLine(itemId, quantity);
+        order.addOrderLine(orderLine);
+        order.calculateTotalPrice();
+        return order;
+    }
+
+    private OrderLine createOrderLine(Long itemId, int quantity) {
+        Item item = itemRepository.findById(itemId).orElseThrow(EntityNotFoundException::new);
+        OrderLine orderLine = OrderLine.builder()
+                .item(item)
+                .quantity(quantity)
+                .build();
+        return orderLine;
     }
 
     private OrderItem toOrderItem(OrderLine orderLine) {

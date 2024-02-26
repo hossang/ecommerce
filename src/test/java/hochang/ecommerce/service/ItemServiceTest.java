@@ -22,10 +22,14 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static hochang.ecommerce.constants.NumberConstants.INT_100;
+import static hochang.ecommerce.constants.NumberConstants.LONG_0;
+import static hochang.ecommerce.constants.NumberConstants.LONG_1;
 import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
@@ -33,8 +37,6 @@ import static org.assertj.core.api.Assertions.*;
 class ItemServiceTest {
     public static final int VIEWS = 10_000;
 
-    @Autowired
-    private ItemService itemService;
     @Autowired
     private AccountRepository accountRepository;
     @Autowired
@@ -44,6 +46,7 @@ class ItemServiceTest {
     @Autowired
     EntityManager entityManager;
 
+    private ConcurrentMap<Long, Long> viewCounter = new ConcurrentHashMap<>(INT_100);
     private Long itemId;
 
     @BeforeEach
@@ -89,22 +92,8 @@ class ItemServiceTest {
         assertThat(item.getName()).isEqualTo("상품1");
     }
 
-/*    @Test
-    @DisplayName("아이템 변경")
-    void modifyItem() {
-        //Given
-        Item item = itemRepository.findById(itemId).orElseThrow(EntityNotFoundException::new);
-        //When
-        itemRepository.modifyItem(item.getId(), item.getQuantity(), "ooo",
-                "ooo", item.getAccount());
-        entityManager.clear();
-        item = itemRepository.findById(itemId).orElseThrow(EntityNotFoundException::new);
-        //Then
-        assertThat(item.getThumbnailUploadFileName()).isEqualTo("ooo");
-    }*/
-
     @Test
-    @DisplayName("조회수 증가시키기")
+    @DisplayName("조회수 증가시키기 - DB에 직접")
     void increaseViews1() {
         //Given
         //When
@@ -118,35 +107,53 @@ class ItemServiceTest {
     }
 
     @Test
-    @DisplayName("조회수 증가시키기 - 동시성테스트 성공하지만 @Transactional임에도 롤백 실패")
-    public void increaseViews2() throws InterruptedException {
+    @DisplayName("ConcurrentHashMap 데이터 추가 - 정합성 X")
+    void putConcurrentHashMap1() throws InterruptedException {
         //Given
         int threadCount = VIEWS;
         ExecutorService executorService = Executors.newFixedThreadPool(32);
         CountDownLatch latch = new CountDownLatch(threadCount);
-
-        long before = 0L;
         //When
         for (int i = 0; i < threadCount; i++) {
             executorService.submit(() -> {
                 try {
-                    itemRepository.incrementViewsById(itemId, 1L);
-                    System.out.println("안녕하세요");
+                    viewCounter.put(itemId, viewCounter.getOrDefault(itemId, LONG_0) + LONG_1);
                 } finally {
                     latch.countDown();
                 }
             });
         }
+        //Then
         latch.await();
         executorService.shutdown();
-        entityManager.clear();
-        Item item = itemRepository.findById(itemId).orElseThrow(EntityNotFoundException::new);
-        long after = item.getViews();
-        long result = after - before;
-        //Then
+        Long result = viewCounter.get(itemId);
         System.out.println("result = " + result);
-        assertThat(result).isEqualTo(VIEWS);
     }
+
+    @Test
+    @DisplayName("ConcurrentHashMap 데이터 추가 - 정합성 O")
+    void putConcurrentHashMap2() throws InterruptedException {
+        //Given
+        int threadCount = VIEWS;
+        ExecutorService executorService = Executors.newFixedThreadPool(32);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+        //When
+        for (int i = 0; i < threadCount; i++) {
+            executorService.submit(() -> {
+                try {
+                    viewCounter.merge(itemId, LONG_1, Long::sum);
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+        //Then
+        latch.await();
+        executorService.shutdown();
+        Long result = viewCounter.get(itemId);
+        System.out.println("result = " + result);
+    }
+
 
     @Test
     @DisplayName("아이템 수량 증가시키기 - 동시성테스트")
@@ -179,7 +186,7 @@ class ItemServiceTest {
     }
 
     @Test
-    @DisplayName("아이템 수량 감소시키기 - 동시성테스트")
+    @DisplayName("아이템 수량 감소시키기 - 동시성테스트 실패")
     void decreaseQuantity() throws InterruptedException {
         //Given
         int threadCount = VIEWS;

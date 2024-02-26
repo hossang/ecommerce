@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -25,12 +24,22 @@ public class AccountService {
     private final UserRepository userRepository;
 
     @Transactional
-    public OrderAccount save(String username, OrderAccount orderAccount) {
+    public OrderAccount save(OrderAccount orderAccount, User user) {
         validateDuplicateAccountNumber(orderAccount);
-        User user = userRepository.findByUsername(username);
         Account account = createAccount(user, orderAccount);
         accountRepository.save(account);
         return toOrderAccount(account);
+    }
+
+    public List<OrderAccount> findOrderAccounts(User user) {
+        List<Account> accounts = accountRepository.findAllByUserId(user.getId());
+        return accounts.stream()
+                .map(this::toOrderAccount)
+                .collect(Collectors.toList());
+    }
+
+    public Account findAccount(Long accountId) {
+        return accountRepository.findById(accountId).orElseThrow(EntityNotFoundException::new);
     }
 
     private void validateDuplicateAccountNumber(OrderAccount orderAccount) {
@@ -50,18 +59,6 @@ public class AccountService {
                 .accountHolder(orderAccount.getAccountHolder())
                 .build();
 
-    }
-
-    public List<OrderAccount> findOrderAccounts(String username) {
-        User user = userRepository.findByUsername(username);
-        List<Account> accounts = accountRepository.findByUserId(user.getId());
-        return accounts.stream()
-                .map(this::toOrderAccount)
-                .collect(Collectors.toList());
-    }
-
-    public Account findAccount(Long accountId) {
-        return accountRepository.findById(accountId).orElseThrow(EntityNotFoundException::new);
     }
 
     private OrderAccount toOrderAccount(Account account) {

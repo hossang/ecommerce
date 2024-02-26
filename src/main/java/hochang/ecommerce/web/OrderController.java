@@ -6,6 +6,7 @@ import hochang.ecommerce.domain.Order;
 import hochang.ecommerce.domain.OrderLine;
 import hochang.ecommerce.domain.OrderStatus;
 import hochang.ecommerce.domain.ShippingAddress;
+import hochang.ecommerce.domain.User;
 import hochang.ecommerce.dto.OrderAccount;
 import hochang.ecommerce.dto.OrderingUser;
 import hochang.ecommerce.dto.BoardOrder;
@@ -16,6 +17,7 @@ import hochang.ecommerce.service.AccountService;
 import hochang.ecommerce.service.ItemService;
 import hochang.ecommerce.service.OrderService;
 import hochang.ecommerce.service.ShippingAddressService;
+import hochang.ecommerce.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -47,6 +49,7 @@ public class OrderController {
     private final ItemService itemService;
     private final ShippingAddressService shippingAddressService;
     private final AccountService accountService;
+    private final UserService userService;
 
     @GetMapping("/users/{username}/orders/cart")
     public String orderLineList(@PathVariable String username, @RequestParam(required = false) Long itemId,
@@ -54,7 +57,8 @@ public class OrderController {
         if (isInsufficientPurchase(itemId, quantity)) {
             return "error/400";
         }
-        Optional<Order> optionalOrder = orderService.findOrderByUserAndStatus(username, OrderStatus.ORDER);
+        User user = userService.findByUsername(username);
+        Optional<Order> optionalOrder = orderService.findOrderByUserAndStatus(user, OrderStatus.ORDER);
         if (isEmptyCart(itemId, quantity, optionalOrder)) {
             return "users/myEmptyCart";
         }
@@ -70,7 +74,8 @@ public class OrderController {
     public String orderLineCreate(@PathVariable String username, @RequestParam(required = false) Long itemId,
                                   @RequestParam(required = false) Integer quantity) {
         if (isItemsToAddInCart(itemId, quantity)) {
-            orderService.addOrderLineInCart(username, itemId, quantity);
+            User user = userService.findByUsername(username);
+            orderService.addOrderLineInCart(user, itemId, quantity);
         }
 
         return "redirect:/users/{username}/orders/cart";
@@ -79,13 +84,14 @@ public class OrderController {
     @GetMapping("/users/{username}/orders/{id}/create")
     public String orderDetails(@PathVariable String username, @PathVariable Long id,
                                @RequestParam(required = false) String errorMessage, Model model) {
-        Optional<Order> optionalOrder = orderService.findOrderByUserAndStatus(username, OrderStatus.ORDER);
+        User user = userService.findByUsername(username);
+        Optional<Order> optionalOrder = orderService.findOrderByUserAndStatus(user, OrderStatus.ORDER);
         if (!optionalOrder.isPresent()) {
             return "users/myEmptyCart";
         }
         Order order = optionalOrder.orElseThrow(EntityNotFoundException::new);
-        List<OrderAddress> availableOrderAddresses = shippingAddressService.findOrderAddresses(username);
-        List<OrderAccount> availableOrderAccounts = accountService.findOrderAccounts(username);
+        List<OrderAddress> availableOrderAddresses = shippingAddressService.findOrderAddresses(user);
+        List<OrderAccount> availableOrderAccounts = accountService.findOrderAccounts(user);
         List<OrderItem> orderItems = orderService.findOrderItems(order.getOrderLines());
         model.addAttribute("totalPrice", order.getTotalPrice());
         model.addAttribute("errorMessage", errorMessage);
@@ -97,7 +103,11 @@ public class OrderController {
 
     @PostMapping("/users/{username}/orders/{id}/create")
     public String orderCreate(@PathVariable String username, @PathVariable Long id, OrderingUser orderingUser) {
-        orderService.completeOrder(username, orderingUser);
+        User user = userService.findByUsername(username);
+        ShippingAddress shippingAddress = shippingAddressService
+                .findShippingAddress(orderingUser.getShippingAddressId());
+        Account account = accountService.findAccount(orderingUser.getAccountId());
+        orderService.completeOrder(user, shippingAddress, account);
         return "redirect:/users/{username}/orders";
     }
 
@@ -109,8 +119,9 @@ public class OrderController {
             return "error/400";
         }
         Item item = itemService.findById(itemId);
-        List<OrderAddress> availableOrderAddresses = shippingAddressService.findOrderAddresses(username);
-        List<OrderAccount> availableOrderAccounts = accountService.findOrderAccounts(username);
+        User user = userService.findByUsername(username);
+        List<OrderAddress> availableOrderAddresses = shippingAddressService.findOrderAddresses(user);
+        List<OrderAccount> availableOrderAccounts = accountService.findOrderAccounts(user);
         OrderItem orderItem = orderService.findOrderItem(item, quantity);
         model.addAttribute("errorMessage", errorMessage);
         model.addAttribute("availableOrderAddresses", availableOrderAddresses);
@@ -122,7 +133,11 @@ public class OrderController {
 
     @PostMapping("/users/{username}/orders/create")
     public String orderCreate(@PathVariable String username, OrderItem orderItem, OrderingUser orderingUser) {
-        Order order = orderService.createOrder(username, orderItem, orderingUser);
+        User user = userService.findByUsername(username);
+        ShippingAddress shippingAddress = shippingAddressService
+                .findShippingAddress(orderingUser.getShippingAddressId());
+        Account account = accountService.findAccount(orderingUser.getAccountId());
+        orderService.createOrder(user, orderItem, shippingAddress, account);
         /*동시성 테스트 해보기*/
         return "redirect:/users/{username}/orders";
     }
@@ -130,7 +145,8 @@ public class OrderController {
 
     @GetMapping("/users/{username}/orders")
     public String orderList(@PathVariable String username, @PageableDefault Pageable pageable, Model model) {
-        Page<BoardOrder> boardOrders = orderService.findBoardOrders(pageable, username,
+        User user = userService.findByUsername(username);
+        Page<BoardOrder> boardOrders = orderService.findBoardOrders(pageable, user,
                 List.of(OrderStatus.COMPLETE, OrderStatus.CANCEL));
         int nowPage = boardOrders.getPageable().getPageNumber() + PREVENTION_ZERO;
         int startPage = Math.max(PREVENTION_NEGATIVE_NUMBERS, nowPage - START_RANGE);

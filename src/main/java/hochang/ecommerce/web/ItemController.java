@@ -1,5 +1,7 @@
 package hochang.ecommerce.web;
 
+import hochang.ecommerce.domain.Account;
+import hochang.ecommerce.domain.User;
 import hochang.ecommerce.dto.BoardItem;
 import hochang.ecommerce.dto.BulletinItem;
 import hochang.ecommerce.dto.ItemRegistration;
@@ -9,6 +11,7 @@ import hochang.ecommerce.dto.OrderAccount;
 import hochang.ecommerce.dto.UploadedItemFile;
 import hochang.ecommerce.service.AccountService;
 import hochang.ecommerce.service.ItemService;
+import hochang.ecommerce.service.UserService;
 import hochang.ecommerce.web.annotation.SignIn;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +45,7 @@ import static hochang.ecommerce.web.PageConstants.START_RANGE;
 public class ItemController {
     private final ItemService itemService;
     private final AccountService accountService;
+    private final UserService userService;
 
     @GetMapping("/admins/{username}/items")
     public String itemListForAdmin(@PathVariable String username,
@@ -82,7 +86,8 @@ public class ItemController {
     @GetMapping("/admins/{username}/items/register")
     public String itemRegistrationFormCreate(@PathVariable String username, ItemRegistration itemRegistration,
                                              Model model) {
-        List<OrderAccount> availableOrderAccounts = accountService.findOrderAccounts(username);
+        User user = userService.findByUsername(username);
+        List<OrderAccount> availableOrderAccounts = accountService.findOrderAccounts(user);
         model.addAttribute("availableOrderAccounts", availableOrderAccounts);
         model.addAttribute("username", username);
         model.addAttribute("itemRegistration", itemRegistration);
@@ -95,7 +100,8 @@ public class ItemController {
         if (bindingResult.hasErrors()) {
             return "admins/itemRegistration";
         }
-        itemService.save(itemRegistration, username);
+        Account account = accountService.findAccount(itemRegistration.getAccountId());
+        itemService.save(itemRegistration, account);
         return "redirect:/admins/{username}/items";
     }
 
@@ -114,7 +120,8 @@ public class ItemController {
     public String itemRegistrationFormModify(@PathVariable String username, @PathVariable Long id, Model model) {
         ItemRegistration itemRegistration = itemService.findItemRegistration(id);
         UploadedItemFile uploadedItemFile = itemService.findUploadedItemFile(id);
-        List<OrderAccount> availableOrderAccounts = accountService.findOrderAccounts(username);
+        User user = userService.findByUsername(username);
+        List<OrderAccount> availableOrderAccounts = accountService.findOrderAccounts(user);
         model.addAttribute("availableOrderAccounts", availableOrderAccounts);
         model.addAttribute("uploadedItemFile", uploadedItemFile);
         model.addAttribute("username", username);
@@ -126,11 +133,11 @@ public class ItemController {
     public String itemRegistrationModify(@PathVariable String username, @PathVariable Long id,
                                          @Valid ItemRegistration itemRegistration,
                                          BindingResult bindingResult) throws IOException {
-        /*ㄷㅅㅅ*/
         if (bindingResult.hasErrors()) {
             return "admins/itemModification";
         }
-        itemService.modifyItem(itemRegistration);
+        Account account = accountService.findAccount(itemRegistration.getAccountId());
+        itemService.modifyItem(itemRegistration, account);
         return "redirect:/admins/{username}/items";
 
     }

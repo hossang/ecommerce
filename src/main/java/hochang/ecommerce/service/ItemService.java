@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -66,15 +67,40 @@ public class ItemService {
     private String bucket;
 
     @Transactional
-    public Long save(ItemRegistration itemRegistration, String username) throws IOException {
+    public Long save(ItemRegistration itemRegistration, Account account) throws IOException {
         UploadFile thumbnailUploadFile = fileStore.storeFile(itemRegistration.getThumbnailImage());
         List<UploadFile> contentUploadFiles = convertMultipartFileToContentUploadFiles(itemRegistration);
 
-        Account account = accountRepository.findById(itemRegistration.getAccountId())
-                .orElseThrow(EntityNotFoundException::new);
         Item item = createItem(account, itemRegistration, thumbnailUploadFile);
         createContents(contentUploadFiles, item);
         return itemRepository.save(item).getId();
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @CacheEvict(cacheNames = FIND_BULLETIN_ITEM, key = "#itemRegistration.id")
+    public void modifyItem(ItemRegistration itemRegistration, Account account) throws IOException {
+        Item item = itemRepository.findByIdForUpdate(itemRegistration.getId()).orElseThrow(EntityNotFoundException::new);
+        UploadFile thumbnailUploadFile = fileStore.storeFile(itemRegistration.getThumbnailImage());
+        List<UploadFile> contentUploadFiles = convertMultipartFileToContentUploadFiles(itemRegistration);
+
+        fileStore.deleteS3File(item.getThumbnailStoreFileName());
+        item.modifyItem(itemRegistration.getQuantity(), thumbnailUploadFile.getUploadFileName(),
+                thumbnailUploadFile.getStoreFileName(), account);
+
+        List<Content> contents = item.getContents();
+        contents.clear();
+
+        createContents(contentUploadFiles, item);
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED) /*통과*/
+    @Scheduled(fixedRate = 60000) // AN_HOUR
+    public void modifyViews() {
+        for (Long id : viewCounter.keySet()) {
+            itemRepository.incrementViewsById(id, viewCounter.get(id));
+            cacheRedisTemplate.opsForZSet().add(VIEW_COUNTER, id.toString(), viewCounter.get(id));
+        }
+        viewCounter = new ConcurrentHashMap<>(INT_100);
     }
 
     public Page<BoardItem> findBoardItems(Pageable pageable) {
@@ -91,8 +117,8 @@ public class ItemService {
                 .map(o -> FIND_BULLETIN_ITEM + "::" + o)
                 .collect(Collectors.toList());
         List<BulletinItem> bulletinItems = (List<BulletinItem>) (Object) cacheRedisTemplate.opsForValue().multiGet(keys);
-
         List<MainItem> mainItems = bulletinItems.stream()
+                .filter(Objects::nonNull)
                 .map(o -> toMainItemFromBulletinItem(o))
                 .collect(Collectors.toList());
 
@@ -114,32 +140,9 @@ public class ItemService {
         return toBulletinItem(item);
     }
 
-    public void increaseViews(Long itemId) {
-        viewCounter.put(itemId, viewCounter.getOrDefault(itemId, LONG_0) + LONG_1);
-    }
-
     public ItemRegistration findItemRegistration(Long itemId) {
         Item item = itemRepository.findById(itemId).orElseThrow(EntityNotFoundException::new);
         return toItemRegistration(item);
-    }
-
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    @CacheEvict(cacheNames = FIND_BULLETIN_ITEM, key = "#itemRegistration.id")
-    public void modifyItem(ItemRegistration itemRegistration) throws IOException {
-        Item item = itemRepository.findByIdForUpdate(itemRegistration.getId()).orElseThrow(EntityNotFoundException::new);
-        Account account = accountRepository.findById(itemRegistration.getAccountId())
-                .orElseThrow(EntityNotFoundException::new);
-        UploadFile thumbnailUploadFile = fileStore.storeFile(itemRegistration.getThumbnailImage());
-        List<UploadFile> contentUploadFiles = convertMultipartFileToContentUploadFiles(itemRegistration);
-
-        fileStore.deleteS3File(item.getThumbnailStoreFileName());
-        item.modifyItem(itemRegistration.getQuantity(), thumbnailUploadFile.getUploadFileName(),
-                thumbnailUploadFile.getStoreFileName(), account);
-
-        List<Content> contents = item.getContents();
-        contents.clear();
-
-        createContents(contentUploadFiles, item);
     }
 
     public UploadedItemFile findUploadedItemFile(Long id) {
@@ -147,21 +150,18 @@ public class ItemService {
         return toUploadedItemFile(item);
     }
 
+    public Item findById(Long itemId) {
+        return itemRepository.findById(itemId).orElseThrow(EntityNotFoundException::new);
+    }
+
+    public void increaseViews(Long itemId) {
+        viewCounter.merge(itemId, LONG_1, Long::sum);
+    }
+
     public Resource getImage(String filename) throws MalformedURLException {
         String url = CLOUDFRONT_DOMAIN + fileStore.getS3FullPath(filename);
         return new UrlResource(url);
     }
-
-    @Transactional
-    @Scheduled(fixedRate = 10000) // AN_HOUR
-    public void modifyViews() {
-        for (Long id : viewCounter.keySet()) {
-            itemRepository.incrementViewsById(id, viewCounter.get(id));
-            cacheRedisTemplate.opsForZSet().add(VIEW_COUNTER, id.toString(), viewCounter.get(id));
-        }
-        viewCounter = new ConcurrentHashMap<>(INT_100);
-    }
-
 
     private List<UploadFile> convertMultipartFileToContentUploadFiles(ItemRegistration itemRegistration) throws IOException {
         List<UploadFile> contentUploadFiles = new ArrayList<>();
@@ -179,10 +179,6 @@ public class ItemService {
             Content content = createContent(contentUploadFiles.get(index));
             item.addContent(content);
         }
-    }
-
-    public Item findById(Long itemId) {
-        return itemRepository.findById(itemId).orElseThrow(EntityNotFoundException::new);
     }
 
     private Item createItem(Account account,ItemRegistration itemRegistration, UploadFile uploadFile) {

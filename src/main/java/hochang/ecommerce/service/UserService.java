@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -42,6 +43,30 @@ public class UserService implements UserDetailsService {
 
     }
 
+    @Transactional
+    public Long modifyEmailAndPhone(UserRegistration userRegistration) {
+        User user = userRepository.findByUsername(userRegistration.getUsername());
+        if (!encoder.matches(userRegistration.getPassword(), user.getPassword())) {
+            return null;
+        }
+
+        user.modifyProfile(userRegistration.getEmail(), userRegistration.getPhone());
+        return user.getId();
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void removeUser(String username) {
+        User user = userRepository.findByUsername(username);
+        removeItemsInCart(user);
+
+        List<Order> orders = orderRepository.findByUserId(user.getId());
+        if (!orders.isEmpty()) {
+            orderRepository.deleteAll(orders);
+        }
+        ///soft delete ?
+        userRepository.delete(user);
+    }
+
     public List<User> findUsers() {
         return userRepository.findAll();
     }
@@ -51,19 +76,8 @@ public class UserService implements UserDetailsService {
         return toUserForm(user);
     }
 
-    @Transactional
-    public Long modifyEmailAndPhone(UserRegistration userRegistration) {
-        User user = userRepository.findByUsername(userRegistration.getUsername());
-        log.info("user.getId() = {}", user.getId());
-        if (!encoder.matches(userRegistration.getPassword(), user.getPassword())) {
-            return null;
-        }
-
-        user.modifyProfile(userRegistration.getEmail(), userRegistration.getPhone());
-        log.info("user.getId() = {}", user.getId());
-        log.info("user.getEmail() = {}", user.getEmail());
-        log.info("user.getPhone() = {}", user.getPhone());
-        return user.getId();
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
     public Page<BoardUser> findBoardUsers(Pageable pageable) {
@@ -71,23 +85,10 @@ public class UserService implements UserDetailsService {
         return users.map(this::toBoardUser);
     }
 
-    @Transactional
-    public void removeUser(String username) {
-        User user = userRepository.findByUsername(username);
-        removeItemsInCart(user);
-
-        List<Order> orders = orderRepository.findByUserId(user.getId());
-        if (!orders.isEmpty()) {
-            orderRepository.deleteAll(orders);
-        }
-        //soft delete ?
-        userRepository.delete(user);
-    }
-
     private void removeItemsInCart(User user) {
         Optional<Order> orderInCart = orderRepository.findByUserAndStatusForUpdate(user, OrderStatus.ORDER);
         if (orderInCart.isPresent()) {
-            orderInCart.get().cancelItem(); //동시성 제어가 필요하다
+            orderInCart.get().cancelItem();
         }
     }
 
