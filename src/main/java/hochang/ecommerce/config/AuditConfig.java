@@ -11,5 +11,6 @@ public class AuditConfig {
     @Bean
     public AuditorAware<String> auditorProvider() {
         return new AuditorAwareImpl();
+        //깃허브커밋테스트
     }
 }
